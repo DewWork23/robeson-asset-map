@@ -1,0 +1,20 @@
+{
+  "name": "Robeson County Recovery Resources",
+  "short_name": "Robeson Recovery",
+  "description": "Find recovery and support services in Robeson County, NC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e40af",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "medical", "lifestyle"],
+  "lang": "en-US"
+}
