@@ -9,14 +9,14 @@ export default function CrisisBanner({ organizations }: CrisisBannerProps) {
 
   return (
     <div className="bg-red-600 text-white p-4">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-lg font-bold mb-2 flex items-center">
+      <div className="max-w-7xl mx-auto text-center">
+        <h2 className="text-lg font-bold mb-2 flex items-center justify-center">
           <span className="mr-2 text-2xl">🚨</span>
           Crisis Help Available 24/7
         </h2>
         <div className="space-y-2">
           {organizations.slice(0, 3).map((org) => (
-            <div key={org.id} className="flex flex-wrap items-center gap-2 text-sm">
+            <div key={org.id} className="flex flex-wrap items-center justify-center gap-2 text-sm">
               <span className="font-semibold">{org.organizationName}:</span>
               {org.phone && (
                 <a

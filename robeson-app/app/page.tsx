@@ -40,11 +40,9 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <ServiceWorkerRegistration />
       <ManifestLink />
-      {/* Crisis Banner */}
-      <CrisisBanner organizations={crisisOrgs} />
-
+      
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-40">
+      <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 text-center">
           <h1 className="text-2xl font-bold text-gray-900">
             Robeson County Recovery Resources
@@ -54,6 +52,9 @@ export default function Home() {
           </p>
         </div>
       </header>
+
+      {/* Crisis Banner */}
+      <CrisisBanner organizations={crisisOrgs} />
 
       {/* Search */}
       <div className="max-w-7xl mx-auto px-4 py-4">
