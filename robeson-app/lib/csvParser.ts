@@ -1,5 +1,6 @@
 import { Organization } from '@/types/organization';
 import { withBasePath } from './basePath';
+import { calculateDistance, getCoordinatesFromAddress } from './locationUtils';
 
 export async function loadOrganizations(): Promise<Organization[]> {
   try {
@@ -72,7 +73,8 @@ function parseCSVLine(line: string): string[] {
 export function filterOrganizations(
   organizations: Organization[], 
   category?: string,
-  searchTerm?: string
+  searchTerm?: string,
+  userLocation?: { lat: number; lon: number }
 ): Organization[] {
   let filtered = [...organizations];
   
@@ -80,7 +82,7 @@ export function filterOrganizations(
     filtered = filtered.filter(org => org.category === category);
   }
   
-  if (searchTerm) {
+  if (searchTerm && !userLocation) {
     const term = searchTerm.toLowerCase();
     filtered = filtered.filter(org => 
       org.organizationName.toLowerCase().includes(term) ||
@@ -90,12 +92,39 @@ export function filterOrganizations(
     );
   }
   
-  // Sort crisis services to the top
-  filtered.sort((a, b) => {
-    if (a.crisisService && !b.crisisService) return -1;
-    if (!a.crisisService && b.crisisService) return 1;
-    return 0;
-  });
+  // If user location is provided, calculate distances
+  if (userLocation) {
+    filtered = filtered.map(org => {
+      const orgCoords = getCoordinatesFromAddress(org.address);
+      if (orgCoords) {
+        const distance = calculateDistance(
+          userLocation.lat,
+          userLocation.lon,
+          orgCoords.lat,
+          orgCoords.lon
+        );
+        return { ...org, distance };
+      }
+      return org;
+    });
+    
+    // Sort by distance (closest first)
+    filtered.sort((a, b) => {
+      if (a.distance === undefined) return 1;
+      if (b.distance === undefined) return -1;
+      return a.distance - b.distance;
+    });
+    
+    // Optional: Filter to show only organizations within a certain radius
+    // filtered = filtered.filter(org => org.distance !== undefined && org.distance <= 25);
+  } else {
+    // Sort crisis services to the top when not using location
+    filtered.sort((a, b) => {
+      if (a.crisisService && !b.crisisService) return -1;
+      if (!a.crisisService && b.crisisService) return 1;
+      return 0;
+    });
+  }
   
   return filtered;
 }

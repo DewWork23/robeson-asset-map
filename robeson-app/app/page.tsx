@@ -16,6 +16,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -28,9 +29,9 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const filtered = filterOrganizations(organizations, selectedCategory, searchTerm);
+    const filtered = filterOrganizations(organizations, selectedCategory, searchTerm, userLocation || undefined);
     setFilteredOrgs(filtered);
-  }, [organizations, selectedCategory, searchTerm]);
+  }, [organizations, selectedCategory, searchTerm, userLocation]);
 
   const categories = ['All', ...Array.from(new Set(organizations.map(org => org.category)))];
   const crisisOrgs = organizations.filter(org => org.crisisService);
@@ -56,7 +57,11 @@ export default function Home() {
 
       {/* Search */}
       <div className="max-w-7xl mx-auto px-4 py-4">
-        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        <SearchBar 
+          searchTerm={searchTerm} 
+          setSearchTerm={setSearchTerm}
+          setUserLocation={setUserLocation}
+        />
       </div>
 
       {/* Category Filter */}

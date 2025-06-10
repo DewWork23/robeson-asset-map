@@ -1,15 +1,17 @@
 interface SearchBarProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
+  setUserLocation: (location: { lat: number; lon: number } | null) => void;
 }
 
-export default function SearchBar({ searchTerm, setSearchTerm }: SearchBarProps) {
+export default function SearchBar({ searchTerm, setSearchTerm, setUserLocation }: SearchBarProps) {
   const handleNearMe = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          // For now, just indicate location search is active
-          setSearchTerm('📍 Near Me');
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lon: longitude });
+          setSearchTerm('📍 Showing resources near you');
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -48,7 +50,10 @@ export default function SearchBar({ searchTerm, setSearchTerm }: SearchBarProps)
       </svg>
       {searchTerm && (
         <button
-          onClick={() => setSearchTerm('')}
+          onClick={() => {
+            setSearchTerm('');
+            setUserLocation(null);
+          }}
           className="absolute right-4 top-3.5 p-1 text-gray-400 hover:text-gray-600"
           aria-label="Clear search"
         >

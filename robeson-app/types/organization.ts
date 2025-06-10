@@ -14,6 +14,7 @@ export interface Organization {
   crisisService: boolean;
   languages: string;
   specialNotes: string;
+  distance?: number; // Distance in miles from user location
 }
 
 export type Category = 
