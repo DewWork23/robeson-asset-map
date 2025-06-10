@@ -1,8 +1,9 @@
 import { Organization } from '@/types/organization';
+import { withBasePath } from './basePath';
 
 export async function loadOrganizations(): Promise<Organization[]> {
   try {
-    const response = await fetch('/robeson_county.csv');
+    const response = await fetch(withBasePath('/robeson_county.csv'));
     const text = await response.text();
     
     const lines = text.split('\n').filter(line => line.trim());

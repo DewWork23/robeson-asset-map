@@ -8,6 +8,7 @@ import SearchBar from '@/components/SearchBar';
 import CategoryFilter from '@/components/CategoryFilter';
 import CrisisBanner from '@/components/CrisisBanner';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
+import ManifestLink from '@/components/ManifestLink';
 
 export default function Home() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -37,12 +38,13 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <ServiceWorkerRegistration />
+      <ManifestLink />
       {/* Crisis Banner */}
       <CrisisBanner organizations={crisisOrgs} />
 
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="max-w-7xl mx-auto px-4 py-4 text-center">
           <h1 className="text-2xl font-bold text-gray-900">
             Robeson County Recovery Resources
           </h1>
