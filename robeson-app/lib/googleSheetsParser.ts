@@ -2,13 +2,19 @@ import { Organization } from '@/types/organization';
 import { calculateDistance, getCoordinatesFromAddress } from './locationUtils';
 
 // Google Sheets API configuration
-// Note: For GitHub Pages deployment, credentials are embedded since env vars aren't supported
-const SHEET_ID = '847266271';
-const API_KEY = 'AIzaSyAL3IbdigULyQOcCWFX7CVu-_CG1ETXXWk';
+// These values are injected at build time via GitHub Actions
+const SHEET_ID = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || '';
+const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'Sheet1!A:N'; // Adjust range as needed
 
 export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[]> {
   try {
+    // Check if credentials are available
+    if (!SHEET_ID || !API_KEY) {
+      console.warn('Google Sheets credentials not found, falling back to CSV');
+      return loadOrganizationsFromCSV();
+    }
+    
     // Build the Google Sheets API URL
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
     
