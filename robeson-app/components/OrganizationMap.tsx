@@ -17,12 +17,30 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
   const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
-    // Dynamically import both leaflet and its CSS
-    Promise.all([
-      import('leaflet'),
-      import('leaflet/dist/leaflet.css')
-    ]).then(([leaflet]) => {
-      setL(leaflet.default);
+    // Dynamically import leaflet
+    import('leaflet').then((leaflet) => {
+      const L = leaflet.default;
+      
+      // Fix for default markers in Next.js
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+      });
+      
+      setL(L);
+      
+      // Add Leaflet CSS to the document
+      if (typeof document !== 'undefined') {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+        link.crossOrigin = '';
+        document.head.appendChild(link);
+      }
+      
       setMapReady(true);
     });
   }, []);
