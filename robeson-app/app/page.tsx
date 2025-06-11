@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { Organization, Category, CATEGORY_ICONS, CATEGORY_COLORS } from '@/types/organization';
-import { loadOrganizations, filterOrganizations } from '@/lib/csvParser';
+import { loadOrganizationsFromGoogleSheets, filterOrganizations } from '@/lib/googleSheetsParser';
 import OrganizationCard from '@/components/OrganizationCard';
 import SearchBar from '@/components/SearchBar';
 import CategoryFilter from '@/components/CategoryFilter';
 import CrisisBanner from '@/components/CrisisBanner';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import ManifestLink from '@/components/ManifestLink';
+import OrganizationMap from '@/components/OrganizationMap';
 
 export default function Home() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -17,10 +18,11 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   useEffect(() => {
     async function loadData() {
-      const orgs = await loadOrganizations();
+      const orgs = await loadOrganizationsFromGoogleSheets();
       setOrganizations(orgs);
       setFilteredOrgs(orgs);
       setLoading(false);
@@ -83,17 +85,64 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <div className="mb-4 text-sm text-gray-600">
-              Showing {filteredOrgs.length} of {organizations.length} resources
+            {/* View Toggle and Results Count */}
+            <div className="mb-4 flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Showing {filteredOrgs.length} of {organizations.length} resources
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                  aria-pressed={viewMode === 'list'}
+                >
+                  <span className="flex items-center gap-2">
+                    <span>📋</span> List
+                  </span>
+                </button>
+                <button
+                  onClick={() => setViewMode('map')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    viewMode === 'map'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                  aria-pressed={viewMode === 'map'}
+                >
+                  <span className="flex items-center gap-2">
+                    <span>🗺️</span> Map
+                  </span>
+                </button>
+              </div>
             </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredOrgs.map((org) => (
-                <OrganizationCard key={org.id} organization={org} />
-              ))}
-            </div>
-            {filteredOrgs.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-600">No resources found matching your criteria.</p>
+
+            {/* Content based on view mode */}
+            {viewMode === 'list' ? (
+              <>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredOrgs.map((org) => (
+                    <OrganizationCard key={org.id} organization={org} />
+                  ))}
+                </div>
+                {filteredOrgs.length === 0 && (
+                  <div className="text-center py-12">
+                    <p className="text-gray-600">No resources found matching your criteria.</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="h-[600px] bg-white rounded-lg shadow-sm overflow-hidden">
+                <OrganizationMap 
+                  organizations={filteredOrgs}
+                  onOrganizationClick={(org) => {
+                    // Scroll to organization card or show details
+                    console.log('Organization clicked:', org);
+                  }}
+                />
               </div>
             )}
           </>
