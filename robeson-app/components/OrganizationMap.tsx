@@ -5,7 +5,6 @@ import { Organization } from '@/types/organization';
 import { getCoordinatesFromAddress, locationCoordinates } from '@/lib/locationUtils';
 import { CATEGORY_COLORS } from '@/types/organization';
 import dynamic from 'next/dynamic';
-import 'leaflet/dist/leaflet.css';
 
 interface OrganizationMapProps {
   organizations: Organization[];
@@ -18,7 +17,11 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
   const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
-    import('leaflet').then((leaflet) => {
+    // Dynamically import both leaflet and its CSS
+    Promise.all([
+      import('leaflet'),
+      import('leaflet/dist/leaflet.css')
+    ]).then(([leaflet]) => {
       setL(leaflet.default);
       setMapReady(true);
     });
