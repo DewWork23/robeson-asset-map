@@ -12,14 +12,23 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     // Check if credentials are available
     if (!SHEET_ID || !API_KEY) {
       console.warn('Google Sheets credentials not found, falling back to CSV');
+      console.log('SHEET_ID:', SHEET_ID);
+      console.log('API_KEY:', API_KEY ? 'Present' : 'Missing');
       return loadOrganizationsFromCSV();
     }
+    
+    console.log('Attempting to fetch from Google Sheets...');
+    console.log('Sheet ID:', SHEET_ID);
     
     // Build the Google Sheets API URL
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
     
     const response = await fetch(url);
+    console.log('Google Sheets API response status:', response.status);
+    
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Google Sheets API error:', errorText);
       throw new Error(`Failed to fetch data: ${response.statusText}`);
     }
     
@@ -27,8 +36,11 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     const rows = data.values;
     
     if (!rows || rows.length === 0) {
+      console.warn('No data found in Google Sheet');
       return [];
     }
+    
+    console.log(`Successfully fetched ${rows.length} rows from Google Sheets`);
     
     // Skip header row and map data
     const organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => ({
