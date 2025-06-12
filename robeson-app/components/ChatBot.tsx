@@ -20,13 +20,30 @@ export default function ChatBot({ organizations }: ChatBotProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const lastBotMessageRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const scrollToLastBotMessage = () => {
+    if (lastBotMessageRef.current) {
+      lastBotMessageRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   useEffect(() => {
-    scrollToBottom();
+    // Check if the last message is a bot message with a component (resource list)
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.isBot && lastMessage.component) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        scrollToLastBotMessage();
+      }, 100);
+    } else {
+      scrollToBottom();
+    }
   }, [messages]);
 
   const handleQuickOption = (option: string) => {
@@ -365,10 +382,11 @@ export default function ChatBot({ organizations }: ChatBotProps) {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {messages.map((message) => (
+          <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+            {messages.map((message, index) => (
               <div
                 key={message.id}
+                ref={message.isBot && message.component ? lastBotMessageRef : null}
                 className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}
               >
                 <div
