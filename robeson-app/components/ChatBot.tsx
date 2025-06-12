@@ -131,6 +131,13 @@ export default function ChatBot({ organizations }: ChatBotProps) {
 
   return (
     <>
+      {/* Help message above chat button */}
+      {!isOpen && (
+        <div className="fixed bottom-20 right-4 z-40 bg-white rounded-lg shadow-lg px-3 py-2 text-sm font-medium text-gray-700 border border-gray-200">
+          Need help finding something?
+        </div>
+      )}
+      
       {/* Floating Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
