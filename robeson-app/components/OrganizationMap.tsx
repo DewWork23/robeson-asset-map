@@ -183,42 +183,54 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
   });
 
   return (
-    <div className="h-full w-full relative">
-      <div id="map" className="h-full w-full" />
-      
-      {/* Legend */}
-      <div className="absolute bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg max-w-xs z-[1000]">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold">Categories</h3>
-          {selectedCategory && (
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Show All
-            </button>
-          )}
-        </div>
-        <div className="space-y-1 max-h-64 overflow-y-auto">
-          {legendItems.map(({ category, icon }) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category === selectedCategory ? null : category)}
-              className={`w-full flex items-center space-x-2 p-1 rounded transition-colors ${
-                selectedCategory === category
-                  ? 'bg-blue-100 ring-2 ring-blue-500'
-                  : selectedCategory && selectedCategory !== category
-                  ? 'opacity-50 hover:opacity-75'
-                  : 'hover:bg-gray-100'
-              }`}
-            >
-              <div className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full border border-gray-300">
+    <div className="h-full w-full relative flex flex-col">
+      {/* Top Category Bar */}
+      <div className="bg-white border-b border-gray-200 px-4 py-2 z-[1000]">
+        <div className="flex items-center gap-2 overflow-x-auto">
+          <span className="text-sm font-medium text-gray-700 whitespace-nowrap mr-2">Filter by:</span>
+          
+          {/* All Categories Button */}
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+              !selectedCategory
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            All Categories
+          </button>
+          
+          {/* Category Buttons */}
+          {legendItems.map(({ category, icon }) => {
+            const isSelected = selectedCategory === category;
+            const count = organizations.filter(org => org.category === category).length;
+            
+            return (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(isSelected ? null : category)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                title={`${category} (${count} locations)`}
+              >
                 <span className="text-base">{icon}</span>
-              </div>
-              <span className="text-xs text-left flex-1">{category}</span>
-            </button>
-          ))}
+                <span>{category}</span>
+                <span className={`text-xs ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+                  ({count})
+                </span>
+              </button>
+            );
+          })}
         </div>
+      </div>
+      
+      {/* Map Container */}
+      <div className="flex-1 relative">
+        <div id="map" className="h-full w-full" />
       </div>
     </div>
   );
