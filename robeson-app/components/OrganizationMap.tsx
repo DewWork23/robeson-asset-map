@@ -15,6 +15,7 @@ interface OrganizationMapProps {
 const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }: OrganizationMapProps) => {
   const [L, setL] = useState<any>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     // Dynamically import leaflet
@@ -72,8 +73,13 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
     // Reset offsets for consistent positioning
     resetLocationOffsets();
 
+    // Filter organizations based on selected category
+    const filteredOrganizations = selectedCategory 
+      ? organizations.filter(org => org.category === selectedCategory)
+      : organizations;
+
     // Add individual markers for each organization
-    organizations.forEach(org => {
+    filteredOrganizations.forEach(org => {
       const coords = getCoordinatesFromAddress(org.address);
       if (!coords) return; // Skip if no coordinates found
       
@@ -145,7 +151,7 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
     return () => {
       map.remove();
     };
-  }, [mapReady, L, organizations, selectedOrganization, onOrganizationClick]);
+  }, [mapReady, L, organizations, selectedOrganization, onOrganizationClick, selectedCategory]);
 
   if (!mapReady) {
     return <div className="h-full flex items-center justify-center">Loading map...</div>;
@@ -166,15 +172,35 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
       
       {/* Legend */}
       <div className="absolute bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg max-w-xs z-[1000]">
-        <h3 className="text-sm font-semibold mb-2">Categories</h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold">Categories</h3>
+          {selectedCategory && (
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Show All
+            </button>
+          )}
+        </div>
         <div className="space-y-1 max-h-64 overflow-y-auto">
           {legendItems.map(({ category, icon }) => (
-            <div key={category} className="flex items-center space-x-2">
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category === selectedCategory ? null : category)}
+              className={`w-full flex items-center space-x-2 p-1 rounded transition-colors ${
+                selectedCategory === category
+                  ? 'bg-blue-100 ring-2 ring-blue-500'
+                  : selectedCategory && selectedCategory !== category
+                  ? 'opacity-50 hover:opacity-75'
+                  : 'hover:bg-gray-100'
+              }`}
+            >
               <div className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full border border-gray-300">
                 <span className="text-base">{icon}</span>
               </div>
-              <span className="text-xs">{category}</span>
-            </div>
+              <span className="text-xs text-left flex-1">{category}</span>
+            </button>
           ))}
         </div>
       </div>
