@@ -64,17 +64,6 @@ export default function Home() {
       </header>
 
 
-      {/* Search */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <SearchBar 
-          searchTerm={searchTerm} 
-          setSearchTerm={setSearchTerm}
-          setUserLocation={setUserLocation}
-          setSelectedCategory={setSelectedCategory}
-        />
-      </div>
-
-
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 pb-20">
         {loading ? (
@@ -84,6 +73,76 @@ export default function Home() {
           </div>
         ) : (
           <>
+            {/* Categories */}
+            {!selectedCategory && viewMode === 'list' && (
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Select a Category</h2>
+                <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
+                  {categories.map((category) => {
+                    const icon = CATEGORY_ICONS[category as Category] || '📍';
+                    const count = organizations.filter(org => org.category === category).length;
+                    const isCrisis = category === 'Crisis Services';
+                    
+                    return (
+                      <button
+                        key={category}
+                        onClick={() => setSelectedCategory(category)}
+                        className={`p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow border text-left ${
+                          isCrisis 
+                            ? 'bg-red-600 border-red-700 text-white hover:bg-red-700 ring-2 ring-red-400 ring-offset-2' 
+                            : 'bg-white border-gray-200 hover:shadow-lg'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-3xl">{icon}</span>
+                          <div>
+                            <p className={`font-medium ${isCrisis ? 'text-white' : 'text-gray-900'}`}>
+                              {isCrisis ? 'Help Available 24/7' : category}
+                            </p>
+                            <p className={`text-sm ${isCrisis ? 'text-red-100' : 'text-gray-500'}`}>
+                              {count} resources
+                            </p>
+                          </div>
+                        </div>
+                        {isCrisis && (
+                          <div className="mt-2">
+                            <p className="text-xs text-red-100">
+                              Immediate crisis support & emergency services
+                            </p>
+                            <p className="text-sm font-bold text-white mt-1">
+                              National Hotline: 988
+                            </p>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => setSelectedCategory('All')}
+                    className="p-4 bg-blue-50 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-blue-200 text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">🏢</span>
+                      <div>
+                        <p className="font-medium text-blue-900">All Resources</p>
+                        <p className="text-sm text-blue-600">{organizations.length} total</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Search */}
+            <div className="mb-4">
+              <SearchBar 
+                searchTerm={searchTerm} 
+                setSearchTerm={setSearchTerm}
+                setUserLocation={setUserLocation}
+                setSelectedCategory={setSelectedCategory}
+              />
+            </div>
+
             {/* View Toggle and Results Count */}
             <div className="mb-4 flex items-center justify-between">
               <div className="text-sm text-gray-600">
@@ -126,65 +185,7 @@ export default function Home() {
             {/* Content based on view mode */}
             {viewMode === 'list' ? (
               <>
-                {!selectedCategory ? (
-                  // Show category buttons
-                  <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-900">Select a Category</h2>
-                    <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
-                      {categories.map((category) => {
-                        const icon = CATEGORY_ICONS[category as Category] || '📍';
-                        const count = organizations.filter(org => org.category === category).length;
-                        const isCrisis = category === 'Crisis Services';
-                        
-                        return (
-                          <button
-                            key={category}
-                            onClick={() => setSelectedCategory(category)}
-                            className={`p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow border text-left ${
-                              isCrisis 
-                                ? 'bg-red-600 border-red-700 text-white hover:bg-red-700 ring-2 ring-red-400 ring-offset-2' 
-                                : 'bg-white border-gray-200 hover:shadow-lg'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className="text-3xl">{icon}</span>
-                              <div>
-                                <p className={`font-medium ${isCrisis ? 'text-white' : 'text-gray-900'}`}>
-                                  {isCrisis ? 'Help Available 24/7' : category}
-                                </p>
-                                <p className={`text-sm ${isCrisis ? 'text-red-100' : 'text-gray-500'}`}>
-                                  {count} resources
-                                </p>
-                              </div>
-                            </div>
-                            {isCrisis && (
-                              <div className="mt-2">
-                                <p className="text-xs text-red-100">
-                                  Immediate crisis support & emergency services
-                                </p>
-                                <p className="text-sm font-bold text-white mt-1">
-                                  National Hotline: 988
-                                </p>
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
-                      <button
-                        onClick={() => setSelectedCategory('All')}
-                        className="p-4 bg-blue-50 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-blue-200 text-left"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-3xl">🏢</span>
-                          <div>
-                            <p className="font-medium text-blue-900">All Resources</p>
-                            <p className="text-sm text-blue-600">{organizations.length} total</p>
-                          </div>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
+                {selectedCategory && (
                   // Show filtered cards with back button
                   <>
                     <div className="mb-6">
