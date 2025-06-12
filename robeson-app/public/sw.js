@@ -13,32 +13,66 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Special handling for Google Sheets API
+  if (url.hostname === 'sheets.googleapis.com') {
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.match(request).then((cachedResponse) => {
+          // Try network first for API calls
+          const fetchPromise = fetch(request)
+            .then((networkResponse) => {
+              // Cache successful API responses
+              if (networkResponse && networkResponse.status === 200) {
+                cache.put(request, networkResponse.clone());
+              }
+              return networkResponse;
+            })
+            .catch(() => {
+              // If network fails, use cache
+              console.log('Network failed, using cached Google Sheets data');
+              return cachedResponse;
+            });
+
+          // If we have a cached response, return it immediately
+          // but still try to update the cache in the background
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+
+          return fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
+  // Default caching strategy for other requests
   event.respondWith(
-    caches.match(event.request)
+    caches.match(request)
       .then((response) => {
-        // Cache hit - return response
         if (response) {
           return response;
         }
 
-        return fetch(event.request).then(
-          (response) => {
-            // Check if we received a valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
+        return fetch(request).then((response) => {
+          // Check if we received a valid response
+          if (!response || response.status !== 200 || response.type !== 'basic') {
             return response;
           }
-        );
+
+          // Clone the response
+          const responseToCache = response.clone();
+
+          caches.open(CACHE_NAME)
+            .then((cache) => {
+              cache.put(request, responseToCache);
+            });
+
+          return response;
+        });
       })
   );
 });

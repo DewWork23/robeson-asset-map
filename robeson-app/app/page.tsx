@@ -40,10 +40,27 @@ export default function Home() {
 
   useEffect(() => {
     async function loadData() {
-      const orgs = await loadOrganizationsFromGoogleSheets();
-      setOrganizations(orgs);
-      setFilteredOrgs(orgs);
-      setLoading(false);
+      try {
+        // Start loading
+        const startTime = Date.now();
+        
+        const orgs = await loadOrganizationsFromGoogleSheets();
+        
+        // Ensure minimum loading time for smooth transition
+        const loadTime = Date.now() - startTime;
+        const minLoadTime = 300; // 300ms minimum
+        
+        if (loadTime < minLoadTime) {
+          await new Promise(resolve => setTimeout(resolve, minLoadTime - loadTime));
+        }
+        
+        setOrganizations(orgs);
+        setFilteredOrgs(orgs);
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to load organizations:', error);
+        setLoading(false);
+      }
     }
     loadData();
   }, []);
@@ -98,9 +115,34 @@ export default function Home() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 pb-20">
         {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-gray-600">Loading resources...</p>
+          <div className="space-y-4">
+            {/* Loading skeleton for categories */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex-1" />
+                <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
+                <div className="flex-1 flex justify-end">
+                  <div className="flex gap-2">
+                    <div className="h-10 w-24 bg-gray-200 rounded-lg animate-pulse" />
+                    <div className="h-10 w-20 bg-gray-200 rounded-lg animate-pulse" />
+                    <div className="h-10 w-20 bg-gray-200 rounded-lg animate-pulse" />
+                  </div>
+                </div>
+              </div>
+              <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 animate-pulse">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gray-200 rounded" />
+                      <div>
+                        <div className="h-5 w-32 bg-gray-200 rounded mb-2" />
+                        <div className="h-4 w-20 bg-gray-200 rounded" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           <>

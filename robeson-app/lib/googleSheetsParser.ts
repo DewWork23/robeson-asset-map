@@ -7,24 +7,85 @@ const SHEET_ID = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || '';
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'Sheet1!A:N'; // Adjust range as needed
 
+// Cache key and duration
+const CACHE_KEY = 'robeson_resources_cache';
+const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
+
+interface CachedData {
+  organizations: Organization[];
+  timestamp: number;
+}
+
+function getCachedData(): Organization[] | null {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) return null;
+    
+    const data: CachedData = JSON.parse(cached);
+    const now = Date.now();
+    
+    // Check if cache is still valid
+    if (now - data.timestamp < CACHE_DURATION) {
+      console.log('Using cached data');
+      return data.organizations;
+    }
+    
+    // Cache expired
+    localStorage.removeItem(CACHE_KEY);
+    return null;
+  } catch (error) {
+    console.error('Error reading cache:', error);
+    return null;
+  }
+}
+
+function setCachedData(organizations: Organization[]): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    const data: CachedData = {
+      organizations,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error('Error setting cache:', error);
+  }
+}
+
 export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[]> {
+  // Try to get cached data first
+  const cached = getCachedData();
+  if (cached) {
+    return cached;
+  }
+  
   try {
     // Check if credentials are available
     if (!SHEET_ID || !API_KEY) {
       console.warn('Google Sheets credentials not found, falling back to CSV');
-      console.log('SHEET_ID:', SHEET_ID);
-      console.log('API_KEY:', API_KEY ? 'Present' : 'Missing');
       return loadOrganizationsFromCSV();
     }
     
-    console.log('Attempting to fetch from Google Sheets...');
-    console.log('Sheet ID:', SHEET_ID);
+    console.log('Fetching fresh data from Google Sheets...');
     
     // Build the Google Sheets API URL
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
     
-    const response = await fetch(url);
-    console.log('Google Sheets API response status:', response.status);
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+      }
+    });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -61,9 +122,19 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
       specialNotes: row[13] || ''
     }));
     
+    // Cache the data
+    setCachedData(organizations);
+    
     return organizations;
   } catch (error) {
     console.error('Error loading organizations from Google Sheets:', error);
+    
+    // If it's a timeout, try cache one more time
+    if (error instanceof Error && error.name === 'AbortError') {
+      const cached = getCachedData();
+      if (cached) return cached;
+    }
+    
     // Fallback to CSV if Google Sheets fails
     return loadOrganizationsFromCSV();
   }
@@ -71,6 +142,12 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
 
 // Fallback function to load from CSV
 async function loadOrganizationsFromCSV(): Promise<Organization[]> {
+  // Check cache first
+  const cached = getCachedData();
+  if (cached) {
+    return cached;
+  }
+  
   try {
     const { withBasePath } = await import('./basePath');
     const response = await fetch(withBasePath('/robeson_county.csv'));
@@ -102,6 +179,9 @@ async function loadOrganizationsFromCSV(): Promise<Organization[]> {
         organizations.push(org);
       }
     }
+    
+    // Cache the CSV data too
+    setCachedData(organizations);
     
     return organizations;
   } catch (error) {
