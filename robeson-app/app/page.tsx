@@ -9,6 +9,7 @@ import CrisisBanner from '@/components/CrisisBanner';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import ManifestLink from '@/components/ManifestLink';
 import OrganizationMap from '@/components/OrganizationMap';
+import ChatBot from '@/components/ChatBot';
 
 export default function Home() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -220,6 +221,9 @@ export default function Home() {
           </>
         )}
       </main>
+      
+      {/* Chat Bot */}
+      <ChatBot organizations={organizations} />
     </div>
   );
 }
