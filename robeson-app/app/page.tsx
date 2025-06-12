@@ -5,7 +5,6 @@ import { Organization, Category, CATEGORY_ICONS, CATEGORY_COLORS } from '@/types
 import { loadOrganizationsFromGoogleSheets, filterOrganizations } from '@/lib/googleSheetsParser';
 import OrganizationCard from '@/components/OrganizationCard';
 import SearchBar from '@/components/SearchBar';
-import CrisisBanner from '@/components/CrisisBanner';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import ManifestLink from '@/components/ManifestLink';
 import OrganizationMap from '@/components/OrganizationMap';
@@ -40,8 +39,12 @@ export default function Home() {
     setFilteredOrgs(filtered);
   }, [organizations, selectedCategory, searchTerm, userLocation]);
 
-  const crisisOrgs = organizations.filter(org => org.crisisService);
-  const categories = Array.from(new Set(organizations.map(org => org.category))).sort();
+  const categories = Array.from(new Set(organizations.map(org => org.category))).sort((a, b) => {
+    // Put Crisis Services first
+    if (a === 'Crisis Services') return -1;
+    if (b === 'Crisis Services') return 1;
+    return a.localeCompare(b);
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -60,8 +63,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Crisis Banner - Only show in list view */}
-      {viewMode === 'list' && <CrisisBanner organizations={crisisOrgs} />}
 
       {/* Search */}
       <div className="max-w-7xl mx-auto px-4 py-4">
@@ -132,19 +133,39 @@ export default function Home() {
                       {categories.map((category) => {
                         const icon = CATEGORY_ICONS[category as Category] || '📍';
                         const count = organizations.filter(org => org.category === category).length;
+                        const isCrisis = category === 'Crisis Services';
+                        
                         return (
                           <button
                             key={category}
                             onClick={() => setSelectedCategory(category)}
-                            className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 text-left"
+                            className={`p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow border text-left ${
+                              isCrisis 
+                                ? 'bg-red-600 border-red-700 text-white hover:bg-red-700 ring-2 ring-red-400 ring-offset-2' 
+                                : 'bg-white border-gray-200 hover:shadow-lg'
+                            }`}
                           >
                             <div className="flex items-center gap-3">
                               <span className="text-3xl">{icon}</span>
                               <div>
-                                <p className="font-medium text-gray-900">{category}</p>
-                                <p className="text-sm text-gray-500">{count} resources</p>
+                                <p className={`font-medium ${isCrisis ? 'text-white' : 'text-gray-900'}`}>
+                                  {isCrisis ? 'Help Available 24/7' : category}
+                                </p>
+                                <p className={`text-sm ${isCrisis ? 'text-red-100' : 'text-gray-500'}`}>
+                                  {count} resources
+                                </p>
                               </div>
                             </div>
+                            {isCrisis && (
+                              <div className="mt-2">
+                                <p className="text-xs text-red-100">
+                                  Immediate crisis support & emergency services
+                                </p>
+                                <p className="text-sm font-bold text-white mt-1">
+                                  National Hotline: 988
+                                </p>
+                              </div>
+                            )}
                           </button>
                         );
                       })}
