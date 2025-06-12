@@ -185,16 +185,16 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
   return (
     <div className="h-full w-full relative flex flex-col">
       {/* Top Category Bar */}
-      <div className="bg-white border-b border-gray-200 px-4 py-2 z-[1000]">
-        <div className="flex items-center gap-2 overflow-x-auto">
-          <span className="text-sm font-medium text-gray-700 whitespace-nowrap mr-2">Filter by:</span>
+      <div className="bg-white border-b border-gray-200 px-4 py-3 z-[1000]">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+          <span className="text-sm font-medium text-gray-700 whitespace-nowrap mr-3">Filter by:</span>
           
           {/* All Categories Button */}
           <button
             onClick={() => setSelectedCategory(null)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap min-h-[40px] ${
               !selectedCategory
-                ? 'bg-blue-600 text-white'
+                ? 'bg-blue-600 text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -210,16 +210,16 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
               <button
                 key={category}
                 onClick={() => setSelectedCategory(isSelected ? null : category)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap min-h-[40px] ${
                   isSelected
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-blue-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
                 title={`${category} (${count} locations)`}
               >
-                <span className="text-base">{icon}</span>
+                <span className="text-lg">{icon}</span>
                 <span>{category}</span>
-                <span className={`text-xs ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+                <span className={`text-xs font-normal ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
                   ({count})
                 </span>
               </button>
