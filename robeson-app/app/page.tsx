@@ -76,7 +76,32 @@ export default function Home() {
             {/* Categories */}
             {!selectedCategory && viewMode === 'list' && (
               <div className="mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Select a Category</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex-1" />
+                  <h2 className="text-lg font-semibold text-gray-900">Select a Category</h2>
+                  <div className="flex-1 flex justify-end">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setViewMode('list')}
+                        className="px-4 py-2 rounded-lg font-medium transition-colors bg-blue-600 text-white"
+                        aria-pressed={true}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span>📋</span> List
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => setViewMode('map')}
+                        className="px-4 py-2 rounded-lg font-medium transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        aria-pressed={false}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span>🗺️</span> Map
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
                 <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
                   {categories.map((category) => {
                     const icon = CATEGORY_ICONS[category as Category] || '📍';
@@ -143,7 +168,7 @@ export default function Home() {
               />
             </div>
 
-            {/* View Toggle and Results Count */}
+            {/* Results Count and View Toggle */}
             <div className="mb-4 flex items-center justify-between">
               <div className="text-sm text-gray-600">
                 {selectedCategory && selectedCategory !== 'All' ? (
@@ -152,34 +177,36 @@ export default function Home() {
                   `Showing ${filteredOrgs.length} of ${organizations.length} resources`
                 )}
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                  aria-pressed={viewMode === 'list'}
-                >
-                  <span className="flex items-center gap-2">
-                    <span>📋</span> List
-                  </span>
-                </button>
-                <button
-                  onClick={() => setViewMode('map')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    viewMode === 'map'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                  aria-pressed={viewMode === 'map'}
-                >
-                  <span className="flex items-center gap-2">
-                    <span>🗺️</span> Map
-                  </span>
-                </button>
-              </div>
+              {(selectedCategory || viewMode === 'map') && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      viewMode === 'list'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                    aria-pressed={viewMode === 'list'}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>📋</span> List
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('map')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      viewMode === 'map'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                    aria-pressed={viewMode === 'map'}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>🗺️</span> Map
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Content based on view mode */}
