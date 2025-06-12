@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Organization, CATEGORY_COLORS } from '@/types/organization';
+import { Organization, CATEGORY_COLORS, CATEGORY_ICONS } from '@/types/organization';
 import { getCoordinatesFromAddress, locationCoordinates } from '@/lib/locationUtils';
 import { robesonCountyBoundary } from '@/lib/robesonCountyBoundary';
 import dynamic from 'next/dynamic';
@@ -76,38 +76,42 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
       
       // Create custom icon based on category
       const category = org.category;
-      const colorClass = CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] || 'bg-gray-600';
+      const categoryIcon = CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || '📍';
       
-      // Get the actual color value for the marker
-      const colorMap: Record<string, string> = {
-        'bg-blue-600': '#2563EB',
-        'bg-emerald-600': '#059669',
-        'bg-red-600': '#DC2626',
-        'bg-red-700': '#B91C1C',
-        'bg-indigo-600': '#4F46E5',
-        'bg-orange-600': '#EA580C',
-        'bg-purple-600': '#9333EA',
-        'bg-teal-600': '#0891B2',
-        'bg-green-600': '#16A34A',
-        'bg-gray-600': '#4B5563',
-        'bg-amber-700': '#B45309',
-        'bg-slate-600': '#475569'
-      };
-      
-      const markerColor = colorMap[colorClass] || '#3B82F6'; // Default blue
-      
-      // Use standard Leaflet marker with custom color
-      const icon = L.icon({
-        iconUrl: `data:image/svg+xml;base64,${btoa(`
-          <svg width="25" height="41" viewBox="0 0 25 41" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12.5 0C5.5 0 0 5.5 0 12.5C0 21.5 12.5 41 12.5 41S25 21.5 25 12.5C25 5.5 19.5 0 12.5 0Z" fill="${markerColor}"/>
-            <circle cx="12.5" cy="12.5" r="8" fill="white"/>
-            <circle cx="12.5" cy="12.5" r="5" fill="${markerColor}"/>
-          </svg>
-        `)}`,
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
+      // Create a div icon with the emoji
+      const icon = L.divIcon({
+        html: `
+          <div style="
+            background-color: white;
+            border: 2px solid #1e293b;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+          ">
+            ${categoryIcon}
+          </div>
+          <div style="
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #1e293b;
+          "></div>
+        `,
+        className: 'custom-emoji-marker',
+        iconSize: [36, 44],
+        iconAnchor: [18, 44],
+        popupAnchor: [0, -44],
       });
 
       const marker = L.marker([coords.lat, coords.lon], { icon }).addTo(map);
@@ -147,24 +151,10 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
   // Get unique categories from organizations
   const uniqueCategories = Array.from(new Set(organizations.map(org => org.category))).sort();
   
-  // Create legend items with colors
+  // Create legend items with icons
   const legendItems = uniqueCategories.map(category => {
-    const colorClass = CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] || 'bg-gray-600';
-    const colorMap: Record<string, string> = {
-      'bg-blue-600': '#2563EB',
-      'bg-emerald-600': '#059669',
-      'bg-red-600': '#DC2626',
-      'bg-red-700': '#B91C1C',
-      'bg-indigo-600': '#4F46E5',
-      'bg-orange-600': '#EA580C',
-      'bg-purple-600': '#9333EA',
-      'bg-teal-600': '#0891B2',
-      'bg-green-600': '#16A34A',
-      'bg-gray-600': '#4B5563',
-      'bg-amber-700': '#B45309',
-      'bg-slate-600': '#475569'
-    };
-    return { category, color: colorMap[colorClass] || '#3B82F6' };
+    const icon = CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || '📍';
+    return { category, icon };
   });
 
   return (
@@ -175,13 +165,11 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
       <div className="absolute bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg max-w-xs z-[1000]">
         <h3 className="text-sm font-semibold mb-2">Categories</h3>
         <div className="space-y-1 max-h-64 overflow-y-auto">
-          {legendItems.map(({ category, color }) => (
+          {legendItems.map(({ category, icon }) => (
             <div key={category} className="flex items-center space-x-2">
-              <svg width="20" height="20" viewBox="0 0 20 20">
-                <circle cx="10" cy="10" r="8" fill={color} />
-                <circle cx="10" cy="10" r="5" fill="white" />
-                <circle cx="10" cy="10" r="3" fill={color} />
-              </svg>
+              <div className="flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full border border-gray-300">
+                <span className="text-base">{icon}</span>
+              </div>
               <span className="text-xs">{category}</span>
             </div>
           ))}
