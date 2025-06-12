@@ -17,6 +17,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -29,11 +30,17 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const filtered = filterOrganizations(organizations, 'All', searchTerm, userLocation || undefined);
+    const filtered = filterOrganizations(
+      organizations, 
+      selectedCategory || 'All', 
+      searchTerm, 
+      userLocation || undefined
+    );
     setFilteredOrgs(filtered);
-  }, [organizations, searchTerm, userLocation]);
+  }, [organizations, selectedCategory, searchTerm, userLocation]);
 
   const crisisOrgs = organizations.filter(org => org.crisisService);
+  const categories = Array.from(new Set(organizations.map(org => org.category))).sort();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -112,15 +119,66 @@ export default function Home() {
             {/* Content based on view mode */}
             {viewMode === 'list' ? (
               <>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredOrgs.map((org) => (
-                    <OrganizationCard key={org.id} organization={org} />
-                  ))}
-                </div>
-                {filteredOrgs.length === 0 && (
-                  <div className="text-center py-12">
-                    <p className="text-gray-600">No resources found matching your criteria.</p>
+                {!selectedCategory ? (
+                  // Show category buttons
+                  <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-900">Select a Category</h2>
+                    <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
+                      {categories.map((category) => {
+                        const icon = CATEGORY_ICONS[category as Category] || '📍';
+                        const count = organizations.filter(org => org.category === category).length;
+                        return (
+                          <button
+                            key={category}
+                            onClick={() => setSelectedCategory(category)}
+                            className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 text-left"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="text-3xl">{icon}</span>
+                              <div>
+                                <p className="font-medium text-gray-900">{category}</p>
+                                <p className="text-sm text-gray-500">{count} resources</p>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                      <button
+                        onClick={() => setSelectedCategory('All')}
+                        className="p-4 bg-blue-50 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-blue-200 text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-3xl">🏢</span>
+                          <div>
+                            <p className="font-medium text-blue-900">All Resources</p>
+                            <p className="text-sm text-blue-600">{organizations.length} total</p>
+                          </div>
+                        </div>
+                      </button>
+                    </div>
                   </div>
+                ) : (
+                  // Show filtered cards with back button
+                  <>
+                    <div className="mb-4">
+                      <button
+                        onClick={() => setSelectedCategory(null)}
+                        className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                      >
+                        ← Back to categories
+                      </button>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      {filteredOrgs.map((org) => (
+                        <OrganizationCard key={org.id} organization={org} />
+                      ))}
+                    </div>
+                    {filteredOrgs.length === 0 && (
+                      <div className="text-center py-12">
+                        <p className="text-gray-600">No resources found matching your criteria.</p>
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             ) : (
