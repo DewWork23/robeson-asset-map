@@ -19,6 +19,25 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  const handleNearMe = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lon: longitude });
+          setSearchTerm('📍 Near me');
+          setSelectedCategory('All');
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          alert('Unable to get your location. Please enable location services.');
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by your browser.');
+    }
+  };
+
   useEffect(() => {
     async function loadData() {
       const orgs = await loadOrganizationsFromGoogleSheets();
@@ -53,13 +72,25 @@ export default function Home() {
       
       {/* Header */}
       <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 text-center">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Robeson County Recovery Resources
-          </h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Find help in your community
-          </p>
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1" />
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-900">
+                Robeson County Recovery Resources
+              </h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Find help in your community
+              </p>
+            </div>
+            <div className="flex-1 flex justify-end">
+              <SearchBar 
+                searchTerm={searchTerm} 
+                setSearchTerm={setSearchTerm}
+                setSelectedCategory={setSelectedCategory}
+              />
+            </div>
+          </div>
         </div>
       </header>
 
@@ -81,6 +112,17 @@ export default function Home() {
                   <h2 className="text-lg font-semibold text-gray-900">Select a Category</h2>
                   <div className="flex-1 flex justify-end">
                     <div className="flex gap-2">
+                      <button
+                        onClick={handleNearMe}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
+                        aria-label="Find resources near me"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Near Me</span>
+                      </button>
                       <button
                         onClick={() => setViewMode('list')}
                         className="px-4 py-2 rounded-lg font-medium transition-colors bg-blue-600 text-white"
@@ -158,15 +200,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* Search */}
-            <div className="mb-4">
-              <SearchBar 
-                searchTerm={searchTerm} 
-                setSearchTerm={setSearchTerm}
-                setUserLocation={setUserLocation}
-                setSelectedCategory={setSelectedCategory}
-              />
-            </div>
 
             {/* Results Count and View Toggle */}
             <div className="mb-4 flex items-center justify-between">
@@ -179,6 +212,17 @@ export default function Home() {
               </div>
               {(selectedCategory || viewMode === 'map') && (
                 <div className="flex gap-2">
+                  <button
+                    onClick={handleNearMe}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
+                    aria-label="Find resources near me"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Near Me</span>
+                  </button>
                   <button
                     onClick={() => setViewMode('list')}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${
