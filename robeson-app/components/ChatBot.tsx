@@ -348,9 +348,13 @@ export default function ChatBot({ organizations }: ChatBotProps) {
     <>
       {/* Help message above chat button */}
       {!isOpen && (
-        <div className="fixed bottom-20 right-2 sm:right-4 z-40 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg shadow-xl px-4 py-3 text-base font-semibold border border-blue-700 animate-pulse">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-20 right-2 sm:right-4 z-40 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg shadow-xl px-4 py-3 text-base font-semibold border border-blue-700 animate-pulse hover:animate-none hover:scale-105 transition-transform cursor-pointer"
+          aria-label="Open chat assistant"
+        >
           Need help finding something? 💬
-        </div>
+        </button>
       )}
       
       {/* Floating Chat Button */}
