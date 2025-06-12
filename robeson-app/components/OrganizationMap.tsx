@@ -147,6 +147,22 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
       });
     });
 
+    // If category is selected and there are filtered pins, zoom to show them
+    if (selectedCategory && filteredOrganizations.length > 0) {
+      const bounds = L.latLngBounds([]);
+      filteredOrganizations.forEach(org => {
+        const coords = getCoordinatesFromAddress(org.address);
+        if (coords) {
+          bounds.extend([coords.lat, coords.lon]);
+        }
+      });
+      if (bounds.isValid()) {
+        setTimeout(() => {
+          map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+        }, 100);
+      }
+    }
+
     // Cleanup
     return () => {
       map.remove();

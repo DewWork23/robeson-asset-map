@@ -90,28 +90,29 @@ export function getCoordinatesFromAddress(address: string): { lat: number; lon: 
   addressOffsets.set(offsetKey, offsetCount + 1);
   
   if (offsetCount > 0) {
-    // Create a circular pattern with better spacing
-    const spokeCount = 8; // Number of directions
-    const ringsBeforeSpokeIncrease = 3; // How many complete rings before adding more spokes
+    // Create a sunflower pattern for optimal spacing
+    const goldenAngle = 137.5077640500378; // Golden angle in degrees
+    const scaleFactor = 0.008; // Significantly increased for better visibility
     
-    // Calculate which ring this pin is on
-    const ring = Math.floor((offsetCount - 1) / spokeCount) + 1;
-    const positionInRing = (offsetCount - 1) % spokeCount;
+    // Calculate position using sunflower seed arrangement
+    const angle = (offsetCount * goldenAngle * Math.PI) / 180;
+    const radius = scaleFactor * Math.sqrt(offsetCount);
     
-    // Adjust spoke count for outer rings to prevent crowding
-    const adjustedSpokeCount = ring > ringsBeforeSpokeIncrease ? spokeCount * 2 : spokeCount;
-    const adjustedPosition = positionInRing % adjustedSpokeCount;
+    // Add slight randomization to prevent perfect patterns
+    const randomOffset = 0.0001;
+    const randomAngle = (Math.random() - 0.5) * randomOffset;
+    const randomRadius = (Math.random() - 0.5) * randomOffset;
     
-    // Calculate angle for this position
-    const angleIncrement = (2 * Math.PI) / adjustedSpokeCount;
-    const angle = adjustedPosition * angleIncrement;
+    // Apply offset with randomization
+    baseCoords.lat += (radius + randomRadius) * Math.cos(angle + randomAngle);
+    baseCoords.lon += (radius + randomRadius) * Math.sin(angle + randomAngle);
     
-    // Increase radius for each ring, with more spacing
-    const radius = 0.004 * ring; // Increased from 0.002 for better visibility
-    
-    // Apply offset
-    baseCoords.lat += radius * Math.cos(angle);
-    baseCoords.lon += radius * Math.sin(angle);
+    // For very crowded areas (>20 pins), increase spacing even more
+    if (offsetCount > 20) {
+      const extraSpacing = 0.002 * Math.floor(offsetCount / 20);
+      baseCoords.lat += extraSpacing * Math.cos(angle);
+      baseCoords.lon += extraSpacing * Math.sin(angle);
+    }
   }
   
   return baseCoords;
