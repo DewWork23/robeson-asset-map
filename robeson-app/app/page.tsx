@@ -5,7 +5,6 @@ import { Organization, Category, CATEGORY_ICONS, CATEGORY_COLORS } from '@/types
 import { loadOrganizationsFromGoogleSheets, filterOrganizations } from '@/lib/googleSheetsParser';
 import OrganizationCard from '@/components/OrganizationCard';
 import SearchBar from '@/components/SearchBar';
-import CategoryFilter from '@/components/CategoryFilter';
 import CrisisBanner from '@/components/CrisisBanner';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import ManifestLink from '@/components/ManifestLink';
@@ -14,7 +13,6 @@ import OrganizationMap from '@/components/OrganizationMap';
 export default function Home() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [filteredOrgs, setFilteredOrgs] = useState<Organization[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
@@ -31,11 +29,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const filtered = filterOrganizations(organizations, selectedCategory, searchTerm, userLocation || undefined);
+    const filtered = filterOrganizations(organizations, 'All', searchTerm, userLocation || undefined);
     setFilteredOrgs(filtered);
-  }, [organizations, selectedCategory, searchTerm, userLocation]);
+  }, [organizations, searchTerm, userLocation]);
 
-  const categories = ['All', ...Array.from(new Set(organizations.map(org => org.category)))];
   const crisisOrgs = organizations.filter(org => org.crisisService);
 
   return (
@@ -67,14 +64,6 @@ export default function Home() {
         />
       </div>
 
-      {/* Category Filter */}
-      <div className="max-w-7xl mx-auto px-4 pb-4">
-        <CategoryFilter
-          categories={categories}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-        />
-      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 pb-20">
@@ -135,7 +124,7 @@ export default function Home() {
                 )}
               </>
             ) : (
-              <div className="h-[400px] bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="h-[600px] bg-white rounded-lg shadow-sm overflow-hidden">
                 <OrganizationMap 
                   organizations={filteredOrgs}
                   onOrganizationClick={(org) => {
