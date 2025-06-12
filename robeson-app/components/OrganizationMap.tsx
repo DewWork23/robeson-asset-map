@@ -56,60 +56,54 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Group organizations by location to handle overlapping markers
-    const locationGroups = new Map<string, Organization[]>();
-    
+    // Add individual markers for each organization
     organizations.forEach(org => {
       const coords = getCoordinatesFromAddress(org.address);
       if (!coords) return; // Skip if no coordinates found
-      const key = `${coords.lat},${coords.lon}`;
-      
-      if (!locationGroups.has(key)) {
-        locationGroups.set(key, []);
-      }
-      locationGroups.get(key)!.push(org);
-    });
-
-    // Add markers for each location
-    locationGroups.forEach((orgs, coordKey) => {
-      const [lat, lng] = coordKey.split(',').map(Number);
       
       // Create custom icon based on category
-      const category = orgs[0].category;
+      const category = org.category;
       const colorClass = CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] || 'bg-gray-600';
-      const bgColor = colorClass.replace('bg-', '').replace('-600', '').replace('-700', '');
       
-      const icon = L.divIcon({
-        html: `<div class="map-marker ${colorClass}" style="background-color: var(--color-${bgColor}-600); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-          <span style="color: white; font-weight: bold;">${orgs.length}</span>
-        </div>`,
-        className: 'custom-div-icon',
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
+      // Get the actual color value for the marker
+      let markerColor = '#3B82F6'; // Default blue
+      if (colorClass === 'bg-red-600') markerColor = '#DC2626';
+      else if (colorClass === 'bg-blue-600') markerColor = '#2563EB';
+      
+      // Use standard Leaflet marker with custom color
+      const icon = L.icon({
+        iconUrl: `data:image/svg+xml;base64,${btoa(`
+          <svg width="25" height="41" viewBox="0 0 25 41" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12.5 0C5.5 0 0 5.5 0 12.5C0 21.5 12.5 41 12.5 41S25 21.5 25 12.5C25 5.5 19.5 0 12.5 0Z" fill="${markerColor}"/>
+            <circle cx="12.5" cy="12.5" r="8" fill="white"/>
+            <circle cx="12.5" cy="12.5" r="5" fill="${markerColor}"/>
+          </svg>
+        `)}`,
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
       });
 
-      const marker = L.marker([lat, lng], { icon }).addTo(map);
+      const marker = L.marker([coords.lat, coords.lon], { icon }).addTo(map);
       
       // Create popup content
-      let popupContent = '<div style="max-width: 300px;">';
-      orgs.forEach((org, index) => {
-        popupContent += `
-          <div style="${index > 0 ? 'border-top: 1px solid #e5e5e5; margin-top: 8px; padding-top: 8px;' : ''}">
-            <h3 style="font-weight: bold; margin: 0 0 4px 0;">${org.organizationName}</h3>
-            <p style="margin: 0 0 4px 0; font-size: 14px; color: #666;">${org.category}</p>
-            <p style="margin: 0 0 4px 0; font-size: 14px;">${org.address}</p>
-            ${org.phone ? `<p style="margin: 0; font-size: 14px;"><a href="tel:${org.phone.replace(/\D/g, '')}" style="color: #2563eb;">📞 ${org.phone}</a></p>` : ''}
-          </div>
-        `;
-      });
-      popupContent += '</div>';
+      const popupContent = `
+        <div style="max-width: 300px;">
+          <h3 style="font-weight: bold; margin: 0 0 4px 0; font-size: 16px;">${org.organizationName}</h3>
+          <p style="margin: 0 0 4px 0; font-size: 14px; color: #666;">${org.category}</p>
+          <p style="margin: 0 0 8px 0; font-size: 13px;">${org.address}</p>
+          ${org.phone ? `<p style="margin: 0 0 4px 0; font-size: 14px;"><a href="tel:${org.phone.replace(/\D/g, '')}" style="color: #2563eb; text-decoration: none; font-weight: 500;">📞 ${org.phone}</a></p>` : ''}
+          ${org.hours ? `<p style="margin: 0 0 4px 0; font-size: 13px; color: #666;"><strong>Hours:</strong> ${org.hours}</p>` : ''}
+          ${org.servicesOffered ? `<p style="margin: 0; font-size: 13px; color: #666;"><strong>Services:</strong> ${org.servicesOffered.substring(0, 100)}${org.servicesOffered.length > 100 ? '...' : ''}</p>` : ''}
+        </div>
+      `;
       
       marker.bindPopup(popupContent);
       
       // Add click handler
       marker.on('click', () => {
-        if (onOrganizationClick && orgs.length === 1) {
-          onOrganizationClick(orgs[0]);
+        if (onOrganizationClick) {
+          onOrganizationClick(org);
         }
       });
     });
