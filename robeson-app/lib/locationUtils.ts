@@ -48,6 +48,11 @@ export const locationCoordinates: Record<string, { lat: number; lon: number }> =
 // Track addresses to add offsets for duplicate locations
 const addressOffsets = new Map<string, number>();
 
+// Reset function to clear offsets when needed
+export function resetLocationOffsets() {
+  addressOffsets.clear();
+}
+
 // Get coordinates from address string
 export function getCoordinatesFromAddress(address: string): { lat: number; lon: number } | null {
   const addressLower = address.toLowerCase();
@@ -78,17 +83,33 @@ export function getCoordinatesFromAddress(address: string): { lat: number; lon: 
     baseCoords = { ...locationCoordinates.default };
   }
   
-  // Add a small offset to prevent exact overlapping
-  // This creates a spiral pattern for multiple organizations at the same city
+  // Add a smart offset to prevent exact overlapping
+  // This creates a circular pattern with proper spacing
   const offsetKey = `${baseCoords.lat},${baseCoords.lon}`;
   const offsetCount = addressOffsets.get(offsetKey) || 0;
   addressOffsets.set(offsetKey, offsetCount + 1);
   
   if (offsetCount > 0) {
-    // Create a spiral offset pattern
-    const angle = (offsetCount * 137.5) * (Math.PI / 180); // Golden angle
-    const radius = 0.002 * Math.sqrt(offsetCount); // Increasing radius
+    // Create a circular pattern with better spacing
+    const spokeCount = 8; // Number of directions
+    const ringsBeforeSpokeIncrease = 3; // How many complete rings before adding more spokes
     
+    // Calculate which ring this pin is on
+    const ring = Math.floor((offsetCount - 1) / spokeCount) + 1;
+    const positionInRing = (offsetCount - 1) % spokeCount;
+    
+    // Adjust spoke count for outer rings to prevent crowding
+    const adjustedSpokeCount = ring > ringsBeforeSpokeIncrease ? spokeCount * 2 : spokeCount;
+    const adjustedPosition = positionInRing % adjustedSpokeCount;
+    
+    // Calculate angle for this position
+    const angleIncrement = (2 * Math.PI) / adjustedSpokeCount;
+    const angle = adjustedPosition * angleIncrement;
+    
+    // Increase radius for each ring, with more spacing
+    const radius = 0.004 * ring; // Increased from 0.002 for better visibility
+    
+    // Apply offset
     baseCoords.lat += radius * Math.cos(angle);
     baseCoords.lon += radius * Math.sin(angle);
   }

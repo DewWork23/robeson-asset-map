@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Organization, CATEGORY_COLORS, CATEGORY_ICONS } from '@/types/organization';
-import { getCoordinatesFromAddress, locationCoordinates } from '@/lib/locationUtils';
+import { getCoordinatesFromAddress, locationCoordinates, resetLocationOffsets } from '@/lib/locationUtils';
 import { robesonCountyBoundary } from '@/lib/robesonCountyBoundary';
 import dynamic from 'next/dynamic';
 
@@ -68,6 +68,9 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
     
     // Fit the map to show the entire county
     map.fitBounds(countyBorder.getBounds(), { padding: [20, 20] });
+
+    // Reset offsets for consistent positioning
+    resetLocationOffsets();
 
     // Add individual markers for each organization
     organizations.forEach(org => {
