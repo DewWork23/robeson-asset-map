@@ -52,8 +52,8 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Crisis Banner */}
-      <CrisisBanner organizations={crisisOrgs} />
+      {/* Crisis Banner - Only show in list view */}
+      {viewMode === 'list' && <CrisisBanner organizations={crisisOrgs} />}
 
       {/* Search */}
       <div className="max-w-7xl mx-auto px-4 py-4">
