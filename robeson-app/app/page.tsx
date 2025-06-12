@@ -84,7 +84,11 @@ export default function Home() {
             {/* View Toggle and Results Count */}
             <div className="mb-4 flex items-center justify-between">
               <div className="text-sm text-gray-600">
-                Showing {filteredOrgs.length} of {organizations.length} resources
+                {selectedCategory && selectedCategory !== 'All' ? (
+                  `Showing ${filteredOrgs.length} ${selectedCategory} resources`
+                ) : (
+                  `Showing ${filteredOrgs.length} of ${organizations.length} resources`
+                )}
               </div>
               <div className="flex gap-2">
                 <button
@@ -160,13 +164,26 @@ export default function Home() {
                 ) : (
                   // Show filtered cards with back button
                   <>
-                    <div className="mb-4">
+                    <div className="mb-4 space-y-2">
                       <button
                         onClick={() => setSelectedCategory(null)}
                         className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
                       >
                         ← Back to categories
                       </button>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p className="text-sm text-blue-900">
+                          {userLocation ? (
+                            <>
+                              <span className="font-medium">📍 Sorted by distance</span> - Showing {selectedCategory === 'All' ? 'all resources' : `${selectedCategory}`} nearest to your location first
+                            </>
+                          ) : (
+                            <>
+                              <span className="font-medium">🚨 Crisis services shown first</span> - {selectedCategory === 'All' ? 'All resources' : `${selectedCategory} resources`} are listed with emergency services at the top
+                            </>
+                          )}
+                        </p>
+                      </div>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {filteredOrgs.map((org) => (
