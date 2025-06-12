@@ -331,8 +331,8 @@ export default function ChatBot({ organizations }: ChatBotProps) {
     <>
       {/* Help message above chat button */}
       {!isOpen && (
-        <div className="fixed bottom-20 right-4 z-40 bg-white rounded-lg shadow-lg px-3 py-2 text-sm font-medium text-gray-700 border border-gray-200">
-          Need help finding something?
+        <div className="fixed bottom-20 right-2 sm:right-4 z-40 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg shadow-xl px-4 py-3 text-base font-semibold border border-blue-700 animate-pulse">
+          Need help finding something? 💬
         </div>
       )}
       
