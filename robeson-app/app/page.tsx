@@ -135,7 +135,7 @@ export default function Home() {
                 )}
               </>
             ) : (
-              <div className="h-[600px] bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="h-[400px] bg-white rounded-lg shadow-sm overflow-hidden">
                 <OrganizationMap 
                   organizations={filteredOrgs}
                   onOrganizationClick={(org) => {

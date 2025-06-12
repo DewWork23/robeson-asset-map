@@ -48,7 +48,7 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
     if (!mapReady || !L) return;
 
     // Create map
-    const map = L.map('map').setView([locationCoordinates.default.lat, locationCoordinates.default.lon], 10);
+    const map = L.map('map').setView([locationCoordinates.default.lat, locationCoordinates.default.lon], 12);
 
     // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
