@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Organization } from '@/types/organization';
+import { Organization, CATEGORY_COLORS } from '@/types/organization';
 import { getCoordinatesFromAddress, locationCoordinates } from '@/lib/locationUtils';
-import { CATEGORY_COLORS } from '@/types/organization';
 import dynamic from 'next/dynamic';
 
 interface OrganizationMapProps {
@@ -66,9 +65,22 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
       const colorClass = CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] || 'bg-gray-600';
       
       // Get the actual color value for the marker
-      let markerColor = '#3B82F6'; // Default blue
-      if (colorClass === 'bg-red-600') markerColor = '#DC2626';
-      else if (colorClass === 'bg-blue-600') markerColor = '#2563EB';
+      const colorMap: Record<string, string> = {
+        'bg-blue-600': '#2563EB',
+        'bg-emerald-600': '#059669',
+        'bg-red-600': '#DC2626',
+        'bg-red-700': '#B91C1C',
+        'bg-indigo-600': '#4F46E5',
+        'bg-orange-600': '#EA580C',
+        'bg-purple-600': '#9333EA',
+        'bg-teal-600': '#0891B2',
+        'bg-green-600': '#16A34A',
+        'bg-gray-600': '#4B5563',
+        'bg-amber-700': '#B45309',
+        'bg-slate-600': '#475569'
+      };
+      
+      const markerColor = colorMap[colorClass] || '#3B82F6'; // Default blue
       
       // Use standard Leaflet marker with custom color
       const icon = L.icon({
@@ -118,7 +130,51 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
     return <div className="h-full flex items-center justify-center">Loading map...</div>;
   }
 
-  return <div id="map" className="h-full w-full" />;
+  // Get unique categories from organizations
+  const uniqueCategories = Array.from(new Set(organizations.map(org => org.category))).sort();
+  
+  // Create legend items with colors
+  const legendItems = uniqueCategories.map(category => {
+    const colorClass = CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] || 'bg-gray-600';
+    const colorMap: Record<string, string> = {
+      'bg-blue-600': '#2563EB',
+      'bg-emerald-600': '#059669',
+      'bg-red-600': '#DC2626',
+      'bg-red-700': '#B91C1C',
+      'bg-indigo-600': '#4F46E5',
+      'bg-orange-600': '#EA580C',
+      'bg-purple-600': '#9333EA',
+      'bg-teal-600': '#0891B2',
+      'bg-green-600': '#16A34A',
+      'bg-gray-600': '#4B5563',
+      'bg-amber-700': '#B45309',
+      'bg-slate-600': '#475569'
+    };
+    return { category, color: colorMap[colorClass] || '#3B82F6' };
+  });
+
+  return (
+    <div className="h-full w-full relative">
+      <div id="map" className="h-full w-full" />
+      
+      {/* Legend */}
+      <div className="absolute bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg max-w-xs z-[1000]">
+        <h3 className="text-sm font-semibold mb-2">Categories</h3>
+        <div className="space-y-1 max-h-64 overflow-y-auto">
+          {legendItems.map(({ category, color }) => (
+            <div key={category} className="flex items-center space-x-2">
+              <svg width="20" height="20" viewBox="0 0 20 20">
+                <circle cx="10" cy="10" r="8" fill={color} />
+                <circle cx="10" cy="10" r="5" fill="white" />
+                <circle cx="10" cy="10" r="3" fill={color} />
+              </svg>
+              <span className="text-xs">{category}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 // Dynamic import to avoid SSR issues
