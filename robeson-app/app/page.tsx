@@ -164,14 +164,22 @@ export default function Home() {
                 ) : (
                   // Show filtered cards with back button
                   <>
-                    <div className="mb-4 space-y-2">
-                      <button
-                        onClick={() => setSelectedCategory(null)}
-                        className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-                      >
-                        ← Back to categories
-                      </button>
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="mb-6">
+                      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <button
+                          onClick={() => setSelectedCategory(null)}
+                          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 transition-all transform hover:scale-105"
+                          aria-label="Go back to category selection"
+                          autoFocus
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                          </svg>
+                          <span>Back to All Categories</span>
+                        </button>
+                        <p className="mt-2 text-sm text-gray-600">Press Tab to navigate through resources</p>
+                      </div>
+                      <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
                         <p className="text-sm text-blue-900">
                           {userLocation ? (
                             <>
