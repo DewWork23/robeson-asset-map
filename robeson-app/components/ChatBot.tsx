@@ -95,6 +95,11 @@ export default function ChatBot({ organizations }: ChatBotProps) {
     return phone.replace(/\D/g, '');
   };
 
+  const getDirectionsUrl = (address: string) => {
+    const encodedAddress = encodeURIComponent(address);
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+  };
+
   const generateResponse = (input: string, orgs: Organization[]): Message => {
     let component: React.ReactNode = null;
 
@@ -114,14 +119,25 @@ export default function ChatBot({ organizations }: ChatBotProps) {
             {crisisOrgs.map(org => (
               <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <p className="font-medium text-gray-900">{org.organizationName}</p>
-                {org.phone && (
+                <p className="text-sm text-gray-600 mt-1">{org.address}</p>
+                <div className="flex gap-2 mt-2">
+                  {org.phone && (
+                    <a 
+                      href={`tel:${formatPhoneForTel(org.phone)}`} 
+                      className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                    >
+                      Call {org.phone}
+                    </a>
+                  )}
                   <a 
-                    href={`tel:${formatPhoneForTel(org.phone)}`} 
-                    className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                    href={getDirectionsUrl(org.address)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
                   >
-                    Call {org.phone}
+                    📍 Directions
                   </a>
-                )}
+                </div>
               </div>
             ))}
           </div>
@@ -144,14 +160,24 @@ export default function ChatBot({ organizations }: ChatBotProps) {
               <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <p className="font-medium text-gray-900">{org.organizationName}</p>
                 <p className="text-sm text-gray-600 mt-1">{org.address}</p>
-                {org.phone && (
+                <div className="flex gap-2 mt-2">
+                  {org.phone && (
+                    <a 
+                      href={`tel:${formatPhoneForTel(org.phone)}`} 
+                      className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                    >
+                      Call {org.phone}
+                    </a>
+                  )}
                   <a 
-                    href={`tel:${formatPhoneForTel(org.phone)}`} 
-                    className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                    href={getDirectionsUrl(org.address)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
                   >
-                    Call {org.phone}
+                    📍 Directions
                   </a>
-                )}
+                </div>
               </div>
             ))}
           </div>
@@ -173,14 +199,24 @@ export default function ChatBot({ organizations }: ChatBotProps) {
               <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <p className="font-medium text-gray-900">{org.organizationName}</p>
                 <p className="text-sm text-gray-600 mt-1">{org.address}</p>
-                {org.phone && (
+                <div className="flex gap-2 mt-2">
+                  {org.phone && (
+                    <a 
+                      href={`tel:${formatPhoneForTel(org.phone)}`} 
+                      className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                    >
+                      Call {org.phone}
+                    </a>
+                  )}
                   <a 
-                    href={`tel:${formatPhoneForTel(org.phone)}`} 
-                    className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                    href={getDirectionsUrl(org.address)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
                   >
-                    Call {org.phone}
+                    📍 Directions
                   </a>
-                )}
+                </div>
               </div>
             ))}
           </div>
@@ -201,14 +237,24 @@ export default function ChatBot({ organizations }: ChatBotProps) {
               <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <p className="font-medium text-gray-900">{org.organizationName}</p>
                 <p className="text-sm text-gray-600 mt-1">{org.address}</p>
-                {org.phone && (
+                <div className="flex gap-2 mt-2">
+                  {org.phone && (
+                    <a 
+                      href={`tel:${formatPhoneForTel(org.phone)}`} 
+                      className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                    >
+                      Call {org.phone}
+                    </a>
+                  )}
                   <a 
-                    href={`tel:${formatPhoneForTel(org.phone)}`} 
-                    className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                    href={getDirectionsUrl(org.address)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
                   >
-                    Call {org.phone}
+                    📍 Directions
                   </a>
-                )}
+                </div>
               </div>
             ))}
           </div>
@@ -225,14 +271,24 @@ export default function ChatBot({ organizations }: ChatBotProps) {
               <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <p className="font-medium text-gray-900">{org.organizationName}</p>
                 <p className="text-sm text-gray-600 mt-1">{org.address}</p>
-                {org.phone && (
+                <div className="flex gap-2 mt-2">
+                  {org.phone && (
+                    <a 
+                      href={`tel:${formatPhoneForTel(org.phone)}`} 
+                      className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                    >
+                      Call {org.phone}
+                    </a>
+                  )}
                   <a 
-                    href={`tel:${formatPhoneForTel(org.phone)}`} 
-                    className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                    href={getDirectionsUrl(org.address)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
                   >
-                    Call {org.phone}
+                    📍 Directions
                   </a>
-                )}
+                </div>
               </div>
             ))}
           </div>

@@ -192,13 +192,18 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
           {/* All Categories Button */}
           <button
             onClick={() => setSelectedCategory(null)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap min-h-[40px] ${
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all min-h-[40px] min-w-fit ${
               !selectedCategory
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            All Categories
+            <div className="flex flex-col items-start">
+              <span className="leading-tight">All Categories</span>
+              <span className={`text-xs font-normal leading-tight ${!selectedCategory ? 'text-blue-100' : 'text-gray-500'}`}>
+                {organizations.length} locations
+              </span>
+            </div>
           </button>
           
           {/* Category Buttons */}
@@ -210,18 +215,20 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
               <button
                 key={category}
                 onClick={() => setSelectedCategory(isSelected ? null : category)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap min-h-[40px] ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all min-h-[40px] min-w-fit ${
                   isSelected
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
                 title={`${category} (${count} locations)`}
               >
-                <span className="text-lg">{icon}</span>
-                <span>{category}</span>
-                <span className={`text-xs font-normal ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
-                  ({count})
-                </span>
+                <span className="text-lg flex-shrink-0">{icon}</span>
+                <div className="flex flex-col items-start">
+                  <span className="leading-tight">{category}</span>
+                  <span className={`text-xs font-normal leading-tight ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+                    {count} locations
+                  </span>
+                </div>
               </button>
             );
           })}
