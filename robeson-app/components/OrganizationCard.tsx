@@ -1,4 +1,4 @@
-import { Organization, CATEGORY_COLORS, Category } from '@/types/organization';
+import { Organization, CATEGORY_COLORS, CATEGORY_ICONS, Category } from '@/types/organization';
 import { formatDistance } from '@/lib/locationUtils';
 
 interface OrganizationCardProps {
@@ -6,7 +6,7 @@ interface OrganizationCardProps {
 }
 
 export default function OrganizationCard({ organization }: OrganizationCardProps) {
-  const colorClass = CATEGORY_COLORS[organization.category as Category] || 'bg-gray-600';
+  const categoryIcon = CATEGORY_ICONS[organization.category as Category] || '📍';
   
   const formatPhoneForTel = (phone: string) => {
     return phone.replace(/\D/g, '');
@@ -18,21 +18,28 @@ export default function OrganizationCard({ organization }: OrganizationCardProps
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200">
-      <div className={`${colorClass} text-white p-4 rounded-t-lg`}>
-        <h3 className="text-lg font-bold">{organization.organizationName}</h3>
-        <p className="text-sm opacity-90">{organization.serviceType}</p>
-        <div className="flex items-center justify-between">
+      <div className="bg-gray-50 p-4 rounded-t-lg border-b border-gray-200">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-2xl" role="img" aria-label={organization.category}>
+                {categoryIcon}
+              </span>
+              <h3 className="text-lg font-bold text-gray-900">{organization.organizationName}</h3>
+            </div>
+            <p className="text-sm text-gray-600">{organization.serviceType}</p>
+          </div>
           {organization.crisisService && (
-            <span className="inline-flex items-center mt-2 px-2 py-1 bg-red-600 text-xs font-medium rounded-full">
-              🚨 Crisis Service Available
-            </span>
-          )}
-          {organization.distance !== undefined && (
-            <span className="inline-flex items-center mt-2 px-2 py-1 bg-white/20 text-xs font-medium rounded-full">
-              📍 {formatDistance(organization.distance)} away
+            <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
+              🚨 Crisis
             </span>
           )}
         </div>
+        {organization.distance !== undefined && (
+          <span className="inline-flex items-center mt-2 px-2 py-1 bg-gray-200 text-gray-700 text-xs font-medium rounded-full">
+            📍 {formatDistance(organization.distance)} away
+          </span>
+        )}
       </div>
       
       <div className="p-4 space-y-3">
