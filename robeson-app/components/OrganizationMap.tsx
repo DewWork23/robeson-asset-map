@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Organization, CATEGORY_COLORS } from '@/types/organization';
 import { getCoordinatesFromAddress, locationCoordinates } from '@/lib/locationUtils';
+import { robesonCountyBoundary } from '@/lib/robesonCountyBoundary';
 import dynamic from 'next/dynamic';
 
 interface OrganizationMapProps {
@@ -54,6 +55,19 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
+
+    // Add county boundary
+    const countyBorder = L.polygon(robesonCountyBoundary, {
+      color: '#1e40af', // Dark blue border
+      weight: 3,
+      opacity: 0.8,
+      fillColor: 'transparent',
+      fillOpacity: 0,
+      dashArray: '5, 10' // Dashed line pattern
+    }).addTo(map);
+    
+    // Fit the map to show the entire county
+    map.fitBounds(countyBorder.getBounds(), { padding: [20, 20] });
 
     // Add individual markers for each organization
     organizations.forEach(org => {
