@@ -70,6 +70,7 @@ export default function Home() {
           searchTerm={searchTerm} 
           setSearchTerm={setSearchTerm}
           setUserLocation={setUserLocation}
+          setSelectedCategory={setSelectedCategory}
         />
       </div>
 
