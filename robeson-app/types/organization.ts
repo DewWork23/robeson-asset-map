@@ -48,15 +48,15 @@ export const CATEGORY_ICONS: Record<Category, string> = {
 
 export const CATEGORY_COLORS: Record<Category, string> = {
   'Free Programs': 'bg-blue-600',
-  'Treatment': 'bg-green-600',
+  'Treatment': 'bg-blue-600',
   'Crisis Services': 'bg-red-600',
-  'Housing': 'bg-blue-700',
-  'Food/Shelter': 'bg-green-700',
-  'Transportation': 'bg-gray-600',
+  'Housing': 'bg-blue-600',
+  'Food/Shelter': 'bg-blue-600',
+  'Transportation': 'bg-blue-600',
   'Job Resources': 'bg-blue-600',
-  'Emergency Services': 'bg-red-600',
-  'Harm Reduction': 'bg-green-600',
-  'Information/Referral': 'bg-gray-600',
-  'Tribal Services': 'bg-blue-700',
-  'Legal Services': 'bg-gray-700'
+  'Emergency Services': 'bg-blue-600',
+  'Harm Reduction': 'bg-blue-600',
+  'Information/Referral': 'bg-blue-600',
+  'Tribal Services': 'bg-blue-600',
+  'Legal Services': 'bg-blue-600'
 };
