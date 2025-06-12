@@ -30,33 +30,70 @@ export const locationCoordinates: Record<string, { lat: number; lon: number }> =
   'maxton': { lat: 34.7352, lon: -79.3489 },
   'red springs': { lat: 34.8152, lon: -79.1831 },
   'st. pauls': { lat: 34.8068, lon: -78.9728 },
+  'st pauls': { lat: 34.8068, lon: -78.9728 }, // Alternative spelling
   'rowland': { lat: 34.5368, lon: -79.2917 },
   'parkton': { lat: 34.9018, lon: -79.0117 },
   'shannon': { lat: 34.8930, lon: -79.1176 },
   'orrum': { lat: 34.4652, lon: -79.0097 },
   
+  // Additional cities found in the data
+  'fayetteville': { lat: 35.0527, lon: -78.8784 },
+  'raeford': { lat: 34.9777, lon: -79.2242 },
+  'laurinburg': { lat: 34.7741, lon: -79.4628 },
+  
   // Default center of Robeson County
   'default': { lat: 34.6293, lon: -79.1148 }
 };
+
+// Track addresses to add offsets for duplicate locations
+const addressOffsets = new Map<string, number>();
 
 // Get coordinates from address string
 export function getCoordinatesFromAddress(address: string): { lat: number; lon: number } | null {
   const addressLower = address.toLowerCase();
   
+  // Skip if no address
+  if (!address || address.trim() === '') {
+    return null;
+  }
+  
+  let baseCoords: { lat: number; lon: number } | null = null;
+  
   // Check for specific locations
   for (const [key, coords] of Object.entries(locationCoordinates)) {
+    if (key === 'default') continue;
     if (addressLower.includes(key)) {
-      return coords;
+      baseCoords = { ...coords };
+      break;
     }
   }
   
   // Special case for UNCP
-  if (addressLower.includes('university of north carolina') || addressLower.includes('uncp')) {
-    return locationCoordinates.uncp;
+  if (!baseCoords && (addressLower.includes('university of north carolina') || addressLower.includes('uncp'))) {
+    baseCoords = { ...locationCoordinates.uncp };
   }
   
   // Default to county center if no match
-  return locationCoordinates.default;
+  if (!baseCoords) {
+    baseCoords = { ...locationCoordinates.default };
+  }
+  
+  // Add a small offset to prevent exact overlapping
+  // This creates a spiral pattern for multiple organizations at the same city
+  const offsetKey = `${baseCoords.lat},${baseCoords.lon}`;
+  const offsetCount = addressOffsets.get(offsetKey) || 0;
+  addressOffsets.set(offsetKey, offsetCount + 1);
+  
+  if (offsetCount > 0) {
+    // Create a spiral offset pattern
+    const angle = (offsetCount * 137.5) * (Math.PI / 180); // Golden angle
+    const radius = 0.002 * Math.sqrt(offsetCount); // Increasing radius
+    
+    baseCoords.lat += radius * Math.cos(angle);
+    baseCoords.lon += radius * Math.sin(angle);
+  }
+  
+  return baseCoords;
 }
 
 // Format distance for display
