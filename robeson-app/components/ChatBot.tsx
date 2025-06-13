@@ -34,7 +34,8 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
   // Handle map category selection
   const handleMapCategorySelect = (category: string | null) => {
     if (onCategorySelect) {
-      onCategorySelect(category);
+      // Use 'All' instead of null to show all categories
+      onCategorySelect(category === null ? 'All' : category);
       // Close chat on mobile when selecting a map filter
       if (isMobile()) {
         setIsOpen(false);
