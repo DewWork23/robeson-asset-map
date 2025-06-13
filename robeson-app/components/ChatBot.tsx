@@ -22,6 +22,7 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
+  const [hideHelpButton, setHideHelpButton] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const lastBotMessageRef = useRef<HTMLDivElement>(null);
@@ -553,10 +554,34 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     }
   }, [isOpen, viewMode]);
 
+  // Hide help button when scrolling near footer on mobile
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isMobile() && !isOpen) {
+        const scrollPosition = window.scrollY + window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        const footerBuffer = 300; // Hide button 300px before reaching bottom
+        
+        if (scrollPosition > documentHeight - footerBuffer) {
+          setHideHelpButton(true);
+        } else {
+          setHideHelpButton(false);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Check initial position
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isOpen]);
+
   return (
     <>
       {/* Help message above chat button */}
-      {!isOpen && (
+      {!isOpen && !hideHelpButton && (
         <button
           onClick={() => setIsOpen(true)}
           className="fixed bottom-32 sm:bottom-24 right-2 sm:right-4 z-40 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg shadow-xl px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base font-semibold border border-blue-700 animate-pulse hover:animate-none hover:scale-105 transition-transform cursor-pointer"
