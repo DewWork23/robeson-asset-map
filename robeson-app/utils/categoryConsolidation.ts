@@ -69,7 +69,7 @@ export const CONSOLIDATED_CATEGORY_ICONS: Record<ConsolidatedCategory, string> =
 };
 
 export const CONSOLIDATED_CATEGORY_COLORS: Record<ConsolidatedCategory, string> = {
-  'Crisis Services': 'bg-blue-600',
+  'Crisis Services': 'bg-red-600',
   'Healthcare Services': 'bg-emerald-600',
   'Mental Health & Addiction': 'bg-indigo-600',
   'Government & Tribal Services': 'bg-gray-600',

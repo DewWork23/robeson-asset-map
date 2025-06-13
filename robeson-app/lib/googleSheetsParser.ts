@@ -236,7 +236,13 @@ export function filterOrganizations(
   let filtered = [...organizations];
   
   if (category && category !== 'All') {
-    filtered = filtered.filter(org => org.category === category);
+    if (category === 'Crisis Services') {
+      // For Crisis Services, show all organizations flagged as crisis
+      filtered = filtered.filter(org => org.crisisService);
+    } else {
+      // For other categories, show only exact matches
+      filtered = filtered.filter(org => org.category === category);
+    }
   }
   
   if (searchTerm && !userLocation) {

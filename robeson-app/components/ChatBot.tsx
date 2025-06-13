@@ -167,19 +167,19 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
           <p className="font-medium mb-3">I understand you need immediate help. Here are 24/7 crisis services:</p>
           <div className="space-y-2 mb-3">
             {/* 911 Emergency Alert */}
-            <div className="p-3 bg-blue-700 text-white rounded-lg border-2 border-blue-800">
+            <div className="p-3 bg-red-700 text-white rounded-lg border-2 border-red-800">
               <p className="font-bold text-lg flex items-center gap-2">
                 <span className="text-xl">🚨</span> Life-Threatening Emergency?
               </p>
-              <a href="tel:911" className="inline-block mt-2 px-6 py-3 bg-white text-blue-700 rounded-lg font-bold hover:bg-gray-100 text-lg">
+              <a href="tel:911" className="inline-block mt-2 px-6 py-3 bg-white text-red-700 rounded-lg font-bold hover:bg-gray-100 text-lg">
                 Call 911 Immediately
               </a>
             </div>
             
             {/* 988 Mental Health Crisis */}
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="font-bold text-blue-800">💙 Mental Health Crisis Hotline</p>
-              <a href="tel:988" className="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
+            <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+              <p className="font-bold text-red-800">💙 Mental Health Crisis Hotline</p>
+              <a href="tel:988" className="inline-block mt-2 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">
                 Call or Text 988
               </a>
             </div>
@@ -187,7 +187,7 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
               <div className="space-y-2">
                 <button
                   onClick={() => handleMapCategorySelect('Crisis Services')}
-                  className="w-full p-3 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg font-medium transition-colors border border-blue-300"
+                  className="w-full p-3 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg font-medium transition-colors border border-red-300"
                 >
                   📍 Show all crisis services on map
                 </button>
@@ -461,7 +461,7 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handleQuickOption('crisis')}
-              className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm font-medium transition-colors"
+              className="p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-medium transition-colors"
             >
               🚨 Crisis Help
             </button>
@@ -473,7 +473,7 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
             </button>
             <button
               onClick={() => handleQuickOption('housing')}
-              className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm font-medium transition-colors"
+              className="p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-medium transition-colors"
             >
               🏠 Housing
             </button>
@@ -523,7 +523,7 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => handleQuickOption('crisis')}
-                className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm font-medium transition-colors"
+                className="p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-medium transition-colors"
               >
                 🚨 Crisis Help
               </button>
@@ -535,7 +535,7 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
               </button>
               <button
                 onClick={() => handleQuickOption('housing')}
-                className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm font-medium transition-colors"
+                className="p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-medium transition-colors"
               >
                 🏠 Housing
               </button>

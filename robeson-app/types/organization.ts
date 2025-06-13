@@ -49,7 +49,7 @@ export const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export const CATEGORY_COLORS: Record<string, string> = {
-  'Crisis Services': 'bg-blue-600',
+  'Crisis Services': 'bg-red-600',
   'Healthcare Services': 'bg-emerald-600',
   'Mental Health & Addiction': 'bg-indigo-600',
   'Government & Tribal Services': 'bg-gray-600',

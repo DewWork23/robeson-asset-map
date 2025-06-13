@@ -202,21 +202,27 @@ export default function Home() {
                 <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
                   {categories.map((category) => {
                     const icon = CATEGORY_ICONS[category] || '📍';
-                    const count = organizations.filter(org => org.category === category).length;
+                    const count = category === 'Crisis Services' 
+                      ? organizations.filter(org => org.crisisService).length
+                      : organizations.filter(org => org.category === category).length;
                     
                     return (
                       <button
                         key={category}
                         onClick={() => setSelectedCategory(category)}
-                        className="p-5 rounded-lg shadow-sm hover:shadow-2xl transition-all duration-200 transform hover:scale-110 border-2 text-left bg-white border-gray-200 hover:bg-blue-50 hover:border-blue-500 hover:ring-2 hover:ring-blue-400 hover:ring-offset-2"
+                        className={`p-5 rounded-lg shadow-sm hover:shadow-2xl transition-all duration-200 transform hover:scale-110 border-2 text-left ${
+                          category === 'Crisis Services' 
+                            ? 'bg-red-100 border-red-300 hover:bg-red-200 hover:border-red-500 ring-1 ring-red-300 hover:ring-2' 
+                            : 'bg-white border-gray-200 hover:bg-blue-50 hover:border-blue-500 hover:ring-2 hover:ring-blue-400 hover:ring-offset-2'
+                        }`}
                       >
                         <div className="flex items-center gap-4">
                           <span className="text-4xl">{icon}</span>
                           <div>
-                            <p className="font-semibold text-lg text-gray-900">
+                            <p className={`font-semibold text-lg ${category === 'Crisis Services' ? 'text-red-900' : 'text-gray-900'}`}>
                               {category}
                             </p>
-                            <p className="text-base text-gray-600">
+                            <p className={`text-base ${category === 'Crisis Services' ? 'text-red-700' : 'text-gray-600'}`}>
                               {count} resources
                             </p>
                           </div>
