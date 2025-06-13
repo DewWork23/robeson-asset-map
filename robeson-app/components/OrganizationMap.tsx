@@ -266,8 +266,8 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
   return (
     <div className="h-full w-full relative flex flex-col">
       {/* Top Category Bar */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 z-[1000]">
-        <div className="flex items-center gap-4">
+      <div className="bg-white border-b border-gray-200 px-3 py-2 sm:px-4 sm:py-3 z-[1000]">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
           <label htmlFor="category-filter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
             Filter by category:
           </label>
@@ -277,7 +277,7 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
             id="category-filter"
             value={selectedCategory || ''}
             onChange={(e) => setSelectedCategory(e.target.value || null)}
-            className="px-4 py-2 pr-10 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+            className="w-full sm:w-auto px-4 py-2 pr-10 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
           >
             <option value="">All Categories ({organizations.length} locations)</option>
             {legendItems.map(({ category, icon }) => {
@@ -292,8 +292,8 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
           
           {/* Selected category indicator */}
           {selectedCategory && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span>Showing:</span>
+            <div className="flex items-center gap-2 text-sm text-gray-600 mt-2 sm:mt-0">
+              <span className="hidden sm:inline">Showing:</span>
               <span className="font-medium text-blue-600">
                 {CATEGORY_ICONS[selectedCategory as keyof typeof CATEGORY_ICONS] || '📍'} {selectedCategory}
               </span>
