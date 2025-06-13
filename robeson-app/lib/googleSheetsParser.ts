@@ -8,7 +8,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'Sheet1!A:N'; // Adjust range as needed
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache';
+const CACHE_KEY = 'robeson_resources_cache_v2'; // Updated to force cache refresh
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {
@@ -183,6 +183,8 @@ async function loadOrganizationsFromCSV(): Promise<Organization[]> {
           specialNotes: values[13] || ''
         };
         organizations.push(org);
+      } else {
+        console.warn(`Skipping line ${i + 1}: insufficient columns (${values.length} found, 14 required)`);
       }
     }
     
