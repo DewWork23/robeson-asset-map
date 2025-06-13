@@ -8,7 +8,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'Sheet1!A:N'; // Adjust range as needed
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v3'; // Updated for consolidated categories
+const CACHE_KEY = 'robeson_resources_cache_v4'; // Updated for separated tribal/government categories
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {
