@@ -23,31 +23,38 @@ function migrateCategories() {
   const migrationStats: Record<string, number> = {};
   const unmappedCategories: Set<string> = new Set();
   let freePrograms: any[] = [];
+  let crisisServicesCount = 0;
   
   // Migrate categories
   const migratedRecords = records.map((record: any) => {
     const oldCategory = record.Category;
     let newCategory = CATEGORY_MIGRATION_MAP[oldCategory];
     
-    // Special handling for "Free Programs" - need manual review
-    if (oldCategory === 'Free Programs') {
-      freePrograms.push(record);
-      // Try to categorize based on organization name or services
-      if (record['Organization Name'].toLowerCase().includes('health') || 
-          record['Services Offered'].toLowerCase().includes('health')) {
-        newCategory = 'Healthcare Services';
-      } else if (record['Organization Name'].toLowerCase().includes('church') || 
-                 record['Organization Name'].toLowerCase().includes('ministry')) {
-        newCategory = 'Faith-Based Services';
-      } else if (record['Organization Name'].toLowerCase().includes('school') || 
-                 record['Organization Name'].toLowerCase().includes('education')) {
-        newCategory = 'Education';
-      } else if (record['Organization Name'].toLowerCase().includes('housing')) {
-        newCategory = 'Housing Services';
-      } else if (record['Organization Name'].toLowerCase().includes('legal')) {
-        newCategory = 'Legal Services';
-      } else {
-        newCategory = 'Community Services'; // Default fallback
+    // FIRST: Check if this is a crisis service - they get priority categorization
+    if (record['Crisis Service']?.toLowerCase() === 'yes') {
+      newCategory = 'Crisis Services';
+      crisisServicesCount++;
+    } else {
+      // Special handling for "Free Programs" - need manual review
+      if (oldCategory === 'Free Programs') {
+        freePrograms.push(record);
+        // Try to categorize based on organization name or services
+        if (record['Organization Name'].toLowerCase().includes('health') || 
+            record['Services Offered'].toLowerCase().includes('health')) {
+          newCategory = 'Healthcare Services';
+        } else if (record['Organization Name'].toLowerCase().includes('church') || 
+                   record['Organization Name'].toLowerCase().includes('ministry')) {
+          newCategory = 'Faith-Based Services';
+        } else if (record['Organization Name'].toLowerCase().includes('school') || 
+                   record['Organization Name'].toLowerCase().includes('education')) {
+          newCategory = 'Education';
+        } else if (record['Organization Name'].toLowerCase().includes('housing')) {
+          newCategory = 'Housing Services';
+        } else if (record['Organization Name'].toLowerCase().includes('legal')) {
+          newCategory = 'Legal Services';
+        } else {
+          newCategory = 'Community Services'; // Default fallback
+        }
       }
     }
     
@@ -88,6 +95,10 @@ function migrateCategories() {
   
   console.log(`\nTotal organizations: ${records.length}`);
   console.log(`Categories reduced from 20 to ${Object.keys(migrationStats).length}`);
+  
+  if (crisisServicesCount > 0) {
+    console.log(`\n🆘 ${crisisServicesCount} crisis services extracted into dedicated "Crisis Services" category`);
+  }
   
   if (freePrograms.length > 0) {
     console.log(`\n⚠️  ${freePrograms.length} "Free Programs" were redistributed based on keywords.`);

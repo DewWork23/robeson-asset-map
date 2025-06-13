@@ -1,4 +1,5 @@
 export const CONSOLIDATED_CATEGORIES = [
+  'Crisis Services',
   'Healthcare Services',
   'Mental Health & Addiction',
   'Government & Tribal Services',
@@ -52,6 +53,7 @@ export const CATEGORY_MIGRATION_MAP: Record<string, ConsolidatedCategory> = {
 };
 
 export const CONSOLIDATED_CATEGORY_ICONS: Record<ConsolidatedCategory, string> = {
+  'Crisis Services': '🆘',
   'Healthcare Services': '🏥',
   'Mental Health & Addiction': '🧠',
   'Government & Tribal Services': '🏛️',
@@ -67,6 +69,7 @@ export const CONSOLIDATED_CATEGORY_ICONS: Record<ConsolidatedCategory, string> =
 };
 
 export const CONSOLIDATED_CATEGORY_COLORS: Record<ConsolidatedCategory, string> = {
+  'Crisis Services': 'bg-blue-600',
   'Healthcare Services': 'bg-emerald-600',
   'Mental Health & Addiction': 'bg-indigo-600',
   'Government & Tribal Services': 'bg-gray-600',

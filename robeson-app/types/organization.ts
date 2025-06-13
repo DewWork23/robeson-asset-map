@@ -18,6 +18,7 @@ export interface Organization {
 }
 
 export type Category = 
+  | 'Crisis Services'
   | 'Healthcare Services'
   | 'Mental Health & Addiction'
   | 'Government & Tribal Services'
@@ -32,6 +33,7 @@ export type Category =
   | 'Cultural & Information Services';
 
 export const CATEGORY_ICONS: Record<string, string> = {
+  'Crisis Services': '🆘',
   'Healthcare Services': '🏥',
   'Mental Health & Addiction': '🧠',
   'Government & Tribal Services': '🏛️',
@@ -47,6 +49,7 @@ export const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export const CATEGORY_COLORS: Record<string, string> = {
+  'Crisis Services': 'bg-blue-600',
   'Healthcare Services': 'bg-emerald-600',
   'Mental Health & Addiction': 'bg-indigo-600',
   'Government & Tribal Services': 'bg-gray-600',
