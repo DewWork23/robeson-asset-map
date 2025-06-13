@@ -94,7 +94,7 @@ export default function Home() {
             <div className="flex-1" />
             <div className="text-center">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-green-700 bg-clip-text text-transparent">
-                Robeson County Recovery Resources
+                Robeson County Community Resources
               </h1>
               <p className="text-base text-gray-700 mt-2 font-medium">
                 You're not alone • Help is here • Your journey starts today

@@ -1,7 +1,7 @@
 {
-  "name": "Robeson County Recovery Resources",
-  "short_name": "Robeson Recovery",
-  "description": "Find recovery and support services in Robeson County, NC",
+  "name": "Robeson County Community Resources",
+  "short_name": "Robeson Resources",
+  "description": "Find community support services in Robeson County, NC",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

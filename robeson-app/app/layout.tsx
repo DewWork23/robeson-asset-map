@@ -13,10 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Robeson County Recovery Resources",
-  description: "Find recovery and support services in Robeson County, NC. Access crisis help, treatment centers, housing, and community resources.",
-  keywords: "Robeson County, recovery, addiction, mental health, crisis help, treatment centers, North Carolina",
-  authors: [{ name: "Robeson County Recovery Resources" }],
+  title: "Robeson County Community Resources",
+  description: "Find community support services in Robeson County, NC. Access crisis help, treatment centers, housing, food assistance, job resources, and more.",
+  keywords: "Robeson County, community resources, mental health, crisis help, treatment centers, housing, food assistance, North Carolina",
+  authors: [{ name: "Robeson County Community Resources" }],
 };
 
 export const viewport = {
