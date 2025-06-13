@@ -8,7 +8,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'Sheet1!A:N'; // Adjust range as needed
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v4'; // Updated for separated tribal/government categories
+const CACHE_KEY = 'robeson_resources_cache_v5'; // Updated for dual-category crisis services
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {
@@ -240,8 +240,84 @@ export function filterOrganizations(
       // For Crisis Services, show all organizations flagged as crisis
       filtered = filtered.filter(org => org.crisisService);
     } else {
-      // For other categories, show only exact matches
-      filtered = filtered.filter(org => org.category === category);
+      // For other categories, show exact matches PLUS crisis services that belong to this category
+      filtered = filtered.filter(org => {
+        // Direct category match
+        if (org.category === category) return true;
+        
+        // For crisis services, check if they belong to this category based on service type
+        if (org.crisisService && org.category === 'Crisis Services') {
+          // Map service types to categories
+          const serviceTypeMap: Record<string, string> = {
+            // Law Enforcement
+            'Police Services': 'Law Enforcement',
+            'Sheriff Services': 'Law Enforcement',
+            
+            // Mental Health & Addiction
+            'Mental Health Services': 'Mental Health & Addiction',
+            'Substance Abuse Treatment': 'Mental Health & Addiction',
+            'Mental Health/Addiction': 'Mental Health & Addiction',
+            'Mental Health/Developmental Services': 'Mental Health & Addiction',
+            'Mental Health/Substance Abuse': 'Mental Health & Addiction',
+            'Addiction Medicine': 'Mental Health & Addiction',
+            'Behavioral Health/Medical': 'Mental Health & Addiction',
+            'Behavioral Health/Peer Support': 'Mental Health & Addiction',
+            'Opioid Treatment': 'Mental Health & Addiction',
+            'Opioid Recovery': 'Mental Health & Addiction',
+            'Substance Abuse Prevention/Recovery': 'Mental Health & Addiction',
+            'Substance Use Prevention/Recovery': 'Mental Health & Addiction',
+            'Youth Substance Abuse Prevention': 'Mental Health & Addiction',
+            'Therapeutic Foster Care/Behavioral Health': 'Mental Health & Addiction',
+            
+            // Healthcare
+            'Healthcare': 'Healthcare Services',
+            'Medical Services': 'Healthcare Services',
+            'Hospital/Medical Services': 'Healthcare Services',
+            'Comprehensive Health Services': 'Healthcare Services',
+            'Integrated Healthcare': 'Healthcare Services',
+            'Public Health Services': 'Healthcare Services',
+            
+            // Tribal
+            'Tribal Services': 'Tribal Services',
+            
+            // Government
+            'Municipal Services': 'Government Services',
+            'Social Services': 'Government Services',
+            
+            // Legal
+            'Legal Services': 'Legal Services',
+            'Legal/Prosecution': 'Legal Services',
+            'Drug Court': 'Legal Services',
+            'Child Advocacy': 'Legal Services',
+            
+            // Community Services
+            'Support Services': 'Community Services',
+            'Community Services': 'Community Services',
+            'Crisis Services': 'Community Services',
+            'Support Group': 'Community Services',
+            'Harm Reduction': 'Community Services',
+            'Mobile Harm Reduction': 'Community Services',
+            'Biopsychosocial Support': 'Community Services',
+            'Community Resilience': 'Community Services',
+            'Disaster Recovery': 'Community Services',
+            'Disaster Relief/Humanitarian': 'Community Services',
+            'Healing/Educational Resources': 'Community Services',
+            'Inclusive Community Support': 'Community Services',
+            'Opioid Crisis Prevention': 'Community Services',
+            'Offender Rehabilitation': 'Community Services',
+            'Resource Gap Bridging': 'Community Services',
+            'Equine-Assisted Learning': 'Community Services',
+            
+            // Faith-Based
+            'Faith-Based Services': 'Faith-Based Services',
+            'Faith-Based Recovery': 'Faith-Based Services'
+          };
+          
+          return serviceTypeMap[org.serviceType] === category;
+        }
+        
+        return false;
+      });
     }
   }
   

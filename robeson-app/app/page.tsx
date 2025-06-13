@@ -235,7 +235,7 @@ export default function Home() {
                     const icon = CATEGORY_ICONS[category] || '📍';
                     const count = category === 'Crisis Services' 
                       ? organizations.filter(org => org.crisisService).length
-                      : organizations.filter(org => org.category === category).length;
+                      : filterOrganizations(organizations, category).length;
                     
                     return (
                       <button
