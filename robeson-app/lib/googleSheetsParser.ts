@@ -56,6 +56,10 @@ function setCachedData(organizations: Organization[]): void {
 }
 
 export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[]> {
+  // Temporarily using CSV as primary data source
+  return loadOrganizationsFromCSV();
+  
+  /* GOOGLE SHEETS CODE - COMMENTED OUT FOR NOW
   // Try to get cached data first
   const cached = getCachedData();
   if (cached) {
@@ -138,9 +142,10 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     // Fallback to CSV if Google Sheets fails
     return loadOrganizationsFromCSV();
   }
+  */
 }
 
-// Fallback function to load from CSV
+// Primary function to load from CSV
 async function loadOrganizationsFromCSV(): Promise<Organization[]> {
   // Check cache first
   const cached = getCachedData();
@@ -149,6 +154,7 @@ async function loadOrganizationsFromCSV(): Promise<Organization[]> {
   }
   
   try {
+    console.log('Loading data from CSV file...');
     const { withBasePath } = await import('./basePath');
     const response = await fetch(withBasePath('/robeson_county.csv'));
     const text = await response.text();
@@ -179,6 +185,8 @@ async function loadOrganizationsFromCSV(): Promise<Organization[]> {
         organizations.push(org);
       }
     }
+    
+    console.log(`Successfully loaded ${organizations.length} organizations from CSV`);
     
     // Cache the CSV data too
     setCachedData(organizations);

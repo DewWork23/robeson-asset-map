@@ -378,9 +378,10 @@ export default function Home() {
       <footer className="bg-gray-100 border-t border-gray-200 py-8 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h3 className="text-lg font-semibold text-gray-800 mb-2">
-            Have feedback?
+            Found incorrect information or missing resources?
           </h3>
           <p className="text-gray-600 mb-4">
+            Help us improve this guide by reporting errors, suggesting new resources, or sharing feedback.<br />
             Contact Jordan Dew, Social Research Specialist, UNCP SPARC
           </p>
           <a
