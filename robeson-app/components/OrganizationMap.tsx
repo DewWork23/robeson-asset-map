@@ -186,52 +186,45 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
     <div className="h-full w-full relative flex flex-col">
       {/* Top Category Bar */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 z-[1000]">
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-          <span className="text-sm font-medium text-gray-700 whitespace-nowrap mr-3">Filter by:</span>
+        <div className="flex items-center gap-4">
+          <label htmlFor="category-filter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            Filter by category:
+          </label>
           
-          {/* All Categories Button */}
-          <button
-            onClick={() => setSelectedCategory(null)}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all min-h-[40px] min-w-fit ${
-              !selectedCategory
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+          {/* Category Dropdown */}
+          <select
+            id="category-filter"
+            value={selectedCategory || ''}
+            onChange={(e) => setSelectedCategory(e.target.value || null)}
+            className="px-4 py-2 pr-10 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
           >
-            <div className="flex flex-col items-start">
-              <span className="leading-tight">All Categories</span>
-              <span className={`text-xs font-normal leading-tight ${!selectedCategory ? 'text-blue-100' : 'text-gray-500'}`}>
-                {organizations.length} locations
-              </span>
-            </div>
-          </button>
+            <option value="">All Categories ({organizations.length} locations)</option>
+            {legendItems.map(({ category, icon }) => {
+              const count = organizations.filter(org => org.category === category).length;
+              return (
+                <option key={category} value={category}>
+                  {icon} {category} ({count} locations)
+                </option>
+              );
+            })}
+          </select>
           
-          {/* Category Buttons */}
-          {legendItems.map(({ category, icon }) => {
-            const isSelected = selectedCategory === category;
-            const count = organizations.filter(org => org.category === category).length;
-            
-            return (
+          {/* Selected category indicator */}
+          {selectedCategory && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span>Showing:</span>
+              <span className="font-medium text-blue-600">
+                {CATEGORY_ICONS[selectedCategory as keyof typeof CATEGORY_ICONS] || '📍'} {selectedCategory}
+              </span>
               <button
-                key={category}
-                onClick={() => setSelectedCategory(isSelected ? null : category)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all min-h-[40px] min-w-fit ${
-                  isSelected
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-                title={`${category} (${count} locations)`}
+                onClick={() => setSelectedCategory(null)}
+                className="text-gray-400 hover:text-gray-600 ml-1"
+                aria-label="Clear filter"
               >
-                <span className="text-lg flex-shrink-0">{icon}</span>
-                <div className="flex flex-col items-start">
-                  <span className="leading-tight">{category}</span>
-                  <span className={`text-xs font-normal leading-tight ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
-                    {count} locations
-                  </span>
-                </div>
+                ✕
               </button>
-            );
-          })}
+            </div>
+          )}
         </div>
       </div>
       
