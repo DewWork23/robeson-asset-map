@@ -76,9 +76,11 @@ export default function Home() {
   }, [organizations, selectedCategory, searchTerm, userLocation]);
 
   const categories = Array.from(new Set(organizations.map(org => org.category))).sort((a, b) => {
-    // Put Crisis Services first
-    if (a === 'Crisis Services') return -1;
-    if (b === 'Crisis Services') return 1;
+    // Put categories with crisis services first
+    const aCrisis = organizations.some(org => org.category === a && org.crisisService);
+    const bCrisis = organizations.some(org => org.category === b && org.crisisService);
+    if (aCrisis && !bCrisis) return -1;
+    if (!aCrisis && bCrisis) return 1;
     return a.localeCompare(b);
   });
 
@@ -201,41 +203,32 @@ export default function Home() {
                 </div>
                 <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
                   {categories.map((category) => {
-                    const icon = CATEGORY_ICONS[category as Category] || '📍';
+                    const icon = CATEGORY_ICONS[category] || '📍';
                     const count = organizations.filter(org => org.category === category).length;
-                    const isCrisis = category === 'Crisis Services';
+                    const hasCrisisServices = organizations.some(org => org.category === category && org.crisisService);
                     
                     return (
                       <button
                         key={category}
                         onClick={() => setSelectedCategory(category)}
                         className={`p-5 rounded-lg shadow-sm hover:shadow-2xl transition-all duration-200 transform hover:scale-110 border-2 text-left ${
-                          isCrisis 
-                            ? 'bg-red-600 border-red-700 text-white hover:bg-red-800 ring-2 ring-red-400 ring-offset-2 hover:ring-4' 
+                          hasCrisisServices 
+                            ? 'bg-red-100 border-red-300 hover:bg-red-200 hover:border-red-500 ring-1 ring-red-300 hover:ring-2' 
                             : 'bg-white border-gray-200 hover:bg-blue-50 hover:border-blue-500 hover:ring-2 hover:ring-blue-400 hover:ring-offset-2'
                         }`}
                       >
                         <div className="flex items-center gap-4">
                           <span className="text-4xl">{icon}</span>
                           <div>
-                            <p className={`font-semibold text-lg ${isCrisis ? 'text-white' : 'text-gray-900'}`}>
-                              {isCrisis ? 'Help Available 24/7' : category}
+                            <p className={`font-semibold text-lg ${hasCrisisServices ? 'text-red-900' : 'text-gray-900'}`}>
+                              {category}
                             </p>
-                            <p className={`text-base ${isCrisis ? 'text-red-100' : 'text-gray-600'}`}>
+                            <p className={`text-base ${hasCrisisServices ? 'text-red-700' : 'text-gray-600'}`}>
                               {count} resources
+                              {hasCrisisServices && ' • Crisis services available'}
                             </p>
                           </div>
                         </div>
-                        {isCrisis && (
-                          <div className="mt-3">
-                            <p className="text-sm text-red-100">
-                              Immediate crisis support & emergency services
-                            </p>
-                            <p className="text-base font-bold text-white mt-1">
-                              National Hotline: 988
-                            </p>
-                          </div>
-                        )}
                       </button>
                     );
                   })}
