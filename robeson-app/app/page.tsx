@@ -9,7 +9,6 @@ import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import ManifestLink from '@/components/ManifestLink';
 import OrganizationMap from '@/components/OrganizationMap';
 import ChatBot from '@/components/ChatBot';
-import FeedbackForm from '@/components/FeedbackForm';
 
 export default function Home() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -19,7 +18,6 @@ export default function Home() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [showSubmissionForm, setShowSubmissionForm] = useState(false);
 
   const handleNearMe = () => {
     if (navigator.geolocation) {
@@ -385,27 +383,15 @@ export default function Home() {
           <p className="text-gray-600 mb-4">
             Contact Jordan Dew, Social Research Specialist, UNCP SPARC
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <button
-              onClick={() => setShowSubmissionForm(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 hover:shadow-xl hover:scale-110 transition-all duration-200"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Submit Feedback Form
-            </button>
-            <span className="text-gray-500">or</span>
-            <a
-              href="mailto:jordan.dew@uncp.edu?subject=Robeson County Community Resources - Feedback"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 hover:shadow-xl hover:scale-110 transition-all duration-200"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Email Directly
-            </a>
-          </div>
+          <a
+            href="mailto:jordan.dew@uncp.edu?subject=Robeson County Community Resources - Feedback"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 hover:shadow-xl hover:scale-110 transition-all duration-200"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Email Feedback
+          </a>
           <p className="text-sm text-gray-500 mt-3">
             <a href="mailto:jordan.dew@uncp.edu" className="text-blue-600 hover:underline">jordan.dew@uncp.edu</a>
           </p>
@@ -420,10 +406,6 @@ export default function Home() {
         onViewModeChange={setViewMode}
       />
       
-      {/* Feedback Form */}
-      {showSubmissionForm && (
-        <FeedbackForm onClose={() => setShowSubmissionForm(false)} />
-      )}
     </div>
   );
 }
