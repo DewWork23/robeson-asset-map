@@ -559,7 +559,7 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-20 right-2 sm:right-4 z-40 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg shadow-xl px-4 py-3 text-base font-semibold border border-blue-700 animate-pulse hover:animate-none hover:scale-105 transition-transform cursor-pointer"
+          className="fixed bottom-24 right-2 sm:right-4 z-40 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg shadow-xl px-4 py-3 text-base font-semibold border border-blue-700 animate-pulse hover:animate-none hover:scale-105 transition-transform cursor-pointer"
           aria-label="Open chat assistant"
         >
           Need help finding something? 💬
