@@ -126,7 +126,7 @@ export default function Home() {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 pb-20">
+      <main className="max-w-7xl mx-auto px-4 pt-6 pb-20">
         {loading ? (
           <div className="space-y-4">
             {/* Loading skeleton for categories */}
