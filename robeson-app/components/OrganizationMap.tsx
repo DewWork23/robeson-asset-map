@@ -15,7 +15,6 @@ interface OrganizationMapProps {
 const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }: OrganizationMapProps) => {
   const [L, setL] = useState<any>(null);
   const [mapReady, setMapReady] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     // Dynamically import leaflet
@@ -119,21 +118,15 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
       });
     });
     
-    // If no category is selected, fit to show the entire county
-    if (!selectedCategory) {
-      map.fitBounds(countyBorder.getBounds(), { padding: [20, 20] });
-    }
+    // Set initial view to show the entire county
+    map.fitBounds(countyBorder.getBounds(), { padding: [20, 20] });
 
     // Reset offsets for consistent positioning
     resetLocationOffsets();
 
-    // Filter organizations based on selected category
-    const filteredOrganizations = selectedCategory 
-      ? organizations.filter(org => org.category === selectedCategory)
-      : organizations;
-
     // Add individual markers for each organization
-    filteredOrganizations.forEach(org => {
+    // Note: organizations are already filtered by the parent component
+    organizations.forEach(org => {
       const coords = getCoordinatesFromAddress(org.address);
       if (!coords) return; // Skip if no coordinates found
       
@@ -208,12 +201,12 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
       });
     });
 
-    // If category is selected and there are filtered pins, zoom to show them
-    if (selectedCategory && filteredOrganizations.length > 0) {
+    // Auto-zoom to show all current pins if we have a subset of organizations
+    if (organizations.length > 0 && organizations.length < 50) { // Assume < 50 means filtered
       const bounds = L.latLngBounds([]);
       let hasValidCoords = false;
       
-      filteredOrganizations.forEach(org => {
+      organizations.forEach(org => {
         const coords = getCoordinatesFromAddress(org.address);
         if (coords) {
           bounds.extend([coords.lat, coords.lon]);
@@ -223,8 +216,8 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
       
       if (hasValidCoords && bounds.isValid()) {
         // Calculate appropriate zoom based on number of locations
-        const padding = filteredOrganizations.length === 1 ? [100, 100] : [80, 80];
-        const maxZoom = filteredOrganizations.length === 1 ? 15 : 14;
+        const padding = organizations.length === 1 ? [100, 100] : [80, 80];
+        const maxZoom = organizations.length === 1 ? 15 : 14;
         
         setTimeout(() => {
           map.fitBounds(bounds, { 
@@ -234,7 +227,7 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
           });
         }, 100);
       }
-    } else if (!selectedCategory) {
+    } else {
       // Reset to county view when filter is cleared
       setTimeout(() => {
         map.fitBounds(countyBorder.getBounds(), { 
@@ -248,7 +241,7 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
     return () => {
       map.remove();
     };
-  }, [mapReady, L, organizations, selectedOrganization, onOrganizationClick, selectedCategory]);
+  }, [mapReady, L, organizations, selectedOrganization, onOrganizationClick]);
 
   if (!mapReady) {
     return <div className="h-full flex items-center justify-center">Loading map...</div>;
@@ -265,47 +258,15 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
 
   return (
     <div className="h-full w-full relative flex flex-col">
-      {/* Top Category Bar */}
+      {/* Top Status Bar */}
       <div className="bg-white border-b border-gray-200 px-3 py-2 sm:px-4 sm:py-3 z-[1000]">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-          <label htmlFor="category-filter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
-            Filter by category:
-          </label>
-          
-          {/* Category Dropdown */}
-          <select
-            id="category-filter"
-            value={selectedCategory || ''}
-            onChange={(e) => setSelectedCategory(e.target.value || null)}
-            className="w-full sm:w-auto px-4 py-2 pr-10 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-          >
-            <option value="">All Categories ({organizations.length} locations)</option>
-            {legendItems.map(({ category, icon }) => {
-              const count = organizations.filter(org => org.category === category).length;
-              return (
-                <option key={category} value={category}>
-                  {icon} {category} ({count} locations)
-                </option>
-              );
-            })}
-          </select>
-          
-          {/* Selected category indicator */}
-          {selectedCategory && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 mt-2 sm:mt-0">
-              <span className="hidden sm:inline">Showing:</span>
-              <span className="font-medium text-blue-600">
-                {CATEGORY_ICONS[selectedCategory as keyof typeof CATEGORY_ICONS] || '📍'} {selectedCategory}
-              </span>
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className="text-gray-400 hover:text-gray-600 ml-1"
-                aria-label="Clear filter"
-              >
-                ✕
-              </button>
-            </div>
-          )}
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-700">
+            Showing <span className="font-medium">{organizations.length} locations</span>
+          </div>
+          <div className="text-xs text-gray-500">
+            Use the chat assistant to filter by category
+          </div>
         </div>
       </div>
       
