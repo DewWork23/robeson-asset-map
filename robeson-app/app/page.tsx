@@ -111,6 +111,19 @@ export default function Home() {
         </div>
       </header>
 
+      {/* Emergency Banner */}
+      <div className="bg-red-600 text-white py-2 px-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-3 text-center">
+          <span className="text-lg">🚨</span>
+          <p className="font-semibold">
+            Life-threatening emergency? Call 911 immediately
+          </p>
+          <span className="hidden sm:inline">•</span>
+          <p className="hidden sm:inline">
+            Mental health crisis? Call or text 988
+          </p>
+        </div>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 pb-20">
@@ -196,29 +209,29 @@ export default function Home() {
                       <button
                         key={category}
                         onClick={() => setSelectedCategory(category)}
-                        className={`p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow border text-left ${
+                        className={`p-5 rounded-lg shadow-sm hover:shadow-xl transition-all transform hover:scale-105 border text-left ${
                           isCrisis 
                             ? 'bg-red-600 border-red-700 text-white hover:bg-red-700 ring-2 ring-red-400 ring-offset-2' 
-                            : 'bg-white border-gray-200 hover:shadow-lg'
+                            : 'bg-white border-gray-200 hover:shadow-lg hover:border-blue-300'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="text-3xl">{icon}</span>
+                        <div className="flex items-center gap-4">
+                          <span className="text-4xl">{icon}</span>
                           <div>
-                            <p className={`font-medium ${isCrisis ? 'text-white' : 'text-gray-900'}`}>
+                            <p className={`font-semibold text-lg ${isCrisis ? 'text-white' : 'text-gray-900'}`}>
                               {isCrisis ? 'Help Available 24/7' : category}
                             </p>
-                            <p className={`text-sm ${isCrisis ? 'text-red-100' : 'text-gray-500'}`}>
+                            <p className={`text-base ${isCrisis ? 'text-red-100' : 'text-gray-600'}`}>
                               {count} resources
                             </p>
                           </div>
                         </div>
                         {isCrisis && (
-                          <div className="mt-2">
-                            <p className="text-xs text-red-100">
+                          <div className="mt-3">
+                            <p className="text-sm text-red-100">
                               Immediate crisis support & emergency services
                             </p>
-                            <p className="text-sm font-bold text-white mt-1">
+                            <p className="text-base font-bold text-white mt-1">
                               National Hotline: 988
                             </p>
                           </div>
@@ -228,13 +241,13 @@ export default function Home() {
                   })}
                   <button
                     onClick={() => setSelectedCategory('All')}
-                    className="p-4 bg-blue-50 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-blue-200 text-left"
+                    className="p-5 bg-blue-50 rounded-lg shadow-sm hover:shadow-xl transition-all transform hover:scale-105 border border-blue-200 hover:border-blue-400 text-left"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-3xl">🏢</span>
+                    <div className="flex items-center gap-4">
+                      <span className="text-4xl">🏢</span>
                       <div>
-                        <p className="font-medium text-blue-900">All Resources</p>
-                        <p className="text-sm text-blue-600">{organizations.length} total</p>
+                        <p className="font-semibold text-lg text-blue-900">All Resources</p>
+                        <p className="text-base text-blue-600">{organizations.length} total</p>
                       </div>
                     </div>
                   </button>
@@ -360,6 +373,29 @@ export default function Home() {
           </>
         )}
       </main>
+      
+      {/* Footer with submission link */}
+      <footer className="bg-gray-100 border-t border-gray-200 py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-gray-600 mb-3">
+            Know of a resource that should be listed?
+          </p>
+          <a
+            href="https://forms.gle/YOUR_FORM_ID_HERE"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Submit a Resource
+          </a>
+          <p className="text-sm text-gray-500 mt-3">
+            Or email updates to: resources@robesoncounty.org
+          </p>
+        </div>
+      </footer>
       
       {/* Chat Bot */}
       <ChatBot 
