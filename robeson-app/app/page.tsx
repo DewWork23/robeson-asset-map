@@ -75,7 +75,15 @@ export default function Home() {
     setFilteredOrgs(filtered);
   }, [organizations, selectedCategory, searchTerm, userLocation]);
 
-  const categories = Array.from(new Set(organizations.map(org => org.category))).sort((a, b) => {
+  // Get unique categories from organizations
+  const uniqueCategories = Array.from(new Set(organizations.map(org => org.category)));
+  
+  // Always ensure Crisis Services is included
+  if (!uniqueCategories.includes('Crisis Services')) {
+    uniqueCategories.push('Crisis Services');
+  }
+  
+  const categories = uniqueCategories.sort((a, b) => {
     // Put Crisis Services category first
     if (a === 'Crisis Services' && b !== 'Crisis Services') return -1;
     if (a !== 'Crisis Services' && b === 'Crisis Services') return 1;
@@ -127,6 +135,29 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 pt-6 pb-20">
+        {/* Prominent Crisis Services Button - Always Visible */}
+        {!loading && selectedCategory !== 'Crisis Services' && (
+          <div className="mb-6">
+            <button
+              onClick={() => setSelectedCategory('Crisis Services')}
+              className="relative w-full p-6 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+            >
+              <div className="flex items-center justify-center gap-4">
+                <span className="text-5xl">🆘</span>
+                <div>
+                  <p className="text-2xl font-bold">Crisis Services</p>
+                  <p className="text-lg opacity-90">
+                    {organizations.filter(org => org.crisisService).length} crisis resources available • Click for immediate help
+                  </p>
+                </div>
+              </div>
+              <span className="absolute -top-2 -right-2 flex h-6 w-6">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-6 w-6 bg-yellow-400"></span>
+              </span>
+            </button>
+          </div>
+        )}
         {loading ? (
           <div className="space-y-4">
             {/* Loading skeleton for categories */}
