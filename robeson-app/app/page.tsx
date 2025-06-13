@@ -169,7 +169,7 @@ export default function Home() {
                     <div className="flex gap-2">
                       <button
                         onClick={handleNearMe}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2"
                         aria-label="Find resources near me"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +180,7 @@ export default function Home() {
                       </button>
                       <button
                         onClick={() => setViewMode('list')}
-                        className="px-4 py-2 rounded-lg font-medium transition-colors bg-blue-600 text-white"
+                        className="px-4 py-2 rounded-lg font-medium transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:scale-105"
                         aria-pressed={true}
                       >
                         <span className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export default function Home() {
                       </button>
                       <button
                         onClick={() => setViewMode('map')}
-                        className="px-4 py-2 rounded-lg font-medium transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        className="px-4 py-2 rounded-lg font-medium transition-all duration-200 bg-gray-200 text-gray-700 hover:bg-gray-400 hover:shadow-lg hover:scale-105"
                         aria-pressed={false}
                       >
                         <span className="flex items-center gap-2">
@@ -209,10 +209,10 @@ export default function Home() {
                       <button
                         key={category}
                         onClick={() => setSelectedCategory(category)}
-                        className={`p-5 rounded-lg shadow-sm hover:shadow-xl transition-all transform hover:scale-105 border text-left ${
+                        className={`p-5 rounded-lg shadow-sm hover:shadow-2xl transition-all duration-200 transform hover:scale-110 border-2 text-left ${
                           isCrisis 
-                            ? 'bg-red-600 border-red-700 text-white hover:bg-red-700 ring-2 ring-red-400 ring-offset-2' 
-                            : 'bg-white border-gray-200 hover:shadow-lg hover:border-blue-300'
+                            ? 'bg-red-600 border-red-700 text-white hover:bg-red-800 ring-2 ring-red-400 ring-offset-2 hover:ring-4' 
+                            : 'bg-white border-gray-200 hover:bg-blue-50 hover:border-blue-500 hover:ring-2 hover:ring-blue-400 hover:ring-offset-2'
                         }`}
                       >
                         <div className="flex items-center gap-4">
@@ -241,7 +241,7 @@ export default function Home() {
                   })}
                   <button
                     onClick={() => setSelectedCategory('All')}
-                    className="p-5 bg-blue-50 rounded-lg shadow-sm hover:shadow-xl transition-all transform hover:scale-105 border border-blue-200 hover:border-blue-400 text-left"
+                    className="p-5 bg-blue-50 rounded-lg shadow-sm hover:shadow-2xl transition-all duration-200 transform hover:scale-110 border-2 border-blue-200 hover:bg-blue-100 hover:border-blue-500 hover:ring-2 hover:ring-blue-400 hover:ring-offset-2 text-left"
                   >
                     <div className="flex items-center gap-4">
                       <span className="text-4xl">🏢</span>
@@ -384,7 +384,7 @@ export default function Home() {
             href="https://forms.gle/YOUR_FORM_ID_HERE"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 hover:shadow-xl hover:scale-110 transition-all duration-200"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
