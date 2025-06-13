@@ -347,6 +347,9 @@ export default function Home() {
               <div className="h-[600px] bg-white rounded-lg shadow-sm overflow-hidden">
                 <OrganizationMap 
                   organizations={filteredOrgs}
+                  allOrganizations={organizations}
+                  selectedCategory={selectedCategory}
+                  onCategorySelect={setSelectedCategory}
                   onOrganizationClick={(org) => {
                     // Scroll to organization card or show details
                     console.log('Organization clicked:', org);

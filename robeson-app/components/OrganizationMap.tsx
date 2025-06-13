@@ -8,11 +8,14 @@ import dynamic from 'next/dynamic';
 
 interface OrganizationMapProps {
   organizations: Organization[];
+  allOrganizations?: Organization[];
+  selectedCategory?: string | null;
+  onCategorySelect?: (category: string | null) => void;
   selectedOrganization?: Organization | null;
   onOrganizationClick?: (org: Organization) => void;
 }
 
-const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }: OrganizationMapProps) => {
+const MapContent = ({ organizations, allOrganizations = [], selectedCategory, onCategorySelect, selectedOrganization, onOrganizationClick }: OrganizationMapProps) => {
   const [L, setL] = useState<any>(null);
   const [mapReady, setMapReady] = useState(false);
 
@@ -247,8 +250,8 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
     return <div className="h-full flex items-center justify-center">Loading map...</div>;
   }
 
-  // Get unique categories from organizations
-  const uniqueCategories = Array.from(new Set(organizations.map(org => org.category))).sort();
+  // Get unique categories from ALL organizations
+  const uniqueCategories = Array.from(new Set(allOrganizations.map(org => org.category))).sort();
   
   // Create legend items with icons
   const legendItems = uniqueCategories.map(category => {
@@ -258,14 +261,34 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
 
   return (
     <div className="h-full w-full relative flex flex-col">
-      {/* Top Status Bar */}
+      {/* Top Category Bar */}
       <div className="bg-white border-b border-gray-200 px-3 py-2 sm:px-4 sm:py-3 z-[1000]">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-700">
-            Showing <span className="font-medium">{organizations.length} locations</span>
-          </div>
-          <div className="text-xs text-gray-500">
-            Use the chat assistant to filter by category
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <label htmlFor="category-filter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            Filter by category:
+          </label>
+          
+          {/* Category Dropdown */}
+          <select
+            id="category-filter"
+            value={selectedCategory || ''}
+            onChange={(e) => onCategorySelect && onCategorySelect(e.target.value || null)}
+            className="w-full sm:w-auto px-4 py-2 pr-10 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+          >
+            <option value="">All Categories ({allOrganizations.length} locations)</option>
+            {legendItems.map(({ category, icon }) => {
+              const count = allOrganizations.filter(org => org.category === category).length;
+              return (
+                <option key={category} value={category}>
+                  {icon} {category} ({count} locations)
+                </option>
+              );
+            })}
+          </select>
+          
+          {/* Current status */}
+          <div className="text-sm text-gray-600">
+            Showing <span className="font-medium">{organizations.length}</span> of <span className="font-medium">{allOrganizations.length}</span> locations
           </div>
         </div>
       </div>
