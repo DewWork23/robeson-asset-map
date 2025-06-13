@@ -156,7 +156,7 @@ async function loadOrganizationsFromCSV(): Promise<Organization[]> {
   try {
     console.log('Loading data from CSV file...');
     const { withBasePath } = await import('./basePath');
-    const response = await fetch(withBasePath('/robeson_county.csv'));
+    const response = await fetch(withBasePath('/consolidated_robeson.csv'));
     const text = await response.text();
     
     const lines = text.split('\n').filter(line => line.trim());
