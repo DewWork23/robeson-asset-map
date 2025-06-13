@@ -5,6 +5,9 @@ import { Organization } from '@/types/organization';
 
 interface ChatBotProps {
   organizations: Organization[];
+  viewMode?: 'list' | 'map';
+  onCategorySelect?: (category: string | null) => void;
+  onViewModeChange?: (mode: 'list' | 'map') => void;
 }
 
 interface Message {
@@ -15,7 +18,7 @@ interface Message {
   component?: React.ReactNode;
 }
 
-export default function ChatBot({ organizations }: ChatBotProps) {
+export default function ChatBot({ organizations, viewMode = 'list', onCategorySelect, onViewModeChange }: ChatBotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -103,8 +106,51 @@ export default function ChatBot({ organizations }: ChatBotProps) {
   const generateResponse = (input: string, orgs: Organization[]): Message => {
     let component: React.ReactNode = null;
 
+    // Check if user is asking about map functionality
+    if (viewMode === 'map' && (input.includes('map') || input.includes('show') || input.includes('where'))) {
+      component = (
+        <div>
+          <p className="mb-3">I can help you navigate the map! Here are some things I can do:</p>
+          <div className="space-y-2">
+            <button
+              onClick={() => {
+                if (onCategorySelect) onCategorySelect('Crisis Services');
+              }}
+              className="w-full p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-medium transition-colors text-left"
+            >
+              🚨 Show Crisis Services on map
+            </button>
+            <button
+              onClick={() => {
+                if (onCategorySelect) onCategorySelect('Food/Shelter');
+              }}
+              className="w-full p-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-sm font-medium transition-colors text-left"
+            >
+              🍽️ Show Food/Shelter locations
+            </button>
+            <button
+              onClick={() => {
+                if (onCategorySelect) onCategorySelect('Treatment');
+              }}
+              className="w-full p-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg text-sm font-medium transition-colors text-left"
+            >
+              💊 Show Treatment centers
+            </button>
+            <button
+              onClick={() => {
+                if (onCategorySelect) onCategorySelect(null);
+              }}
+              className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm font-medium transition-colors text-left"
+            >
+              🗺️ Show all locations
+            </button>
+          </div>
+          <p className="mt-3 text-sm text-gray-600">The map will zoom to show only the selected category.</p>
+        </div>
+      );
+    }
     // Check for crisis keywords
-    if (input === 'crisis' || input.includes('crisis') || input.includes('emergency') || input.includes('help now') || input.includes('suicide')) {
+    else if (input === 'crisis' || input.includes('crisis') || input.includes('emergency') || input.includes('help now') || input.includes('suicide')) {
       const crisisOrgs = orgs.filter(org => org.crisisService).slice(0, 3);
       component = (
         <div>
@@ -116,6 +162,16 @@ export default function ChatBot({ organizations }: ChatBotProps) {
                 Call 988 Now
               </a>
             </div>
+            {viewMode === 'map' && (
+              <button
+                onClick={() => {
+                  if (onCategorySelect) onCategorySelect('Crisis Services');
+                }}
+                className="w-full p-3 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg font-medium transition-colors border border-red-300"
+              >
+                📍 Show all crisis services on map
+              </button>
+            )}
             {crisisOrgs.map(org => (
               <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <p className="font-medium text-gray-900">{org.organizationName}</p>
@@ -155,6 +211,16 @@ export default function ChatBot({ organizations }: ChatBotProps) {
       component = (
         <div>
           <p className="font-medium mb-3">Here are resources for food assistance:</p>
+          {viewMode === 'map' && (
+            <button
+              onClick={() => {
+                if (onCategorySelect) onCategorySelect('Food/Shelter');
+              }}
+              className="w-full p-3 mb-3 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg font-medium transition-colors border border-green-300"
+            >
+              📍 Show all food/shelter locations on map
+            </button>
+          )}
           <div className="space-y-2">
             {foodOrgs.map(org => (
               <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -194,6 +260,16 @@ export default function ChatBot({ organizations }: ChatBotProps) {
       component = (
         <div>
           <p className="font-medium mb-3">Here are housing and shelter resources:</p>
+          {viewMode === 'map' && (
+            <button
+              onClick={() => {
+                if (onCategorySelect) onCategorySelect('Housing');
+              }}
+              className="w-full p-3 mb-3 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg font-medium transition-colors border border-blue-300"
+            >
+              📍 Show all housing locations on map
+            </button>
+          )}
           <div className="space-y-2">
             {housingOrgs.map(org => (
               <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -232,6 +308,16 @@ export default function ChatBot({ organizations }: ChatBotProps) {
       component = (
         <div>
           <p className="font-medium mb-3">Here are treatment and recovery resources:</p>
+          {viewMode === 'map' && (
+            <button
+              onClick={() => {
+                if (onCategorySelect) onCategorySelect('Treatment');
+              }}
+              className="w-full p-3 mb-3 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg font-medium transition-colors border border-purple-300"
+            >
+              📍 Show all treatment centers on map
+            </button>
+          )}
           <div className="space-y-2">
             {treatmentOrgs.map(org => (
               <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -266,6 +352,16 @@ export default function ChatBot({ organizations }: ChatBotProps) {
       component = (
         <div>
           <p className="font-medium mb-3">Here are job and employment resources:</p>
+          {viewMode === 'map' && (
+            <button
+              onClick={() => {
+                if (onCategorySelect) onCategorySelect('Job Resources');
+              }}
+              className="w-full p-3 mb-3 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-lg font-medium transition-colors border border-yellow-300"
+            >
+              📍 Show all job resources on map
+            </button>
+          )}
           <div className="space-y-2">
             {jobOrgs.map(org => (
               <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -347,14 +443,21 @@ export default function ChatBot({ organizations }: ChatBotProps) {
 
   // Initialize welcome message with buttons
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (isOpen) {
+      // Clear messages when view mode changes
+      setMessages([]);
       const welcomeMessage: Message = {
         id: '1',
         isBot: true,
         timestamp: new Date(),
         component: (
           <div>
-            <p className="mb-3">Hello! I'm here to help you find resources in Robeson County. What type of help are you looking for?</p>
+            <p className="mb-3">
+              {viewMode === 'map' 
+                ? "Hello! I'm here to help you navigate the map and find resources. I can filter the map to show specific types of services. What are you looking for?"
+                : "Hello! I'm here to help you find resources in Robeson County. What type of help are you looking for?"
+              }
+            </p>
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => handleQuickOption('crisis')}
@@ -398,7 +501,7 @@ export default function ChatBot({ organizations }: ChatBotProps) {
       };
       setMessages([welcomeMessage]);
     }
-  }, [isOpen]);
+  }, [isOpen, viewMode]);
 
   return (
     <>

@@ -359,7 +359,12 @@ export default function Home() {
       </main>
       
       {/* Chat Bot */}
-      <ChatBot organizations={organizations} />
+      <ChatBot 
+        organizations={organizations} 
+        viewMode={viewMode}
+        onCategorySelect={setSelectedCategory}
+        onViewModeChange={setViewMode}
+      />
     </div>
   );
 }
