@@ -165,10 +165,21 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
         <div>
           <p className="font-medium mb-3">I understand you need immediate help. Here are 24/7 crisis services:</p>
           <div className="space-y-2 mb-3">
+            {/* 911 Emergency Alert */}
+            <div className="p-3 bg-red-700 text-white rounded-lg border-2 border-red-800">
+              <p className="font-bold text-lg flex items-center gap-2">
+                <span className="text-xl">🚨</span> Life-Threatening Emergency?
+              </p>
+              <a href="tel:911" className="inline-block mt-2 px-6 py-3 bg-white text-red-700 rounded-lg font-bold hover:bg-gray-100 text-lg">
+                Call 911 Immediately
+              </a>
+            </div>
+            
+            {/* 988 Mental Health Crisis */}
             <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-              <p className="font-bold text-red-800">🚨 National Crisis Hotline</p>
+              <p className="font-bold text-red-800">💙 Mental Health Crisis Hotline</p>
               <a href="tel:988" className="inline-block mt-2 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">
-                Call 988 Now
+                Call or Text 988
               </a>
             </div>
             {viewMode === 'map' && (
