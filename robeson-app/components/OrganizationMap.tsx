@@ -67,8 +67,62 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
       dashArray: '5, 10' // Dashed line pattern
     }).addTo(map);
     
-    // Fit the map to show the entire county
-    map.fitBounds(countyBorder.getBounds(), { padding: [20, 20] });
+    // Add town/city markers
+    const majorTowns = [
+      { name: 'Lumberton', coords: locationCoordinates.lumberton, isCountySeat: true },
+      { name: 'Pembroke', coords: locationCoordinates.pembroke },
+      { name: 'Fairmont', coords: locationCoordinates.fairmont },
+      { name: 'Maxton', coords: locationCoordinates.maxton },
+      { name: 'Red Springs', coords: locationCoordinates['red springs'] },
+      { name: 'St. Pauls', coords: locationCoordinates['st. pauls'] },
+      { name: 'Rowland', coords: locationCoordinates.rowland },
+      { name: 'Parkton', coords: locationCoordinates.parkton },
+    ];
+
+    // Create a layer group for towns to control z-index
+    const townLayer = L.layerGroup().addTo(map);
+    
+    majorTowns.forEach(town => {
+      // Create a circle marker for towns
+      const circle = L.circleMarker([town.coords.lat, town.coords.lon], {
+        radius: town.isCountySeat ? 12 : 8,
+        fillColor: town.isCountySeat ? '#dc2626' : '#3b82f6',
+        color: '#ffffff',
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.7,
+        pane: 'markerPane' // Ensure it's below organization markers
+      }).addTo(townLayer);
+
+      // Add town label
+      const icon = L.divIcon({
+        html: `<div style="
+          font-weight: ${town.isCountySeat ? 'bold' : '600'};
+          font-size: ${town.isCountySeat ? '14px' : '12px'};
+          color: #1e293b;
+          text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;
+          white-space: nowrap;
+          pointer-events: none;
+        ">${town.name}${town.isCountySeat ? ' (County Seat)' : ''}</div>`,
+        className: 'town-label',
+        iconSize: [0, 0],
+        iconAnchor: [0, -20]
+      });
+
+      L.marker([town.coords.lat, town.coords.lon], { icon, pane: 'markerPane' }).addTo(townLayer);
+      
+      // Add tooltip on hover
+      circle.bindTooltip(town.name, {
+        permanent: false,
+        direction: 'top',
+        offset: [0, -10]
+      });
+    });
+    
+    // If no category is selected, fit to show the entire county
+    if (!selectedCategory) {
+      map.fitBounds(countyBorder.getBounds(), { padding: [20, 20] });
+    }
 
     // Reset offsets for consistent positioning
     resetLocationOffsets();
@@ -150,17 +204,37 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
     // If category is selected and there are filtered pins, zoom to show them
     if (selectedCategory && filteredOrganizations.length > 0) {
       const bounds = L.latLngBounds([]);
+      let hasValidCoords = false;
+      
       filteredOrganizations.forEach(org => {
         const coords = getCoordinatesFromAddress(org.address);
         if (coords) {
           bounds.extend([coords.lat, coords.lon]);
+          hasValidCoords = true;
         }
       });
-      if (bounds.isValid()) {
+      
+      if (hasValidCoords && bounds.isValid()) {
+        // Calculate appropriate zoom based on number of locations
+        const padding = filteredOrganizations.length === 1 ? [100, 100] : [80, 80];
+        const maxZoom = filteredOrganizations.length === 1 ? 15 : 14;
+        
         setTimeout(() => {
-          map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+          map.fitBounds(bounds, { 
+            padding: padding, 
+            maxZoom: maxZoom,
+            duration: 0.5 // Smooth animation
+          });
         }, 100);
       }
+    } else if (!selectedCategory) {
+      // Reset to county view when filter is cleared
+      setTimeout(() => {
+        map.fitBounds(countyBorder.getBounds(), { 
+          padding: [20, 20],
+          duration: 0.5
+        });
+      }, 100);
     }
 
     // Cleanup
