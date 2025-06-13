@@ -180,6 +180,9 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
       const marker = L.marker([coords.lat, coords.lon], { icon }).addTo(map);
       
       // Create popup content
+      const encodedAddress = encodeURIComponent(org.address);
+      const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+      
       const popupContent = `
         <div style="max-width: 300px;">
           <h3 style="font-weight: bold; margin: 0 0 4px 0; font-size: 16px;">${org.organizationName}</h3>
@@ -187,7 +190,11 @@ const MapContent = ({ organizations, selectedOrganization, onOrganizationClick }
           <p style="margin: 0 0 8px 0; font-size: 13px;">${org.address}</p>
           ${org.phone ? `<p style="margin: 0 0 4px 0; font-size: 14px;"><a href="tel:${org.phone.replace(/\D/g, '')}" style="color: #2563eb; text-decoration: none; font-weight: 500;">📞 ${org.phone}</a></p>` : ''}
           ${org.hours ? `<p style="margin: 0 0 4px 0; font-size: 13px; color: #666;"><strong>Hours:</strong> ${org.hours}</p>` : ''}
-          ${org.servicesOffered ? `<p style="margin: 0; font-size: 13px; color: #666;"><strong>Services:</strong> ${org.servicesOffered.substring(0, 100)}${org.servicesOffered.length > 100 ? '...' : ''}</p>` : ''}
+          ${org.servicesOffered ? `<p style="margin: 0 0 8px 0; font-size: 13px; color: #666;"><strong>Services:</strong> ${org.servicesOffered.substring(0, 100)}${org.servicesOffered.length > 100 ? '...' : ''}</p>` : ''}
+          <div style="margin-top: 12px; display: flex; gap: 8px;">
+            ${org.phone ? `<a href="tel:${org.phone.replace(/\D/g, '')}" style="flex: 1; display: inline-block; padding: 8px 12px; background-color: #16a34a; color: white; text-align: center; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">Call</a>` : ''}
+            <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; display: inline-block; padding: 8px 12px; background-color: #2563eb; color: white; text-align: center; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">📍 Directions</a>
+          </div>
         </div>
       `;
       

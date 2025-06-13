@@ -26,6 +26,22 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const lastBotMessageRef = useRef<HTMLDivElement>(null);
 
+  // Check if device is mobile
+  const isMobile = () => {
+    return window.innerWidth <= 768;
+  };
+
+  // Handle map category selection
+  const handleMapCategorySelect = (category: string | null) => {
+    if (onCategorySelect) {
+      onCategorySelect(category);
+      // Close chat on mobile when selecting a map filter
+      if (isMobile()) {
+        setIsOpen(false);
+      }
+    }
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -113,33 +129,25 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
           <p className="mb-3">I can help you navigate the map! Here are some things I can do:</p>
           <div className="space-y-2">
             <button
-              onClick={() => {
-                if (onCategorySelect) onCategorySelect('Crisis Services');
-              }}
+              onClick={() => handleMapCategorySelect('Crisis Services')}
               className="w-full p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-medium transition-colors text-left"
             >
               🚨 Show Crisis Services on map
             </button>
             <button
-              onClick={() => {
-                if (onCategorySelect) onCategorySelect('Food/Shelter');
-              }}
+              onClick={() => handleMapCategorySelect('Food/Shelter')}
               className="w-full p-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-sm font-medium transition-colors text-left"
             >
               🍽️ Show Food/Shelter locations
             </button>
             <button
-              onClick={() => {
-                if (onCategorySelect) onCategorySelect('Treatment');
-              }}
+              onClick={() => handleMapCategorySelect('Treatment')}
               className="w-full p-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg text-sm font-medium transition-colors text-left"
             >
               💊 Show Treatment centers
             </button>
             <button
-              onClick={() => {
-                if (onCategorySelect) onCategorySelect(null);
-              }}
+              onClick={() => handleMapCategorySelect(null)}
               className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm font-medium transition-colors text-left"
             >
               🗺️ Show all locations
@@ -163,14 +171,20 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
               </a>
             </div>
             {viewMode === 'map' && (
-              <button
-                onClick={() => {
-                  if (onCategorySelect) onCategorySelect('Crisis Services');
-                }}
-                className="w-full p-3 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg font-medium transition-colors border border-red-300"
-              >
-                📍 Show all crisis services on map
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={() => handleMapCategorySelect('Crisis Services')}
+                  className="w-full p-3 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg font-medium transition-colors border border-red-300"
+                >
+                  📍 Show all crisis services on map
+                </button>
+                <button
+                  onClick={() => handleMapCategorySelect(null)}
+                  className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                >
+                  🗺️ Show all categories
+                </button>
+              </div>
             )}
             {crisisOrgs.map(org => (
               <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -212,14 +226,20 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
         <div>
           <p className="font-medium mb-3">Here are resources for food assistance:</p>
           {viewMode === 'map' && (
-            <button
-              onClick={() => {
-                if (onCategorySelect) onCategorySelect('Food/Shelter');
-              }}
-              className="w-full p-3 mb-3 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg font-medium transition-colors border border-green-300"
-            >
-              📍 Show all food/shelter locations on map
-            </button>
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Food/Shelter')}
+                className="w-full p-3 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg font-medium transition-colors border border-green-300"
+              >
+                📍 Show all food/shelter locations on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
           )}
           <div className="space-y-2">
             {foodOrgs.map(org => (
@@ -261,14 +281,20 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
         <div>
           <p className="font-medium mb-3">Here are housing and shelter resources:</p>
           {viewMode === 'map' && (
-            <button
-              onClick={() => {
-                if (onCategorySelect) onCategorySelect('Housing');
-              }}
-              className="w-full p-3 mb-3 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg font-medium transition-colors border border-blue-300"
-            >
-              📍 Show all housing locations on map
-            </button>
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Housing')}
+                className="w-full p-3 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg font-medium transition-colors border border-blue-300"
+              >
+                📍 Show all housing locations on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
           )}
           <div className="space-y-2">
             {housingOrgs.map(org => (
@@ -309,14 +335,20 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
         <div>
           <p className="font-medium mb-3">Here are treatment and recovery resources:</p>
           {viewMode === 'map' && (
-            <button
-              onClick={() => {
-                if (onCategorySelect) onCategorySelect('Treatment');
-              }}
-              className="w-full p-3 mb-3 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg font-medium transition-colors border border-purple-300"
-            >
-              📍 Show all treatment centers on map
-            </button>
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Treatment')}
+                className="w-full p-3 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg font-medium transition-colors border border-purple-300"
+              >
+                📍 Show all treatment centers on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
           )}
           <div className="space-y-2">
             {treatmentOrgs.map(org => (
@@ -353,14 +385,20 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
         <div>
           <p className="font-medium mb-3">Here are job and employment resources:</p>
           {viewMode === 'map' && (
-            <button
-              onClick={() => {
-                if (onCategorySelect) onCategorySelect('Job Resources');
-              }}
-              className="w-full p-3 mb-3 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-lg font-medium transition-colors border border-yellow-300"
-            >
-              📍 Show all job resources on map
-            </button>
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Job Resources')}
+                className="w-full p-3 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-lg font-medium transition-colors border border-yellow-300"
+              >
+                📍 Show all job resources on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
           )}
           <div className="space-y-2">
             {jobOrgs.map(org => (
