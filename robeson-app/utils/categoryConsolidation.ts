@@ -2,7 +2,8 @@ export const CONSOLIDATED_CATEGORIES = [
   'Crisis Services',
   'Healthcare Services',
   'Mental Health & Addiction',
-  'Government & Tribal Services',
+  'Government Services',
+  'Tribal Services',
   'Community Services',
   'Community Groups & Development',
   'Faith-Based Services',
@@ -23,9 +24,10 @@ export const CATEGORY_MIGRATION_MAP: Record<string, ConsolidatedCategory> = {
   'Healthcare/Public Health': 'Healthcare Services',
   'Mental Health': 'Mental Health & Addiction',
   
-  // Government consolidation
-  'Government Services': 'Government & Tribal Services',
-  'Government/Tribal Services': 'Government & Tribal Services',
+  // Government and Tribal separation
+  'Government Services': 'Government Services',
+  'Government/Tribal Services': 'Government Services', // Default to Government, will handle Tribal separately
+  'Government & Tribal Services': 'Government Services', // For migration
   
   // Community consolidation
   'Community Services': 'Community Services',
@@ -56,7 +58,8 @@ export const CONSOLIDATED_CATEGORY_ICONS: Record<ConsolidatedCategory, string> =
   'Crisis Services': '🆘',
   'Healthcare Services': '🏥',
   'Mental Health & Addiction': '🧠',
-  'Government & Tribal Services': '🏛️',
+  'Government Services': '🏛️',
+  'Tribal Services': '🪶',
   'Community Services': '🏘️',
   'Community Groups & Development': '👥',
   'Faith-Based Services': '⛪',
@@ -72,7 +75,8 @@ export const CONSOLIDATED_CATEGORY_COLORS: Record<ConsolidatedCategory, string> 
   'Crisis Services': 'bg-red-600',
   'Healthcare Services': 'bg-emerald-600',
   'Mental Health & Addiction': 'bg-indigo-600',
-  'Government & Tribal Services': 'bg-gray-600',
+  'Government Services': 'bg-gray-600',
+  'Tribal Services': 'bg-amber-700',
   'Community Services': 'bg-orange-600',
   'Community Groups & Development': 'bg-amber-600',
   'Faith-Based Services': 'bg-purple-600',

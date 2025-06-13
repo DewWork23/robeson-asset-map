@@ -35,8 +35,15 @@ function migrateCategories() {
       newCategory = 'Crisis Services';
       crisisServicesCount++;
     } else {
+      // Check if this is a tribal organization
+      const orgName = record['Organization Name'].toLowerCase();
+      const services = record['Services Offered']?.toLowerCase() || '';
+      if ((orgName.includes('tribal') || orgName.includes('lumbee') || orgName.includes('tribe')) &&
+          !orgName.includes('town')) {
+        newCategory = 'Tribal Services';
+      }
       // Special handling for "Free Programs" - need manual review
-      if (oldCategory === 'Free Programs') {
+      else if (oldCategory === 'Free Programs') {
         freePrograms.push(record);
         // Try to categorize based on organization name or services
         if (record['Organization Name'].toLowerCase().includes('health') || 

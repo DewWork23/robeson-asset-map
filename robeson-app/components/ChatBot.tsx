@@ -400,7 +400,8 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     else if (input === 'jobs' || input.includes('job') || input.includes('work') || input.includes('employment')) {
       const jobOrgs = orgs.filter(org => 
         org.category === 'Community Services' || 
-        org.category === 'Government & Tribal Services' ||
+        org.category === 'Government Services' ||
+        org.category === 'Tribal Services' ||
         org.servicesOffered.toLowerCase().includes('job') ||
         org.servicesOffered.toLowerCase().includes('employment') ||
         org.servicesOffered.toLowerCase().includes('workforce')

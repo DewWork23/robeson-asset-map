@@ -21,7 +21,8 @@ export type Category =
   | 'Crisis Services'
   | 'Healthcare Services'
   | 'Mental Health & Addiction'
-  | 'Government & Tribal Services'
+  | 'Government Services'
+  | 'Tribal Services'
   | 'Community Services'
   | 'Community Groups & Development'
   | 'Faith-Based Services'
@@ -36,7 +37,8 @@ export const CATEGORY_ICONS: Record<string, string> = {
   'Crisis Services': '🆘',
   'Healthcare Services': '🏥',
   'Mental Health & Addiction': '🧠',
-  'Government & Tribal Services': '🏛️',
+  'Government Services': '🏛️',
+  'Tribal Services': '🪶',
   'Community Services': '🏘️',
   'Community Groups & Development': '👥',
   'Faith-Based Services': '⛪',
@@ -52,7 +54,8 @@ export const CATEGORY_COLORS: Record<string, string> = {
   'Crisis Services': 'bg-red-600',
   'Healthcare Services': 'bg-emerald-600',
   'Mental Health & Addiction': 'bg-indigo-600',
-  'Government & Tribal Services': 'bg-gray-600',
+  'Government Services': 'bg-gray-600',
+  'Tribal Services': 'bg-amber-700',
   'Community Services': 'bg-orange-600',
   'Community Groups & Development': 'bg-amber-600',
   'Faith-Based Services': 'bg-purple-600',
