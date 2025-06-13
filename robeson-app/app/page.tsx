@@ -9,7 +9,7 @@ import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import ManifestLink from '@/components/ManifestLink';
 import OrganizationMap from '@/components/OrganizationMap';
 import ChatBot from '@/components/ChatBot';
-import ResourceSubmissionForm from '@/components/ResourceSubmissionForm';
+import FeedbackForm from '@/components/FeedbackForm';
 
 export default function Home() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -376,39 +376,21 @@ export default function Home() {
         )}
       </main>
       
-      {/* Footer with submission link */}
-      <footer className="bg-gray-100 border-t border-gray-200 py-8 mt-12">
+      {/* Footer with feedback link */}
+      <footer className="bg-gray-100 border-t border-gray-200 py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">
-            Know of a resource that should be listed?
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">
+            Have feedback?
           </h3>
-          <p className="text-gray-600 mb-4">
-            Contact Jordan Dew, Social Research Specialist, UNCP SPARC
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <button
-              onClick={() => setShowSubmissionForm(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 hover:shadow-xl hover:scale-110 transition-all duration-200"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Submit via Form
-            </button>
-            <span className="text-gray-500">or</span>
-            <a
-              href="mailto:jordan.dew@uncp.edu?subject=Robeson County Community Resource Submission&body=Please provide the following information about the resource:%0D%0A%0D%0AOrganization Name:%0D%0ACategory:%0D%0AAddress:%0D%0APhone:%0D%0AWebsite:%0D%0AServices Offered:%0D%0AHours:%0D%0A%0D%0AAdditional Information:"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 hover:shadow-xl hover:scale-110 transition-all duration-200"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Email Directly
-            </a>
-          </div>
-          <p className="text-sm text-gray-500 mt-3">
-            <a href="mailto:jordan.dew@uncp.edu" className="text-blue-600 hover:underline">jordan.dew@uncp.edu</a>
-          </p>
+          <button
+            onClick={() => setShowSubmissionForm(true)}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 hover:shadow-xl hover:scale-110 transition-all duration-200"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Send Feedback
+          </button>
         </div>
       </footer>
       
@@ -420,9 +402,9 @@ export default function Home() {
         onViewModeChange={setViewMode}
       />
       
-      {/* Resource Submission Form */}
+      {/* Feedback Form */}
       {showSubmissionForm && (
-        <ResourceSubmissionForm onClose={() => setShowSubmissionForm(false)} />
+        <FeedbackForm onClose={() => setShowSubmissionForm(false)} />
       )}
     </div>
   );
