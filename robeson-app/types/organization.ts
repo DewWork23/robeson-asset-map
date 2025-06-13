@@ -18,69 +18,45 @@ export interface Organization {
 }
 
 export type Category = 
-  | 'Free Programs' 
-  | 'Faith-Based Programs'
-  | 'Fee-Based Programs'
-  | 'Healthcare/Treatment' 
-  | 'Healthcare/Medical'
-  | 'Healthcare/Public Health'
-  | 'Mental Health'
-  | 'Housing Services' 
+  | 'Healthcare Services'
+  | 'Mental Health & Addiction'
+  | 'Government & Tribal Services'
   | 'Community Services'
-  | 'Community Organizations'
-  | 'Community Development'
-  | 'Education'
-  | 'Government Services'
-  | 'Government/Tribal Services'
-  | 'Law Enforcement'
+  | 'Community Groups & Development'
+  | 'Faith-Based Services'
   | 'Legal Services'
-  | 'Information/Referral'
-  | 'Cultural Services'
-  | 'Labor Union'
-  | 'Pharmacy';
+  | 'Law Enforcement'
+  | 'Education'
+  | 'Housing Services'
+  | 'Pharmacy'
+  | 'Cultural & Information Services';
 
 export const CATEGORY_ICONS: Record<string, string> = {
-  'Free Programs': '🤝',
-  'Faith-Based Programs': '⛪',
-  'Fee-Based Programs': '💵',
-  'Healthcare/Treatment': '🏥',
-  'Healthcare/Medical': '⚕️',
-  'Healthcare/Public Health': '🏥',
-  'Mental Health': '🧠',
-  'Housing Services': '🏠',
+  'Healthcare Services': '🏥',
+  'Mental Health & Addiction': '🧠',
+  'Government & Tribal Services': '🏛️',
   'Community Services': '🏘️',
-  'Community Organizations': '👥',
-  'Community Development': '🏗️',
-  'Education': '📚',
-  'Government Services': '🏛️',
-  'Government/Tribal Services': '🪶',
-  'Law Enforcement': '🚓',
+  'Community Groups & Development': '👥',
+  'Faith-Based Services': '⛪',
   'Legal Services': '⚖️',
-  'Information/Referral': 'ℹ️',
-  'Cultural Services': '🎭',
-  'Labor Union': '👷',
-  'Pharmacy': '💊'
+  'Law Enforcement': '🚓',
+  'Education': '📚',
+  'Housing Services': '🏠',
+  'Pharmacy': '💊',
+  'Cultural & Information Services': '🎭'
 };
 
 export const CATEGORY_COLORS: Record<string, string> = {
-  'Free Programs': 'bg-blue-600',
-  'Faith-Based Programs': 'bg-purple-600',
-  'Fee-Based Programs': 'bg-green-600',
-  'Healthcare/Treatment': 'bg-emerald-600',
-  'Healthcare/Medical': 'bg-teal-600',
-  'Healthcare/Public Health': 'bg-cyan-600',
-  'Mental Health': 'bg-indigo-600',
-  'Housing Services': 'bg-indigo-600',
+  'Healthcare Services': 'bg-emerald-600',
+  'Mental Health & Addiction': 'bg-indigo-600',
+  'Government & Tribal Services': 'bg-gray-600',
   'Community Services': 'bg-orange-600',
-  'Community Organizations': 'bg-amber-600',
-  'Community Development': 'bg-yellow-600',
-  'Education': 'bg-blue-700',
-  'Government Services': 'bg-gray-600',
-  'Government/Tribal Services': 'bg-amber-700',
-  'Law Enforcement': 'bg-red-700',
+  'Community Groups & Development': 'bg-amber-600',
+  'Faith-Based Services': 'bg-purple-600',
   'Legal Services': 'bg-slate-600',
-  'Information/Referral': 'bg-gray-600',
-  'Cultural Services': 'bg-pink-600',
-  'Labor Union': 'bg-gray-700',
-  'Pharmacy': 'bg-green-700'
+  'Law Enforcement': 'bg-red-700',
+  'Education': 'bg-blue-700',
+  'Housing Services': 'bg-indigo-600',
+  'Pharmacy': 'bg-green-700',
+  'Cultural & Information Services': 'bg-pink-600'
 };

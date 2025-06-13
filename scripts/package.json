@@ -1,0 +1,15 @@
+{
+  "name": "robeson-scripts",
+  "version": "1.0.0",
+  "scripts": {
+    "migrate-categories": "tsx migrateCategories.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "csv-parse": "^5.5.3",
+    "tsx": "^4.0.0"
+  },
+  "dependencies": {
+    "csv-stringify": "^6.5.2"
+  }
+}
