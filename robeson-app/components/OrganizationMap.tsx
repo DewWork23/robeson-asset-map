@@ -54,6 +54,11 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Create map
     const map = L.map('map').setView([locationCoordinates.default.lat, locationCoordinates.default.lon], 12);
 
+    // Create custom panes for better layer control
+    map.createPane('townLabels');
+    map.getPane('townLabels').style.zIndex = '650'; // Above markers (600)
+    map.getPane('townLabels').style.pointerEvents = 'none'; // Allow clicks to pass through
+
     // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
@@ -81,8 +86,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       { name: 'Parkton', coords: locationCoordinates.parkton },
     ];
 
-    // Create a layer group for towns to control z-index
+    // Create layer groups for better organization
     const townLayer = L.layerGroup().addTo(map);
+    const organizationLayer = L.layerGroup().addTo(map);
     
     majorTowns.forEach(town => {
       // Create a circle marker for towns
@@ -96,22 +102,26 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         pane: 'markerPane' // Ensure it's below organization markers
       }).addTo(townLayer);
 
-      // Add town label
+      // Add town label with improved visibility
       const icon = L.divIcon({
         html: `<div style="
           font-weight: ${town.isCountySeat ? 'bold' : '600'};
-          font-size: ${town.isCountySeat ? '14px' : '12px'};
+          font-size: ${town.isCountySeat ? '15px' : '13px'};
           color: #1e293b;
-          text-shadow: 1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white;
+          background-color: rgba(255, 255, 255, 0.95);
+          padding: 2px 6px;
+          border-radius: 4px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
           white-space: nowrap;
           pointer-events: none;
+          transform: translateY(-8px);
         ">${town.name}${town.isCountySeat ? ' (County Seat)' : ''}</div>`,
         className: 'town-label',
         iconSize: [0, 0],
-        iconAnchor: [0, -20]
+        iconAnchor: [0, -25]
       });
 
-      L.marker([town.coords.lat, town.coords.lon], { icon, pane: 'markerPane' }).addTo(townLayer);
+      L.marker([town.coords.lat, town.coords.lon], { icon, pane: 'townLabels' }).addTo(map);
       
       // Add tooltip on hover
       circle.bindTooltip(town.name, {
@@ -123,6 +133,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     
     // Set initial view to show the entire county
     map.fitBounds(countyBorder.getBounds(), { padding: [20, 20] });
+
+    // Add layer control to toggle visibility
+    const overlays = {
+      "Resources": organizationLayer,
+      "Towns": townLayer
+    };
+    L.control.layers(null, overlays, { position: 'topright', collapsed: false }).addTo(map);
 
     // Reset offsets for consistent positioning
     resetLocationOffsets();
@@ -144,12 +161,12 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
             background-color: white;
             border: 2px solid #1e293b;
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             position: relative;
           ">
@@ -157,23 +174,23 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           </div>
           <div style="
             position: absolute;
-            bottom: -8px;
+            bottom: -6px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid #1e293b;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #1e293b;
           "></div>
         `,
         className: 'custom-emoji-marker',
-        iconSize: [36, 44],
-        iconAnchor: [18, 44],
-        popupAnchor: [0, -44],
+        iconSize: [32, 38],
+        iconAnchor: [16, 38],
+        popupAnchor: [0, -38],
       });
 
-      const marker = L.marker([coords.lat, coords.lon], { icon }).addTo(map);
+      const marker = L.marker([coords.lat, coords.lon], { icon }).addTo(organizationLayer);
       
       // Create popup content
       const encodedAddress = encodeURIComponent(org.address);
