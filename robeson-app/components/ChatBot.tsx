@@ -184,10 +184,10 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
               🍽️ Show Community Services (includes food)
             </button>
             <button
-              onClick={() => handleMapCategorySelect('Mental Health & Addiction')}
+              onClick={() => handleMapCategorySelect('Mental Health & Substance Use')}
               className="w-full p-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg text-sm font-medium transition-colors text-left"
             >
-              💊 Show Mental Health & Addiction services
+              💊 Show Mental Health & Substance Use services
             </button>
             <button
               onClick={() => handleMapCategorySelect('Housing Services')}
@@ -433,7 +433,7 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
         const serviceType = org.serviceType.toLowerCase();
         
         // Focus on actual treatment centers, not just support groups
-        return (org.category === 'Mental Health & Addiction' && 
+        return (org.category === 'Mental Health & Substance Use' && 
                 (services.includes('treatment') || 
                  services.includes('therapy') ||
                  services.includes('counseling'))) ||
@@ -453,10 +453,10 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
           {viewMode === 'map' && (
             <div className="space-y-2 mb-3">
               <button
-                onClick={() => handleMapCategorySelect('Mental Health & Addiction')}
+                onClick={() => handleMapCategorySelect('Mental Health & Substance Use')}
                 className="w-full p-3 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg font-medium transition-colors border border-purple-300"
               >
-                📍 Show all mental health & addiction services on map
+                📍 Show all mental health & substance use services on map
               </button>
               <button
                 onClick={() => handleMapCategorySelect(null)}
@@ -606,7 +606,20 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
               💼 Jobs
             </button>
           </div>
-          <p className="mt-3 text-sm text-gray-600">Or type your specific need below.</p>
+          <p className="mt-3 text-sm text-gray-600 font-medium">Other categories I can help with:</p>
+          <div className="mt-2 text-xs text-gray-500 space-y-1">
+            <p>• Healthcare Services 🏥</p>
+            <p>• Government Services 🏛️</p>
+            <p>• Tribal Services 🪶</p>
+            <p>• Community Services 🏘️</p>
+            <p>• Faith-Based Services ⛪</p>
+            <p>• Legal Services ⚖️</p>
+            <p>• Law Enforcement 🚓</p>
+            <p>• Education 📚</p>
+            <p>• Pharmacy 💊</p>
+            <p>• Cultural & Information Services 🎭</p>
+          </div>
+          <p className="mt-3 text-sm text-gray-600">Type your specific need below or click a button above.</p>
         </div>
       );
     }

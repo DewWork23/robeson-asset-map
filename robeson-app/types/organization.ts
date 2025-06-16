@@ -22,7 +22,7 @@ export type Category =
   | 'Food Services'
   | 'Housing Services'
   | 'Healthcare Services'
-  | 'Mental Health & Addiction'
+  | 'Mental Health & Substance Use'
   | 'Government Services'
   | 'Tribal Services'
   | 'Community Services'
@@ -39,7 +39,7 @@ export const CATEGORY_ICONS: Record<string, string> = {
   'Food Services': '🍽️',
   'Housing Services': '🏠',
   'Healthcare Services': '🏥',
-  'Mental Health & Addiction': '🧠',
+  'Mental Health & Substance Use': '🧠',
   'Government Services': '🏛️',
   'Tribal Services': '🪶',
   'Community Services': '🏘️',
@@ -57,7 +57,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
   'Food Services': 'bg-green-600',
   'Housing Services': 'bg-blue-600',
   'Healthcare Services': 'bg-emerald-600',
-  'Mental Health & Addiction': 'bg-indigo-600',
+  'Mental Health & Substance Use': 'bg-indigo-600',
   'Government Services': 'bg-gray-600',
   'Tribal Services': 'bg-amber-700',
   'Community Services': 'bg-orange-600',
