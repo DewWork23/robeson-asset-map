@@ -64,43 +64,29 @@ export default function Home() {
       <ManifestLink />
       
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-50 to-green-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      <header className="bg-gradient-to-r from-blue-600 to-green-600 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            <h1 className="text-4xl font-bold text-white mb-3">
               Robeson County Community Resources
             </h1>
-            <p className="text-lg text-gray-700">
+            <p className="text-xl text-white mb-4">
               Your comprehensive guide to local services and support
             </p>
+            <div className="bg-red-700 text-white px-6 py-3 rounded-lg inline-block">
+              <p className="text-lg font-semibold">
+                ⚠️ In case of emergency, call 911
+              </p>
+              <p className="text-sm mt-1">
+                For mental health crisis, call or text 988
+              </p>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto p-4">
         <CrisisBanner organizations={organizations.filter(org => org.crisisService)} />
-        
-        {/* Prominent Crisis Services Button */}
-        <div className="mb-6">
-          <Link
-            href="/category/crisis-services"
-            className="relative block w-full p-6 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-          >
-            <div className="flex items-center justify-center gap-4">
-              <span className="text-5xl">🆘</span>
-              <div>
-                <p className="text-2xl font-bold">Crisis Services</p>
-                <p className="text-lg opacity-90">
-                  {organizations.filter(org => org.crisisService).length} crisis resources available • Click for immediate help
-                </p>
-              </div>
-            </div>
-            <span className="absolute -top-2 -right-2 flex h-6 w-6">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-6 w-6 bg-yellow-400"></span>
-            </span>
-          </Link>
-        </div>
 
         {loading ? (
           <div className="space-y-4">
@@ -169,7 +155,7 @@ export default function Home() {
                     <Link
                       key={category.name}
                       href={`/category/${slug}`}
-                      className={`block p-5 rounded-lg shadow-sm hover:shadow-2xl transition-all duration-200 transform hover:scale-110 border-2 text-left ${
+                      className={`relative block p-5 rounded-lg shadow-sm hover:shadow-2xl transition-all duration-200 transform hover:scale-110 border-2 text-left ${
                         category.name === 'Crisis Services' 
                           ? 'bg-red-100 border-red-300 hover:bg-red-200 hover:border-red-500 ring-1 ring-red-300 hover:ring-2' 
                           : 'bg-white border-gray-200 hover:bg-blue-50 hover:border-blue-500 hover:ring-2 hover:ring-blue-400 hover:ring-offset-2'
@@ -182,10 +168,16 @@ export default function Home() {
                             {category.name}
                           </p>
                           <p className={`text-base ${category.name === 'Crisis Services' ? 'text-red-700' : 'text-gray-600'}`}>
-                            {category.count} resources
+                            {category.count} resources{category.name === 'Crisis Services' ? ' • Immediate help' : ''}
                           </p>
                         </div>
                       </div>
+                      {category.name === 'Crisis Services' && (
+                        <span className="absolute -top-2 -right-2 flex h-4 w-4">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500"></span>
+                        </span>
+                      )}
                     </Link>
                   );
                 })}
