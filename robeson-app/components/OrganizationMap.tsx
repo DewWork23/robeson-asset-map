@@ -237,14 +237,38 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       
       if (hasValidCoords && bounds.isValid()) {
         console.log('Bounds are valid, zooming to:', bounds.toBBoxString());
-        // Calculate appropriate zoom based on number of locations
-        const padding = organizations.length === 1 ? [100, 100] : [80, 80];
-        const maxZoom = organizations.length === 1 ? 15 : 14;
+        
+        // Calculate the bounds size to determine if resources are clustered
+        const ne = bounds.getNorthEast();
+        const sw = bounds.getSouthWest();
+        const latDiff = Math.abs(ne.lat - sw.lat);
+        const lngDiff = Math.abs(ne.lng - sw.lng);
+        const boundsSize = Math.max(latDiff, lngDiff);
+        
+        console.log('Bounds size:', boundsSize);
+        
+        // Adjust zoom based on bounds size and number of locations
+        let padding, maxZoom;
+        
+        if (organizations.length === 1) {
+          padding = [50, 50];
+          maxZoom = 17;
+        } else if (boundsSize < 0.05) { // Very tight cluster
+          padding = [30, 30];
+          maxZoom = 16;
+        } else if (boundsSize < 0.1) { // Small area
+          padding = [40, 40];
+          maxZoom = 15;
+        } else { // Spread out
+          padding = [60, 60];
+          maxZoom = 14;
+        }
         
         setTimeout(() => {
           map.fitBounds(bounds, { 
             padding: padding, 
             maxZoom: maxZoom,
+            animate: true,
             duration: 0.5 // Smooth animation
           });
         }, 100);
