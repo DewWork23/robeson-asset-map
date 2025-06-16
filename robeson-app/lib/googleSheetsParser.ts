@@ -361,6 +361,65 @@ export function filterOrganizations(
       return 0;
     });
   }
+
+  // Apply crisis priority sorting when in Crisis Services category
+  if (category === 'Crisis Services') {
+    filtered.sort((a, b) => {
+      // Define priority order for crisis services (lower number = higher priority)
+      const getCrisisPriority = (org: Organization): number => {
+        const name = org.organizationName.toLowerCase();
+        
+        // Highest priority - immediate life-threatening situations
+        if (name.includes('suicide prevention') || name === 'suicide prevention hotline') return 1;
+        if (name.includes('crisis text line')) return 2;
+        if (name.includes('crisis intervention')) return 3;
+        
+        // Emergency medical services
+        if (name.includes('unc health southeastern')) return 4;
+        
+        // Law enforcement (for immediate physical danger)
+        if (name.includes('police department') || name.includes('sheriff')) return 5;
+        
+        // Domestic/sexual violence (immediate safety concerns)
+        if (name.includes('domestic violence')) return 6;
+        if (name.includes('sexual assault')) return 7;
+        
+        // Mental health crisis services
+        if (name.includes('southeastern integrated care')) return 8;
+        if (name.includes('life net services')) return 9;
+        if (name.includes('monarch')) return 10;
+        if (name.includes('carter clinic')) return 11;
+        
+        // Substance abuse treatment (urgent but not immediate crisis)
+        if (name.includes('lumberton treatment center')) return 12;
+        if (name.includes('harm reduction')) return 13;
+        if (name.includes('breeches buoy')) return 14;
+        if (name.includes('tae\'s pathway')) return 15;
+        
+        // Support services and other crisis resources
+        if (name.includes('stop the pain')) return 16;
+        if (name.includes('hope alive')) return 17;
+        if (name.includes('christian recovery')) return 18;
+        
+        // Other crisis services
+        return 19;
+      };
+      
+      const priorityA = getCrisisPriority(a);
+      const priorityB = getCrisisPriority(b);
+      
+      // If same priority, maintain original order
+      if (priorityA === priorityB) {
+        // If location is available, sort by distance within same priority
+        if (a.distance !== undefined && b.distance !== undefined) {
+          return a.distance - b.distance;
+        }
+        return 0;
+      }
+      
+      return priorityA - priorityB;
+    });
+  }
   
   return filtered;
 }
