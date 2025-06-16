@@ -23,6 +23,7 @@ export default function CategoryPage() {
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [mapSelectedCategory, setMapSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     if (!category) {
@@ -187,11 +188,17 @@ export default function CategoryPage() {
         ) : (
           <div className="h-[600px] bg-white rounded-lg shadow-sm overflow-hidden">
             <OrganizationMap 
-              organizations={filteredOrgs}
+              organizations={mapSelectedCategory === null || mapSelectedCategory === category
+                ? filteredOrgs
+                : organizations.filter(org => 
+                    org.category === mapSelectedCategory ||
+                    (mapSelectedCategory === 'Crisis Services' && org.crisisService)
+                  )
+              }
               allOrganizations={organizations}
-              selectedCategory={category}
-              onCategorySelect={(cat) => {
-                router.push(cat === null ? '/' : `/category/${categoryToSlug(cat)}`);
+              selectedCategory={mapSelectedCategory || category}
+              onCategorySelect={(newCat) => {
+                setMapSelectedCategory(newCat);
               }}
               onOrganizationClick={(org) => {
                 console.log('Organization clicked:', org);

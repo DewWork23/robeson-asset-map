@@ -13,6 +13,7 @@ export default function MapPage() {
   const router = useRouter();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -61,14 +62,23 @@ export default function MapPage() {
         </div>
       </div>
 
+      {/* Feedback Banner */}
+      <FeedbackBanner />
+
       {/* Map */}
       <div className="flex-1 relative">
         <OrganizationMap 
-          organizations={organizations}
+          organizations={selectedCategory 
+            ? organizations.filter(org => 
+                org.category === selectedCategory ||
+                (selectedCategory === 'Crisis Services' && org.crisisService)
+              )
+            : organizations
+          }
           allOrganizations={organizations}
-          selectedCategory={null}
+          selectedCategory={selectedCategory}
           onCategorySelect={(cat) => {
-            router.push(cat === null ? '/' : `/category/${categoryToSlug(cat)}`);
+            setSelectedCategory(cat);
           }}
           onOrganizationClick={(org) => {
             console.log('Organization clicked:', org);
