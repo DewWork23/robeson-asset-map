@@ -121,6 +121,46 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     return `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
   };
 
+  // Helper function to prioritize crisis organizations by physical safety
+  const getCrisisPriority = (org: Organization): number => {
+    const name = org.organizationName.toLowerCase();
+    
+    // Highest priority - immediate life-threatening situations
+    if (name.includes('suicide prevention') || name === 'suicide prevention hotline') return 1;
+    if (name.includes('crisis text line')) return 2;
+    if (name.includes('crisis intervention')) return 3;
+    
+    // Emergency medical services
+    if (name.includes('unc health southeastern')) return 4;
+    
+    // Law enforcement (for immediate physical danger)
+    if (name.includes('police department') || name.includes('sheriff')) return 5;
+    
+    // Domestic/sexual violence (immediate safety concerns)
+    if (name.includes('domestic violence')) return 6;
+    if (name.includes('sexual assault')) return 7;
+    
+    // Mental health crisis services
+    if (name.includes('southeastern integrated care')) return 8;
+    if (name.includes('life net services')) return 9;
+    if (name.includes('monarch')) return 10;
+    if (name.includes('carter clinic')) return 11;
+    
+    // Substance abuse treatment (urgent but not immediate crisis)
+    if (name.includes('lumberton treatment center')) return 12;
+    if (name.includes('harm reduction')) return 13;
+    if (name.includes('breeches buoy')) return 14;
+    if (name.includes('tae\'s pathway')) return 15;
+    
+    // Support services and other crisis resources
+    if (name.includes('stop the pain')) return 16;
+    if (name.includes('hope alive')) return 17;
+    if (name.includes('christian recovery')) return 18;
+    
+    // Other crisis services
+    return 19;
+  };
+
   const generateResponse = (input: string, orgs: Organization[]): Message => {
     let component: React.ReactNode = null;
 
@@ -137,16 +177,22 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
               🚨 Show Crisis Services on map
             </button>
             <button
-              onClick={() => handleMapCategorySelect('Food/Shelter')}
+              onClick={() => handleMapCategorySelect('Community Services')}
               className="w-full p-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-sm font-medium transition-colors text-left"
             >
-              🍽️ Show Food/Shelter locations
+              🍽️ Show Community Services (includes food)
             </button>
             <button
-              onClick={() => handleMapCategorySelect('Treatment')}
+              onClick={() => handleMapCategorySelect('Mental Health & Addiction')}
               className="w-full p-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg text-sm font-medium transition-colors text-left"
             >
-              💊 Show Treatment centers
+              💊 Show Mental Health & Addiction services
+            </button>
+            <button
+              onClick={() => handleMapCategorySelect('Housing Services')}
+              className="w-full p-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm font-medium transition-colors text-left"
+            >
+              🏠 Show Housing Services
             </button>
             <button
               onClick={() => handleMapCategorySelect(null)}
@@ -161,7 +207,11 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     }
     // Check for crisis keywords
     else if (input === 'crisis' || input.includes('crisis') || input.includes('emergency') || input.includes('help now') || input.includes('suicide')) {
-      const crisisOrgs = orgs.filter(org => org.crisisService).slice(0, 3);
+      // Get crisis organizations and sort by priority
+      const crisisOrgs = orgs
+        .filter(org => org.crisisService)
+        .sort((a, b) => getCrisisPriority(a) - getCrisisPriority(b))
+        .slice(0, 5); // Show top 5 priority crisis services
       component = (
         <div>
           <p className="font-medium mb-3">I understand you need immediate help. Here are 24/7 crisis services:</p>
@@ -199,10 +249,13 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
                 </button>
               </div>
             )}
+            {/* Priority Crisis Services */}
+            <p className="text-sm font-semibold text-gray-700 mt-2">Priority services for immediate help:</p>
             {crisisOrgs.map(org => (
               <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <p className="font-medium text-gray-900">{org.organizationName}</p>
-                <p className="text-sm text-gray-600 mt-1">{org.address}</p>
+                <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                <p className="text-sm text-gray-600">{org.address}</p>
                 <div className="flex gap-2 mt-2">
                   {org.phone && (
                     <a 
@@ -474,7 +527,7 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
             </button>
             <button
               onClick={() => handleQuickOption('housing')}
-              className="p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-medium transition-colors"
+              className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm font-medium transition-colors"
             >
               🏠 Housing
             </button>
@@ -536,7 +589,7 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
               </button>
               <button
                 onClick={() => handleQuickOption('housing')}
-                className="p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-medium transition-colors"
+                className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm font-medium transition-colors"
               >
                 🏠 Housing
               </button>

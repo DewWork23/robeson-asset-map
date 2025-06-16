@@ -73,8 +73,10 @@ export default function Home() {
             <p className="text-xl text-gray-700 mb-2">
               Your comprehensive guide to local services and support
             </p>
-            <p className="text-lg text-gray-600 mb-4">
-              You're not alone. Help is here. Take your first step today.
+            <p className="text-lg font-medium text-gray-700 mb-4">
+              <span className="text-blue-600">You're not alone.</span>{' '}
+              <span className="text-green-600">Help is here.</span>{' '}
+              <span className="text-purple-600">Take your first step today.</span>
             </p>
             <div className="bg-red-700 text-white px-6 py-3 rounded-lg inline-block">
               <p className="text-lg font-semibold">
