@@ -8,7 +8,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'Sheet1!A:N'; // Adjust range as needed
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v8'; // Updated to ensure all crisis services appear in both categories
+const CACHE_KEY = 'robeson_resources_cache_v9'; // Updated chatbot filtering to include dual-category crisis services
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {

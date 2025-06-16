@@ -440,12 +440,29 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
         const name = org.organizationName.toLowerCase();
         const serviceType = org.serviceType.toLowerCase();
         
-        // Focus on actual treatment centers, not just support groups
-        return (org.category === 'Mental Health & Substance Use' && 
-                (services.includes('treatment') || 
-                 services.includes('therapy') ||
-                 services.includes('counseling'))) ||
-               services.includes('substance abuse treatment') ||
+        // Direct category match for Mental Health & Substance Use
+        if (org.category === 'Mental Health & Substance Use' && 
+            (services.includes('treatment') || 
+             services.includes('therapy') ||
+             services.includes('counseling'))) {
+          return true;
+        }
+        
+        // Include crisis services that are mental health/substance related
+        if (org.crisisService && org.category === 'Crisis Services') {
+          const mentalHealthServiceTypes = [
+            'Mental Health Services', 'Substance Abuse Treatment', 'Mental Health/Addiction',
+            'Mental Health/Developmental Services', 'Mental Health/Substance Abuse',
+            'Addiction Medicine', 'Behavioral Health/Medical', 'Behavioral Health/Peer Support',
+            'Opioid Treatment', 'Opioid Recovery', 'Substance Abuse Prevention/Recovery',
+            'Substance Use Prevention/Recovery', 'Youth Substance Abuse Prevention',
+            'Therapeutic Foster Care/Behavioral Health'
+          ];
+          return mentalHealthServiceTypes.includes(org.serviceType);
+        }
+        
+        // General service matching
+        return services.includes('substance abuse treatment') ||
                services.includes('addiction treatment') ||
                services.includes('detox') ||
                services.includes('rehabilitation') ||
@@ -579,8 +596,25 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     }
     // Healthcare category
     else if (input === 'healthcare' || input.includes('healthcare') || input.includes('medical') || input.includes('health')) {
-      // TODO: Many healthcare providers are miscategorized as Crisis Services (e.g., UNC Health Southeastern)
-      const healthcareOrgs = orgs.filter(org => org.category === 'Healthcare Services').slice(0, 5);
+      const healthcareOrgs = orgs.filter(org => {
+        // Direct category match
+        if (org.category === 'Healthcare Services') return true;
+        
+        // Include crisis services that are healthcare-related
+        if (org.crisisService && org.category === 'Crisis Services') {
+          const healthcareServiceTypes = [
+            'Hospital/Medical Services',
+            'Healthcare',
+            'Medical Services',
+            'Comprehensive Health Services',
+            'Integrated Healthcare',
+            'Public Health Services'
+          ];
+          return healthcareServiceTypes.includes(org.serviceType);
+        }
+        
+        return false;
+      }).slice(0, 5);
       component = (
         <div>
           <p className="font-medium mb-3">Here are healthcare resources:</p>
@@ -636,7 +670,13 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     }
     // Government category
     else if (input === 'government' || input.includes('government')) {
-      const governmentOrgs = orgs.filter(org => org.category === 'Government Services').slice(0, 5);
+      const governmentOrgs = orgs.filter(org => {
+        if (org.category === 'Government Services') return true;
+        if (org.crisisService && org.category === 'Crisis Services') {
+          return ['Social Services', 'Municipal Services'].includes(org.serviceType);
+        }
+        return false;
+      }).slice(0, 5);
       component = (
         <div>
           <p className="font-medium mb-3">Here are government services:</p>
@@ -692,7 +732,13 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     }
     // Tribal category
     else if (input === 'tribal' || input.includes('tribal') || input.includes('native')) {
-      const tribalOrgs = orgs.filter(org => org.category === 'Tribal Services').slice(0, 5);
+      const tribalOrgs = orgs.filter(org => {
+        if (org.category === 'Tribal Services') return true;
+        if (org.crisisService && org.category === 'Crisis Services') {
+          return org.serviceType === 'Tribal Services';
+        }
+        return false;
+      }).slice(0, 5);
       component = (
         <div>
           <p className="font-medium mb-3">Here are tribal services:</p>
@@ -748,7 +794,21 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     }
     // Community category
     else if (input === 'community' || input.includes('community')) {
-      const communityOrgs = orgs.filter(org => org.category === 'Community Services').slice(0, 5);
+      const communityOrgs = orgs.filter(org => {
+        if (org.category === 'Community Services') return true;
+        if (org.crisisService && org.category === 'Crisis Services') {
+          const communityServiceTypes = [
+            'Support Services', 'Community Services', 'Crisis Services', 'Support Group',
+            'Harm Reduction', 'Mobile Harm Reduction', 'Biopsychosocial Support',
+            'Community Resilience', 'Disaster Recovery', 'Disaster Relief/Humanitarian',
+            'Healing/Educational Resources', 'Inclusive Community Support',
+            'Opioid Crisis Prevention', 'Offender Rehabilitation', 'Resource Gap Bridging',
+            'Equine-Assisted Learning'
+          ];
+          return communityServiceTypes.includes(org.serviceType);
+        }
+        return false;
+      }).slice(0, 5);
       component = (
         <div>
           <p className="font-medium mb-3">Here are community services:</p>
@@ -804,7 +864,13 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     }
     // Faith-based category
     else if (input === 'faith' || input.includes('faith') || input.includes('church') || input.includes('religious')) {
-      const faithOrgs = orgs.filter(org => org.category === 'Faith-Based Services').slice(0, 5);
+      const faithOrgs = orgs.filter(org => {
+        if (org.category === 'Faith-Based Services') return true;
+        if (org.crisisService && org.category === 'Crisis Services') {
+          return ['Faith-Based Services', 'Faith-Based Recovery'].includes(org.serviceType);
+        }
+        return false;
+      }).slice(0, 5);
       component = (
         <div>
           <p className="font-medium mb-3">Here are faith-based services:</p>
@@ -860,7 +926,13 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     }
     // Legal category
     else if (input === 'legal' || input.includes('legal') || input.includes('lawyer') || input.includes('attorney')) {
-      const legalOrgs = orgs.filter(org => org.category === 'Legal Services').slice(0, 5);
+      const legalOrgs = orgs.filter(org => {
+        if (org.category === 'Legal Services') return true;
+        if (org.crisisService && org.category === 'Crisis Services') {
+          return ['Legal Services', 'Legal/Prosecution', 'Drug Court', 'Child Advocacy'].includes(org.serviceType);
+        }
+        return false;
+      }).slice(0, 5);
       component = (
         <div>
           <p className="font-medium mb-3">Here are legal services:</p>
