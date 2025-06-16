@@ -377,8 +377,9 @@ export function filterOrganizations(
         // Emergency medical services
         if (name.includes('unc health southeastern')) return 4;
         
-        // Law enforcement (for immediate physical danger)
-        if (name.includes('police department') || name.includes('sheriff')) return 5;
+        // Law enforcement (for immediate physical danger) - prioritize Sheriff's Office
+        if (name.includes('sheriff')) return 5;
+        if (name.includes('police department')) return 20; // Lower priority for local PDs
         
         // Domestic/sexual violence (immediate safety concerns)
         if (name.includes('domestic violence')) return 6;
