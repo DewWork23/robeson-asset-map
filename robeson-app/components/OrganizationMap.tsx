@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Organization, CATEGORY_COLORS, CATEGORY_ICONS } from '@/types/organization';
 import { getCoordinatesFromAddress, locationCoordinates, resetLocationOffsets } from '@/lib/locationUtils';
 import { robesonCountyBoundary } from '@/lib/robesonCountyBoundary';
@@ -18,6 +18,10 @@ interface OrganizationMapProps {
 const MapContent = ({ organizations, allOrganizations = [], selectedCategory, onCategorySelect, selectedOrganization, onOrganizationClick }: OrganizationMapProps) => {
   const [L, setL] = useState<any>(null);
   const [mapReady, setMapReady] = useState(false);
+  const mapRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+  const countyBorderRef = useRef<any>(null);
+  const organizationLayerRef = useRef<any>(null);
 
   useEffect(() => {
     // Dynamically import leaflet
@@ -48,16 +52,20 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     });
   }, []);
 
+  // Initialize map only once
   useEffect(() => {
-    if (!mapReady || !L) return;
+    if (!mapReady || !L || mapRef.current) return;
 
+    console.log('Initializing map...');
+    
     // Create map
     const map = L.map('map').setView([locationCoordinates.default.lat, locationCoordinates.default.lon], 12);
+    mapRef.current = map;
 
     // Create custom panes for better layer control
     map.createPane('townLabels');
-    map.getPane('townLabels').style.zIndex = '650'; // Above markers (600)
-    map.getPane('townLabels').style.pointerEvents = 'none'; // Allow clicks to pass through
+    map.getPane('townLabels').style.zIndex = '650';
+    map.getPane('townLabels').style.pointerEvents = 'none';
 
     // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -66,13 +74,14 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
 
     // Add county boundary
     const countyBorder = L.polygon(robesonCountyBoundary, {
-      color: '#1e40af', // Dark blue border
+      color: '#1e40af',
       weight: 3,
       opacity: 0.8,
       fillColor: 'transparent',
       fillOpacity: 0,
-      dashArray: '5, 10' // Dashed line pattern
+      dashArray: '5, 10'
     }).addTo(map);
+    countyBorderRef.current = countyBorder;
     
     // Add town/city markers
     const majorTowns = [
@@ -86,12 +95,12 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       { name: 'Parkton', coords: locationCoordinates.parkton },
     ];
 
-    // Create layer groups for better organization
+    // Create layer groups
     const townLayer = L.layerGroup().addTo(map);
     const organizationLayer = L.layerGroup().addTo(map);
+    organizationLayerRef.current = organizationLayer;
     
     majorTowns.forEach(town => {
-      // Create a circle marker for towns
       const circle = L.circleMarker([town.coords.lat, town.coords.lon], {
         radius: town.isCountySeat ? 12 : 8,
         fillColor: town.isCountySeat ? '#dc2626' : '#3b82f6',
@@ -99,10 +108,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         weight: 2,
         opacity: 1,
         fillOpacity: 0.7,
-        pane: 'markerPane' // Ensure it's below organization markers
+        pane: 'markerPane'
       }).addTo(townLayer);
 
-      // Add town label with improved visibility
       const icon = L.divIcon({
         html: `<div style="
           font-weight: ${town.isCountySeat ? 'bold' : '600'};
@@ -123,7 +131,6 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
 
       L.marker([town.coords.lat, town.coords.lon], { icon, pane: 'townLabels' }).addTo(map);
       
-      // Add tooltip on hover
       circle.bindTooltip(town.name, {
         permanent: false,
         direction: 'top',
@@ -131,30 +138,51 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       });
     });
     
-    // Set initial view to show the entire county
+    // Set initial view
     map.fitBounds(countyBorder.getBounds(), { padding: [20, 20] });
 
-    // Add layer control to toggle visibility
+    // Add layer control
     const overlays = {
       "Resources": organizationLayer,
       "Towns": townLayer
     };
     L.control.layers(null, overlays, { position: 'topright', collapsed: false }).addTo(map);
 
+    // Cleanup on unmount
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [mapReady, L]);
+
+  // Update markers and handle zoom when organizations or category changes
+  useEffect(() => {
+    if (!mapReady || !L || !mapRef.current || !organizationLayerRef.current) return;
+
+    const map = mapRef.current;
+    const organizationLayer = organizationLayerRef.current;
+    const countyBorder = countyBorderRef.current;
+
+    console.log('Updating markers, selectedCategory:', selectedCategory, 'organizations:', organizations.length);
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => {
+      organizationLayer.removeLayer(marker);
+    });
+    markersRef.current = [];
+
     // Reset offsets for consistent positioning
     resetLocationOffsets();
 
-    // Add individual markers for each organization
-    // Note: organizations are already filtered by the parent component
+    // Add new markers
     organizations.forEach(org => {
       const coords = getCoordinatesFromAddress(org.address);
-      if (!coords) return; // Skip if no coordinates found
+      if (!coords) return;
       
-      // Create custom icon based on category
-      const category = org.category;
-      const categoryIcon = CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || '📍';
+      const categoryIcon = CATEGORY_ICONS[org.category as keyof typeof CATEGORY_ICONS] || '📍';
       
-      // Create a div icon with the emoji
       const icon = L.divIcon({
         html: `
           <div style="
@@ -191,8 +219,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       });
 
       const marker = L.marker([coords.lat, coords.lon], { icon }).addTo(organizationLayer);
+      markersRef.current.push(marker);
       
-      // Create popup content
       const encodedAddress = encodeURIComponent(org.address);
       const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
       
@@ -213,7 +241,6 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       
       marker.bindPopup(popupContent);
       
-      // Add click handler
       marker.on('click', () => {
         if (onOrganizationClick) {
           onOrganizationClick(org);
@@ -221,7 +248,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       });
     });
 
-    // Auto-zoom to show filtered resources when a category is selected
+    // Handle zoom based on selected category
     if (selectedCategory && organizations.length > 0) {
       console.log(`Zooming to category: ${selectedCategory}, organizations: ${organizations.length}`);
       const bounds = L.latLngBounds([]);
@@ -238,59 +265,24 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       if (hasValidCoords && bounds.isValid()) {
         console.log('Bounds are valid, zooming to:', bounds.toBBoxString());
         
-        // Calculate the bounds size to determine if resources are clustered
-        const ne = bounds.getNorthEast();
-        const sw = bounds.getSouthWest();
-        const latDiff = Math.abs(ne.lat - sw.lat);
-        const lngDiff = Math.abs(ne.lng - sw.lng);
-        const boundsSize = Math.max(latDiff, lngDiff);
-        
-        console.log('Bounds size:', boundsSize);
-        
-        // Adjust zoom based on bounds size and number of locations
-        let padding, maxZoom;
-        
-        if (organizations.length === 1) {
-          padding = [50, 50];
-          maxZoom = 17;
-        } else if (boundsSize < 0.05) { // Very tight cluster
-          padding = [30, 30];
-          maxZoom = 16;
-        } else if (boundsSize < 0.1) { // Small area
-          padding = [40, 40];
-          maxZoom = 15;
-        } else { // Spread out
-          padding = [60, 60];
-          maxZoom = 14;
-        }
-        
-        setTimeout(() => {
-          map.fitBounds(bounds, { 
-            padding: padding, 
-            maxZoom: maxZoom,
-            animate: true,
-            duration: 0.5 // Smooth animation
-          });
-        }, 100);
-      } else {
-        console.log('No valid bounds found for zoom');
-      }
-    } else if (!selectedCategory) {
-      console.log('No category selected, resetting to county view');
-      // Reset to county view when no category is selected
-      setTimeout(() => {
-        map.fitBounds(countyBorder.getBounds(), { 
-          padding: [20, 20],
+        // Force immediate zoom without checking current view
+        map.fitBounds(bounds, { 
+          padding: [50, 50], 
+          maxZoom: 16,
+          animate: true,
           duration: 0.5
         });
-      }, 100);
+      }
+    } else if (!selectedCategory && countyBorder) {
+      console.log('No category selected, resetting to county view');
+      // Reset to county view
+      map.fitBounds(countyBorder.getBounds(), { 
+        padding: [20, 20],
+        animate: true,
+        duration: 0.5
+      });
     }
-
-    // Cleanup
-    return () => {
-      map.remove();
-    };
-  }, [mapReady, L, organizations, selectedOrganization, onOrganizationClick, selectedCategory]);
+  }, [mapReady, L, organizations, selectedCategory, onOrganizationClick]);
 
   if (!mapReady) {
     return <div className="h-full flex items-center justify-center">Loading map...</div>;
