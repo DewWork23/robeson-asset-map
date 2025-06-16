@@ -579,7 +579,14 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     }
     // Healthcare category
     else if (input === 'healthcare' || input.includes('healthcare') || input.includes('medical') || input.includes('health')) {
-      const healthcareOrgs = orgs.filter(org => org.category === 'Healthcare Services').slice(0, 5);
+      const healthcareOrgs = orgs.filter(org => {
+        const serviceType = org.serviceType.toLowerCase();
+        // Exclude support groups from healthcare
+        if (serviceType.includes('support group')) {
+          return false;
+        }
+        return org.category === 'Healthcare Services';
+      }).slice(0, 5);
       component = (
         <div>
           <p className="font-medium mb-3">Here are healthcare resources:</p>

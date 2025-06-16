@@ -261,6 +261,18 @@ export function filterOrganizations(
                name.includes('food bank') ||
                name.includes('soup kitchen');
       });
+    } else if (category === 'Healthcare Services') {
+      // For Healthcare Services, exclude support groups
+      filtered = filtered.filter(org => {
+        if (org.category !== 'Healthcare Services') return false;
+        
+        const serviceType = org.serviceType.toLowerCase();
+        // Exclude support groups from healthcare
+        if (serviceType.includes('support group')) {
+          return false;
+        }
+        return true;
+      });
     } else {
       // For other categories, show exact matches PLUS crisis services that belong to this category
       filtered = filtered.filter(org => {
