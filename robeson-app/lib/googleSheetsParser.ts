@@ -8,7 +8,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'Sheet1!A:N'; // Adjust range as needed
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v6'; // Updated to exclude support groups from healthcare
+const CACHE_KEY = 'robeson_resources_cache_v7'; // Reverted healthcare filtering - data needs recategorization
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {
@@ -262,17 +262,9 @@ export function filterOrganizations(
                name.includes('soup kitchen');
       });
     } else if (category === 'Healthcare Services') {
-      // For Healthcare Services, exclude support groups
-      filtered = filtered.filter(org => {
-        if (org.category !== 'Healthcare Services') return false;
-        
-        const serviceType = org.serviceType.toLowerCase();
-        // Exclude support groups from healthcare
-        if (serviceType.includes('support group')) {
-          return false;
-        }
-        return true;
-      });
+      // For Healthcare Services, show all entries for now
+      // TODO: Data needs recategorization - many medical providers are in Crisis Services
+      filtered = filtered.filter(org => org.category === 'Healthcare Services');
     } else {
       // For other categories, show exact matches PLUS crisis services that belong to this category
       filtered = filtered.filter(org => {
