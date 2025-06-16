@@ -597,6 +597,12 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     // Healthcare category
     else if (input === 'healthcare' || input.includes('healthcare') || input.includes('medical') || input.includes('health')) {
       const healthcareOrgs = orgs.filter(org => {
+        // Exclude support groups regardless of category
+        const serviceType = org.serviceType.toLowerCase();
+        if (serviceType.includes('support group')) {
+          return false;
+        }
+        
         // Direct category match
         if (org.category === 'Healthcare Services') return true;
         

@@ -8,7 +8,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'Sheet1!A:N'; // Adjust range as needed
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v9'; // Updated chatbot filtering to include dual-category crisis services
+const CACHE_KEY = 'robeson_resources_cache_v10'; // Exclude support groups from Healthcare while keeping dual-category
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {
@@ -261,8 +261,35 @@ export function filterOrganizations(
                name.includes('food bank') ||
                name.includes('soup kitchen');
       });
+    } else if (category === 'Healthcare Services') {
+      // For Healthcare Services, exclude support groups but include related crisis services
+      filtered = filtered.filter(org => {
+        const serviceType = org.serviceType.toLowerCase();
+        // Exclude support groups from healthcare
+        if (serviceType.includes('support group')) {
+          return false;
+        }
+        
+        // Direct category match
+        if (org.category === category) return true;
+        
+        // Include healthcare-related crisis services
+        if (org.crisisService && org.category === 'Crisis Services') {
+          const healthcareServiceTypes = [
+            'Hospital/Medical Services',
+            'Healthcare',
+            'Medical Services',
+            'Comprehensive Health Services',
+            'Integrated Healthcare',
+            'Public Health Services'
+          ];
+          return healthcareServiceTypes.includes(org.serviceType);
+        }
+        
+        return false;
+      });
     } else {
-      // For all categories, show exact matches PLUS crisis services that belong to this category
+      // For all other categories, show exact matches PLUS crisis services that belong to this category
       filtered = filtered.filter(org => {
         // Direct category match
         if (org.category === category) return true;
