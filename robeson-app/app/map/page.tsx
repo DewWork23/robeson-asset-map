@@ -62,9 +62,6 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* Feedback Banner */}
-      <FeedbackBanner />
-
       {/* Map */}
       <div className="flex-1 relative">
         <OrganizationMap 
@@ -85,6 +82,9 @@ export default function MapPage() {
           }}
         />
       </div>
+
+      {/* Feedback Banner */}
+      <FeedbackBanner />
     </div>
   );
 }
