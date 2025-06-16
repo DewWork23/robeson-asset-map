@@ -223,6 +223,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
 
     // Auto-zoom to show filtered resources when a category is selected
     if (selectedCategory && organizations.length > 0) {
+      console.log(`Zooming to category: ${selectedCategory}, organizations: ${organizations.length}`);
       const bounds = L.latLngBounds([]);
       let hasValidCoords = false;
       
@@ -235,6 +236,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       });
       
       if (hasValidCoords && bounds.isValid()) {
+        console.log('Bounds are valid, zooming to:', bounds.toBBoxString());
         // Calculate appropriate zoom based on number of locations
         const padding = organizations.length === 1 ? [100, 100] : [80, 80];
         const maxZoom = organizations.length === 1 ? 15 : 14;
@@ -246,8 +248,11 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
             duration: 0.5 // Smooth animation
           });
         }, 100);
+      } else {
+        console.log('No valid bounds found for zoom');
       }
     } else if (!selectedCategory) {
+      console.log('No category selected, resetting to county view');
       // Reset to county view when no category is selected
       setTimeout(() => {
         map.fitBounds(countyBorder.getBounds(), { 
