@@ -573,53 +573,92 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     else {
       component = (
         <div>
-          <p className="mb-3">I can help you find many types of resources. You can tell me what you need, or choose from these options:</p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => handleQuickOption('crisis')}
-              className="p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-medium transition-colors"
-            >
-              🚨 Crisis Help
-            </button>
-            <button
-              onClick={() => handleQuickOption('food')}
-              className="p-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-sm font-medium transition-colors"
-            >
-              🍽️ Food & Meals
-            </button>
-            <button
-              onClick={() => handleQuickOption('housing')}
-              className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm font-medium transition-colors"
-            >
-              🏠 Housing
-            </button>
-            <button
-              onClick={() => handleQuickOption('treatment')}
-              className="p-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg text-sm font-medium transition-colors"
-            >
-              💊 Treatment
-            </button>
-            <button
-              onClick={() => handleQuickOption('jobs')}
-              className="p-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-lg text-sm font-medium transition-colors"
-            >
-              💼 Jobs
-            </button>
+          <p className="mb-3">I can help you find many types of resources. Choose a category or type your specific need:</p>
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Quick access:</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleQuickOption('crisis')}
+                  className="p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-medium transition-colors"
+                >
+                  🚨 Crisis Help
+                </button>
+                <button
+                  onClick={() => handleQuickOption('food')}
+                  className="p-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-sm font-medium transition-colors"
+                >
+                  🍽️ Food Services
+                </button>
+                <button
+                  onClick={() => handleQuickOption('housing')}
+                  className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm font-medium transition-colors"
+                >
+                  🏠 Housing
+                </button>
+                <button
+                  onClick={() => handleQuickOption('treatment')}
+                  className="p-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg text-sm font-medium transition-colors"
+                >
+                  💊 Treatment
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">More categories:</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleQuickOption('healthcare')}
+                  className="p-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg text-xs font-medium transition-colors"
+                >
+                  🏥 Healthcare
+                </button>
+                <button
+                  onClick={() => handleQuickOption('government')}
+                  className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-medium transition-colors"
+                >
+                  🏛️ Government
+                </button>
+                <button
+                  onClick={() => handleQuickOption('tribal')}
+                  className="p-2 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg text-xs font-medium transition-colors"
+                >
+                  🪶 Tribal Services
+                </button>
+                <button
+                  onClick={() => handleQuickOption('community')}
+                  className="p-2 bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-lg text-xs font-medium transition-colors"
+                >
+                  🏘️ Community
+                </button>
+                <button
+                  onClick={() => handleQuickOption('faith')}
+                  className="p-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg text-xs font-medium transition-colors"
+                >
+                  ⛪ Faith-Based
+                </button>
+                <button
+                  onClick={() => handleQuickOption('legal')}
+                  className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-medium transition-colors"
+                >
+                  ⚖️ Legal Services
+                </button>
+                <button
+                  onClick={() => handleQuickOption('education')}
+                  className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-xs font-medium transition-colors"
+                >
+                  📚 Education
+                </button>
+                <button
+                  onClick={() => handleQuickOption('pharmacy')}
+                  className="p-2 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg text-xs font-medium transition-colors"
+                >
+                  💊 Pharmacy
+                </button>
+              </div>
+            </div>
           </div>
-          <p className="mt-3 text-sm text-gray-600 font-medium">Other categories I can help with:</p>
-          <div className="mt-2 text-xs text-gray-500 space-y-1">
-            <p>• Healthcare Services 🏥</p>
-            <p>• Government Services 🏛️</p>
-            <p>• Tribal Services 🪶</p>
-            <p>• Community Services 🏘️</p>
-            <p>• Faith-Based Services ⛪</p>
-            <p>• Legal Services ⚖️</p>
-            <p>• Law Enforcement 🚓</p>
-            <p>• Education 📚</p>
-            <p>• Pharmacy 💊</p>
-            <p>• Cultural & Information Services 🎭</p>
-          </div>
-          <p className="mt-3 text-sm text-gray-600">Type your specific need below or click a button above.</p>
         </div>
       );
     }
