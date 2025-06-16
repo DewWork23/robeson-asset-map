@@ -8,7 +8,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'Sheet1!A:N'; // Adjust range as needed
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v7'; // Reverted healthcare filtering - data needs recategorization
+const CACHE_KEY = 'robeson_resources_cache_v8'; // Updated to ensure all crisis services appear in both categories
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {
@@ -261,12 +261,8 @@ export function filterOrganizations(
                name.includes('food bank') ||
                name.includes('soup kitchen');
       });
-    } else if (category === 'Healthcare Services') {
-      // For Healthcare Services, show all entries for now
-      // TODO: Data needs recategorization - many medical providers are in Crisis Services
-      filtered = filtered.filter(org => org.category === 'Healthcare Services');
     } else {
-      // For other categories, show exact matches PLUS crisis services that belong to this category
+      // For all categories, show exact matches PLUS crisis services that belong to this category
       filtered = filtered.filter(org => {
         // Direct category match
         if (org.category === category) return true;
