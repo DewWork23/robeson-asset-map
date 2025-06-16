@@ -221,8 +221,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       });
     });
 
-    // Auto-zoom to show all current pins if we have a subset of organizations
-    if (organizations.length > 0 && organizations.length < 50) { // Assume < 50 means filtered
+    // Auto-zoom to show filtered resources when a category is selected
+    if (selectedCategory && organizations.length > 0) {
       const bounds = L.latLngBounds([]);
       let hasValidCoords = false;
       
@@ -247,8 +247,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           });
         }, 100);
       }
-    } else {
-      // Reset to county view when filter is cleared
+    } else if (!selectedCategory) {
+      // Reset to county view when no category is selected
       setTimeout(() => {
         map.fitBounds(countyBorder.getBounds(), { 
           padding: [20, 20],
@@ -261,7 +261,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     return () => {
       map.remove();
     };
-  }, [mapReady, L, organizations, selectedOrganization, onOrganizationClick]);
+  }, [mapReady, L, organizations, selectedOrganization, onOrganizationClick, selectedCategory]);
 
   if (!mapReady) {
     return <div className="h-full flex items-center justify-center">Loading map...</div>;
