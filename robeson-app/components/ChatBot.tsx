@@ -284,13 +284,26 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
     }
     // Check for specific service types
     else if (input === 'food' || input.includes('food') || input.includes('hungry') || input.includes('meal')) {
-      const foodOrgs = orgs.filter(org => 
-        org.category === 'Community Services' || 
-        org.category === 'Faith-Based Services' ||
-        org.servicesOffered.toLowerCase().includes('food') ||
-        org.servicesOffered.toLowerCase().includes('meal') ||
-        org.servicesOffered.toLowerCase().includes('pantry')
-      ).slice(0, 3);
+      const foodOrgs = orgs.filter(org => {
+        const name = org.organizationName.toLowerCase();
+        const services = org.servicesOffered.toLowerCase();
+        const serviceType = org.serviceType.toLowerCase();
+        
+        // Exclude support groups and other non-food services
+        if (serviceType.includes('support group') || name.includes('anonymous') || name.includes('al-anon')) {
+          return false;
+        }
+        
+        // Include organizations that specifically mention food services
+        return services.includes('food') ||
+               services.includes('meal') ||
+               services.includes('pantry') ||
+               services.includes('kitchen') ||
+               services.includes('nutrition') ||
+               services.includes('feeding') ||
+               name.includes('food bank') ||
+               name.includes('soup kitchen');
+      }).slice(0, 5);
       component = (
         <div>
           <p className="font-medium mb-3">Here are resources for food assistance:</p>
@@ -311,42 +324,55 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
             </div>
           )}
           <div className="space-y-2">
-            {foodOrgs.map(org => (
-              <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="font-medium text-gray-900">{org.organizationName}</p>
-                <p className="text-sm text-gray-600 mt-1">{org.address}</p>
-                <div className="flex gap-2 mt-2">
-                  {org.phone && (
+            {foodOrgs.length > 0 ? (
+              foodOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
                     <a 
-                      href={`tel:${formatPhoneForTel(org.phone)}`} 
-                      className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
                     >
-                      Call {org.phone}
+                      📍 Directions
                     </a>
-                  )}
-                  <a 
-                    href={getDirectionsUrl(org.address)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-                  >
-                    📍 Directions
-                  </a>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No food assistance resources found. Try searching for "Community Services" or contact 2-1-1 for help.</p>
+            )}
           </div>
         </div>
       );
     }
     else if (input === 'housing' || input.includes('housing') || input.includes('shelter') || input.includes('homeless')) {
-      const housingOrgs = orgs.filter(org => 
-        org.category === 'Housing Services' || 
-        org.category === 'Community Services' ||
-        org.servicesOffered.toLowerCase().includes('shelter') ||
-        org.servicesOffered.toLowerCase().includes('housing') ||
-        org.servicesOffered.toLowerCase().includes('homeless')
-      ).slice(0, 3);
+      const housingOrgs = orgs.filter(org => {
+        const services = org.servicesOffered.toLowerCase();
+        const name = org.organizationName.toLowerCase();
+        const category = org.category;
+        
+        return category === 'Housing Services' ||
+               services.includes('shelter') ||
+               services.includes('housing') ||
+               services.includes('homeless') ||
+               services.includes('transitional housing') ||
+               services.includes('emergency housing') ||
+               services.includes('rental assistance') ||
+               name.includes('housing authority') ||
+               name.includes('shelter');
+      }).slice(0, 5);
       component = (
         <div>
           <p className="font-medium mb-3">Here are housing and shelter resources:</p>
@@ -367,42 +393,60 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
             </div>
           )}
           <div className="space-y-2">
-            {housingOrgs.map(org => (
-              <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="font-medium text-gray-900">{org.organizationName}</p>
-                <p className="text-sm text-gray-600 mt-1">{org.address}</p>
-                <div className="flex gap-2 mt-2">
-                  {org.phone && (
+            {housingOrgs.length > 0 ? (
+              housingOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
                     <a 
-                      href={`tel:${formatPhoneForTel(org.phone)}`} 
-                      className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
                     >
-                      Call {org.phone}
+                      📍 Directions
                     </a>
-                  )}
-                  <a 
-                    href={getDirectionsUrl(org.address)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-                  >
-                    📍 Directions
-                  </a>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No housing resources found. Contact the Robeson County Housing Authority at (910) 738-4866 or dial 2-1-1 for assistance.</p>
+            )}
           </div>
         </div>
       );
     }
     else if (input === 'treatment' || input.includes('treatment') || input.includes('addiction') || input.includes('substance')) {
-      const treatmentOrgs = orgs.filter(org => 
-        org.category === 'Mental Health & Addiction' || 
-        org.category === 'Healthcare Services' ||
-        org.servicesOffered.toLowerCase().includes('treatment') ||
-        org.servicesOffered.toLowerCase().includes('substance') ||
-        org.servicesOffered.toLowerCase().includes('addiction')
-      ).slice(0, 3);
+      const treatmentOrgs = orgs.filter(org => {
+        const services = org.servicesOffered.toLowerCase();
+        const name = org.organizationName.toLowerCase();
+        const serviceType = org.serviceType.toLowerCase();
+        
+        // Focus on actual treatment centers, not just support groups
+        return (org.category === 'Mental Health & Addiction' && 
+                (services.includes('treatment') || 
+                 services.includes('therapy') ||
+                 services.includes('counseling'))) ||
+               services.includes('substance abuse treatment') ||
+               services.includes('addiction treatment') ||
+               services.includes('detox') ||
+               services.includes('rehabilitation') ||
+               services.includes('methadone') ||
+               services.includes('suboxone') ||
+               serviceType.includes('treatment') ||
+               name.includes('treatment center') ||
+               name.includes('recovery center');
+      }).slice(0, 5);
       component = (
         <div>
           <p className="font-medium mb-3">Here are treatment and recovery resources:</p>
@@ -423,43 +467,55 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
             </div>
           )}
           <div className="space-y-2">
-            {treatmentOrgs.map(org => (
-              <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="font-medium text-gray-900">{org.organizationName}</p>
-                <p className="text-sm text-gray-600 mt-1">{org.address}</p>
-                <div className="flex gap-2 mt-2">
-                  {org.phone && (
+            {treatmentOrgs.length > 0 ? (
+              treatmentOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
                     <a 
-                      href={`tel:${formatPhoneForTel(org.phone)}`} 
-                      className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
                     >
-                      Call {org.phone}
+                      📍 Directions
                     </a>
-                  )}
-                  <a 
-                    href={getDirectionsUrl(org.address)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-                  >
-                    📍 Directions
-                  </a>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No treatment resources found. For immediate help, call the Crisis Intervention line at (800) 939-5911.</p>
+            )}
           </div>
         </div>
       );
     }
     else if (input === 'jobs' || input.includes('job') || input.includes('work') || input.includes('employment')) {
-      const jobOrgs = orgs.filter(org => 
-        org.category === 'Community Services' || 
-        org.category === 'Government Services' ||
-        org.category === 'Tribal Services' ||
-        org.servicesOffered.toLowerCase().includes('job') ||
-        org.servicesOffered.toLowerCase().includes('employment') ||
-        org.servicesOffered.toLowerCase().includes('workforce')
-      ).slice(0, 3);
+      const jobOrgs = orgs.filter(org => {
+        const services = org.servicesOffered.toLowerCase();
+        const name = org.organizationName.toLowerCase();
+        
+        return services.includes('job') ||
+               services.includes('employment') ||
+               services.includes('workforce') ||
+               services.includes('career') ||
+               services.includes('vocational') ||
+               services.includes('job training') ||
+               services.includes('job placement') ||
+               name.includes('ncworks') ||
+               name.includes('employment') ||
+               name.includes('workforce');
+      }).slice(0, 5);
       component = (
         <div>
           <p className="font-medium mb-3">Here are job and employment resources:</p>
@@ -480,30 +536,35 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
             </div>
           )}
           <div className="space-y-2">
-            {jobOrgs.map(org => (
-              <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="font-medium text-gray-900">{org.organizationName}</p>
-                <p className="text-sm text-gray-600 mt-1">{org.address}</p>
-                <div className="flex gap-2 mt-2">
-                  {org.phone && (
+            {jobOrgs.length > 0 ? (
+              jobOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
                     <a 
-                      href={`tel:${formatPhoneForTel(org.phone)}`} 
-                      className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
                     >
-                      Call {org.phone}
+                      📍 Directions
                     </a>
-                  )}
-                  <a 
-                    href={getDirectionsUrl(org.address)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-                  >
-                    📍 Directions
-                  </a>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No job resources found. Contact NCWorks Career Center at (910) 618-5627 or visit their office.</p>
+            )}
           </div>
         </div>
       );
