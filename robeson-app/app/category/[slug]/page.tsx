@@ -9,6 +9,7 @@ import OrganizationCard from '@/components/OrganizationCard';
 import SimpleSearchBar from '@/components/SimpleSearchBar';
 import OrganizationMap from '@/components/OrganizationMap';
 import { slugToCategory, categoryToSlug } from '@/utils/categoryUtils';
+import FeedbackBanner from '@/components/FeedbackBanner';
 
 export default function CategoryPage() {
   const params = useParams();
@@ -205,6 +206,7 @@ export default function CategoryPage() {
           </div>
         )}
       </div>
+      <FeedbackBanner />
     </main>
   );
 }

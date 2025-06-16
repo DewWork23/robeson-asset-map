@@ -7,6 +7,7 @@ import { Organization } from '@/types/organization';
 import { loadOrganizationsFromGoogleSheets } from '@/lib/googleSheetsParser';
 import OrganizationMap from '@/components/OrganizationMap';
 import { categoryToSlug } from '@/utils/categoryUtils';
+import FeedbackBanner from '@/components/FeedbackBanner';
 
 export default function MapPage() {
   const router = useRouter();

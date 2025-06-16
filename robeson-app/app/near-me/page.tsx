@@ -9,6 +9,7 @@ import OrganizationCard from '@/components/OrganizationCard';
 import SimpleSearchBar from '@/components/SimpleSearchBar';
 import OrganizationMap from '@/components/OrganizationMap';
 import { categoryToSlug } from '@/utils/categoryUtils';
+import FeedbackBanner from '@/components/FeedbackBanner';
 
 export default function NearMePage() {
   const router = useRouter();
@@ -199,6 +200,7 @@ export default function NearMePage() {
           </div>
         )}
       </div>
+      <FeedbackBanner />
     </main>
   );
 }
