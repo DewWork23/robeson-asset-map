@@ -267,8 +267,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         
         // Force immediate zoom without checking current view
         map.fitBounds(bounds, { 
-          padding: [50, 50], 
-          maxZoom: 16,
+          padding: [80, 80], 
+          maxZoom: 14,
           animate: true,
           duration: 0.5
         });
