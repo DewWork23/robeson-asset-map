@@ -64,14 +64,17 @@ export default function Home() {
       <ManifestLink />
       
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-green-600 shadow-lg">
+      <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-3">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-3">
               Robeson County Community Resources
             </h1>
-            <p className="text-xl text-white mb-4">
+            <p className="text-xl text-gray-700 mb-2">
               Your comprehensive guide to local services and support
+            </p>
+            <p className="text-lg text-gray-600 mb-4">
+              You're not alone. Help is here. Take your first step today.
             </p>
             <div className="bg-red-700 text-white px-6 py-3 rounded-lg inline-block">
               <p className="text-lg font-semibold">
