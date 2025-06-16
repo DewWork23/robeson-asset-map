@@ -19,6 +19,8 @@ export interface Organization {
 
 export type Category = 
   | 'Crisis Services'
+  | 'Food Services'
+  | 'Housing Services'
   | 'Healthcare Services'
   | 'Mental Health & Addiction'
   | 'Government Services'
@@ -29,12 +31,13 @@ export type Category =
   | 'Legal Services'
   | 'Law Enforcement'
   | 'Education'
-  | 'Housing Services'
   | 'Pharmacy'
   | 'Cultural & Information Services';
 
 export const CATEGORY_ICONS: Record<string, string> = {
   'Crisis Services': '🆘',
+  'Food Services': '🍽️',
+  'Housing Services': '🏠',
   'Healthcare Services': '🏥',
   'Mental Health & Addiction': '🧠',
   'Government Services': '🏛️',
@@ -45,13 +48,14 @@ export const CATEGORY_ICONS: Record<string, string> = {
   'Legal Services': '⚖️',
   'Law Enforcement': '🚓',
   'Education': '📚',
-  'Housing Services': '🏠',
   'Pharmacy': '💊',
   'Cultural & Information Services': '🎭'
 };
 
 export const CATEGORY_COLORS: Record<string, string> = {
   'Crisis Services': 'bg-red-600',
+  'Food Services': 'bg-green-600',
+  'Housing Services': 'bg-blue-600',
   'Healthcare Services': 'bg-emerald-600',
   'Mental Health & Addiction': 'bg-indigo-600',
   'Government Services': 'bg-gray-600',
@@ -62,7 +66,6 @@ export const CATEGORY_COLORS: Record<string, string> = {
   'Legal Services': 'bg-slate-600',
   'Law Enforcement': 'bg-red-700',
   'Education': 'bg-blue-700',
-  'Housing Services': 'bg-indigo-600',
   'Pharmacy': 'bg-green-700',
   'Cultural & Information Services': 'bg-pink-600'
 };

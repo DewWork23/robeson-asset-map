@@ -239,6 +239,28 @@ export function filterOrganizations(
     if (category === 'Crisis Services') {
       // For Crisis Services, show all organizations flagged as crisis
       filtered = filtered.filter(org => org.crisisService);
+    } else if (category === 'Food Services') {
+      // For Food Services, show organizations providing food assistance
+      filtered = filtered.filter(org => {
+        const services = org.servicesOffered.toLowerCase();
+        const name = org.organizationName.toLowerCase();
+        const serviceType = org.serviceType.toLowerCase();
+        
+        // Exclude support groups and other non-food services
+        if (serviceType.includes('support group') || name.includes('anonymous') || name.includes('al-anon')) {
+          return false;
+        }
+        
+        // Include organizations that specifically mention food services
+        return services.includes('food') ||
+               services.includes('meal') ||
+               services.includes('pantry') ||
+               services.includes('kitchen') ||
+               services.includes('nutrition') ||
+               services.includes('feeding') ||
+               name.includes('food bank') ||
+               name.includes('soup kitchen');
+      });
     } else {
       // For other categories, show exact matches PLUS crisis services that belong to this category
       filtered = filtered.filter(org => {
