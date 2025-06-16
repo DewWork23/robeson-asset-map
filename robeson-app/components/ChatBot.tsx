@@ -74,6 +74,14 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
       housing: '🏠 I need housing help',
       treatment: '💊 I need treatment services',
       jobs: '💼 I need job resources',
+      healthcare: '🏥 I need healthcare services',
+      government: '🏛️ I need government services',
+      tribal: '🪶 I need tribal services',
+      community: '🏘️ I need community services',
+      faith: '⛪ I need faith-based services',
+      legal: '⚖️ I need legal services',
+      education: '📚 I need education resources',
+      pharmacy: '💊 I need pharmacy services',
       other: '❓ I need other help'
     }[option] || option;
 
@@ -564,6 +572,454 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
               ))
             ) : (
               <p className="text-sm text-gray-600">No job resources found. Contact NCWorks Career Center at (910) 618-5627 or visit their office.</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+    // Healthcare category
+    else if (input === 'healthcare' || input.includes('healthcare') || input.includes('medical') || input.includes('health')) {
+      const healthcareOrgs = orgs.filter(org => org.category === 'Healthcare Services').slice(0, 5);
+      component = (
+        <div>
+          <p className="font-medium mb-3">Here are healthcare resources:</p>
+          {viewMode === 'map' && (
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Healthcare Services')}
+                className="w-full p-3 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg font-medium transition-colors border border-emerald-300"
+              >
+                📍 Show all healthcare services on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
+          )}
+          <div className="space-y-2">
+            {healthcareOrgs.length > 0 ? (
+              healthcareOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
+                    <a 
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                    >
+                      📍 Directions
+                    </a>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No healthcare resources found. Call 2-1-1 for assistance finding healthcare services.</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+    // Government category
+    else if (input === 'government' || input.includes('government')) {
+      const governmentOrgs = orgs.filter(org => org.category === 'Government Services').slice(0, 5);
+      component = (
+        <div>
+          <p className="font-medium mb-3">Here are government services:</p>
+          {viewMode === 'map' && (
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Government Services')}
+                className="w-full p-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg font-medium transition-colors border border-gray-300"
+              >
+                📍 Show all government services on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
+          )}
+          <div className="space-y-2">
+            {governmentOrgs.length > 0 ? (
+              governmentOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
+                    <a 
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                    >
+                      📍 Directions
+                    </a>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No government services found. Contact Robeson County government offices for assistance.</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+    // Tribal category
+    else if (input === 'tribal' || input.includes('tribal') || input.includes('native')) {
+      const tribalOrgs = orgs.filter(org => org.category === 'Tribal Services').slice(0, 5);
+      component = (
+        <div>
+          <p className="font-medium mb-3">Here are tribal services:</p>
+          {viewMode === 'map' && (
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Tribal Services')}
+                className="w-full p-3 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg font-medium transition-colors border border-amber-300"
+              >
+                📍 Show all tribal services on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
+          )}
+          <div className="space-y-2">
+            {tribalOrgs.length > 0 ? (
+              tribalOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
+                    <a 
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                    >
+                      📍 Directions
+                    </a>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No tribal services found. Contact the Lumbee Tribe of North Carolina for assistance.</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+    // Community category
+    else if (input === 'community' || input.includes('community')) {
+      const communityOrgs = orgs.filter(org => org.category === 'Community Services').slice(0, 5);
+      component = (
+        <div>
+          <p className="font-medium mb-3">Here are community services:</p>
+          {viewMode === 'map' && (
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Community Services')}
+                className="w-full p-3 bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-lg font-medium transition-colors border border-orange-300"
+              >
+                📍 Show all community services on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
+          )}
+          <div className="space-y-2">
+            {communityOrgs.length > 0 ? (
+              communityOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
+                    <a 
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                    >
+                      📍 Directions
+                    </a>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No community services found. Call 2-1-1 for assistance finding community resources.</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+    // Faith-based category
+    else if (input === 'faith' || input.includes('faith') || input.includes('church') || input.includes('religious')) {
+      const faithOrgs = orgs.filter(org => org.category === 'Faith-Based Services').slice(0, 5);
+      component = (
+        <div>
+          <p className="font-medium mb-3">Here are faith-based services:</p>
+          {viewMode === 'map' && (
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Faith-Based Services')}
+                className="w-full p-3 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg font-medium transition-colors border border-purple-300"
+              >
+                📍 Show all faith-based services on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
+          )}
+          <div className="space-y-2">
+            {faithOrgs.length > 0 ? (
+              faithOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
+                    <a 
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                    >
+                      📍 Directions
+                    </a>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No faith-based services found. Contact local churches for assistance.</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+    // Legal category
+    else if (input === 'legal' || input.includes('legal') || input.includes('lawyer') || input.includes('attorney')) {
+      const legalOrgs = orgs.filter(org => org.category === 'Legal Services').slice(0, 5);
+      component = (
+        <div>
+          <p className="font-medium mb-3">Here are legal services:</p>
+          {viewMode === 'map' && (
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Legal Services')}
+                className="w-full p-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg font-medium transition-colors border border-slate-300"
+              >
+                📍 Show all legal services on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
+          )}
+          <div className="space-y-2">
+            {legalOrgs.length > 0 ? (
+              legalOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
+                    <a 
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                    >
+                      📍 Directions
+                    </a>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No legal services found. Contact the North Carolina Bar Association for referrals.</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+    // Education category
+    else if (input === 'education' || input.includes('education') || input.includes('school')) {
+      const educationOrgs = orgs.filter(org => org.category === 'Education').slice(0, 5);
+      component = (
+        <div>
+          <p className="font-medium mb-3">Here are education resources:</p>
+          {viewMode === 'map' && (
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Education')}
+                className="w-full p-3 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg font-medium transition-colors border border-blue-300"
+              >
+                📍 Show all education services on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
+          )}
+          <div className="space-y-2">
+            {educationOrgs.length > 0 ? (
+              educationOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
+                    <a 
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                    >
+                      📍 Directions
+                    </a>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No education resources found. Contact Robeson County Schools for assistance.</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+    // Pharmacy category
+    else if (input === 'pharmacy' || input.includes('pharmacy') || input.includes('medication')) {
+      const pharmacyOrgs = orgs.filter(org => org.category === 'Pharmacy').slice(0, 5);
+      component = (
+        <div>
+          <p className="font-medium mb-3">Here are pharmacy services:</p>
+          {viewMode === 'map' && (
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Pharmacy')}
+                className="w-full p-3 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg font-medium transition-colors border border-green-300"
+              >
+                📍 Show all pharmacies on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
+          )}
+          <div className="space-y-2">
+            {pharmacyOrgs.length > 0 ? (
+              pharmacyOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
+                    <a 
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                    >
+                      📍 Directions
+                    </a>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No pharmacy services found. Call 2-1-1 for assistance finding pharmacies.</p>
             )}
           </div>
         </div>
