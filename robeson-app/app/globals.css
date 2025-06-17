@@ -99,3 +99,18 @@ button, a {
   transform: scale(1.1);
 }
 
+/* Ensure map is fully interactive */
+#map {
+  touch-action: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Fix for mobile map interaction */
+.leaflet-container {
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+

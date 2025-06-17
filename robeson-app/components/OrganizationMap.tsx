@@ -58,8 +58,20 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
 
     console.log('Initializing map...');
     
-    // Create map
-    const map = L.map('map').setView([locationCoordinates.default.lat, locationCoordinates.default.lon], 12);
+    // Create map with explicit options for better mobile experience
+    const map = L.map('map', {
+      center: [locationCoordinates.default.lat, locationCoordinates.default.lon],
+      zoom: 11,
+      zoomControl: true,
+      dragging: true,
+      touchZoom: true,
+      scrollWheelZoom: true,
+      doubleClickZoom: true,
+      boxZoom: true,
+      tap: true,
+      tapTolerance: 15,
+      trackResize: true
+    });
     mapRef.current = map;
 
     // Create custom panes for better layer control
@@ -138,8 +150,11 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       });
     });
     
-    // Set initial view
-    map.fitBounds(countyBorder.getBounds(), { padding: [20, 20] });
+    // Set initial view with more padding for better navigation
+    map.fitBounds(countyBorder.getBounds(), { 
+      padding: [50, 50],
+      maxZoom: 13 
+    });
 
     // Add layer control
     const overlays = {
