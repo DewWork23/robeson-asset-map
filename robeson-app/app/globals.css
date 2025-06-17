@@ -114,3 +114,27 @@ button, a {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Ensure scrollbars are always visible on map page */
+.overflow-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.overflow-auto::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.overflow-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
