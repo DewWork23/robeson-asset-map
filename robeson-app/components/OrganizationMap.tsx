@@ -288,10 +288,10 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       if (hasValidCoords && bounds.isValid()) {
         console.log('Bounds are valid, zooming to:', bounds.toBBoxString());
         
-        // Force immediate zoom without checking current view
+        // Keep a reasonable zoom level even when filtering
         map.fitBounds(bounds, { 
-          padding: [80, 80], 
-          maxZoom: 14,
+          padding: [150, 150], 
+          maxZoom: 11,
           animate: true,
           duration: 0.5
         });
