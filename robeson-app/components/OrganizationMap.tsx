@@ -61,8 +61,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Create map with explicit options for better mobile experience
     const map = L.map('map', {
       center: [locationCoordinates.default.lat, locationCoordinates.default.lon],
-      zoom: 9,
-      minZoom: 7,
+      zoom: 8,
+      minZoom: 6,
       maxZoom: 18,
       zoomControl: true,
       dragging: true,
@@ -153,11 +153,12 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       });
     });
     
-    // Set initial view with more padding for better navigation
-    map.fitBounds(countyBorder.getBounds(), { 
-      padding: [200, 200],
-      maxZoom: 10 
-    });
+    // Set initial view to show the whole county centered
+    const bounds = countyBorder.getBounds();
+    const center = bounds.getCenter();
+    
+    // Set view to center of county with appropriate zoom
+    map.setView(center, 9.5);
 
     // Force map to recalculate its size
     setTimeout(() => {
