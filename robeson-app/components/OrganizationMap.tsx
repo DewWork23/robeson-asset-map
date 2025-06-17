@@ -61,7 +61,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Create map with explicit options for better mobile experience
     const map = L.map('map', {
       center: [locationCoordinates.default.lat, locationCoordinates.default.lon],
-      zoom: 11,
+      zoom: 10,
+      minZoom: 8,
+      maxZoom: 18,
       zoomControl: true,
       dragging: true,
       touchZoom: true,
@@ -70,7 +72,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       boxZoom: true,
       tap: true,
       tapTolerance: 15,
-      trackResize: true
+      trackResize: true,
+      worldCopyJump: true
     });
     mapRef.current = map;
 
@@ -152,8 +155,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     
     // Set initial view with more padding for better navigation
     map.fitBounds(countyBorder.getBounds(), { 
-      padding: [50, 50],
-      maxZoom: 13 
+      padding: [100, 100],
+      maxZoom: 11 
     });
 
     // Force map to recalculate its size

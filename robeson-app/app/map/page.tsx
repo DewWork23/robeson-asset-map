@@ -64,27 +64,25 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* Map container with scrollbars */}
-      <div className="flex-1 relative overflow-auto">
-        <div className="w-[150%] h-[150%] relative">
-          <OrganizationMap 
-            organizations={selectedCategory 
-              ? organizations.filter(org => 
-                  org.category === selectedCategory ||
-                  (selectedCategory === 'Crisis Services' && org.crisisService)
-                )
-              : organizations
-            }
-            allOrganizations={organizations}
-            selectedCategory={selectedCategory}
-            onCategorySelect={(cat) => {
-              setSelectedCategory(cat);
-            }}
-            onOrganizationClick={(org) => {
-              console.log('Organization clicked:', org);
-            }}
-          />
-        </div>
+      {/* Map container */}
+      <div className="flex-1 relative">
+        <OrganizationMap 
+          organizations={selectedCategory 
+            ? organizations.filter(org => 
+                org.category === selectedCategory ||
+                (selectedCategory === 'Crisis Services' && org.crisisService)
+              )
+            : organizations
+          }
+          allOrganizations={organizations}
+          selectedCategory={selectedCategory}
+          onCategorySelect={(cat) => {
+            setSelectedCategory(cat);
+          }}
+          onOrganizationClick={(org) => {
+            console.log('Organization clicked:', org);
+          }}
+        />
       </div>
     </div>
   );
