@@ -59,9 +59,10 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     console.log('Initializing map...');
     
     // Create map with explicit options for better mobile experience
+    // Start very zoomed out to ensure we see everything
     const map = L.map('map', {
-      center: [locationCoordinates.default.lat, locationCoordinates.default.lon],
-      zoom: 8,
+      center: [34.6341, -79.0073], // Center of Robeson County
+      zoom: 9, // Start zoomed out
       minZoom: 6,
       maxZoom: 18,
       zoomControl: true,
@@ -153,16 +154,14 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       });
     });
     
-    // Set initial view to show the whole county centered
-    const bounds = countyBorder.getBounds();
-    const center = bounds.getCenter();
+    // Don't auto-fit to bounds, keep the initial zoom level
+    // This ensures we see a wider area around the county
     
-    // Set view to center of county with appropriate zoom
-    map.setView(center, 9.5);
-
     // Force map to recalculate its size
     setTimeout(() => {
       map.invalidateSize();
+      // After resize, ensure we're at the right zoom
+      map.setView([34.6341, -79.0073], 9);
     }, 100);
 
     // Add layer control
@@ -298,10 +297,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         });
       }
     } else if (!selectedCategory && countyBorder) {
-      console.log('No category selected, resetting to county view');
-      // Reset to county view
-      map.fitBounds(countyBorder.getBounds(), { 
-        padding: [20, 20],
+      console.log('No category selected, keeping wide view');
+      // Keep the wide view when showing all resources
+      map.setView([34.6341, -79.0073], 9, {
         animate: true,
         duration: 0.5
       });
