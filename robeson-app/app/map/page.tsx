@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Organization } from '@/types/organization';
@@ -13,6 +13,7 @@ export default function MapPage() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -27,6 +28,19 @@ export default function MapPage() {
     }
     loadData();
   }, []);
+
+  // Center the scrollable container when component mounts
+  useEffect(() => {
+    if (!loading && scrollContainerRef.current) {
+      // Scroll to center of the 2000x2000 container
+      const container = scrollContainerRef.current;
+      const centerX = (2000 - container.clientWidth) / 2;
+      const centerY = (2000 - container.clientHeight) / 2;
+      
+      container.scrollLeft = centerX;
+      container.scrollTop = centerY;
+    }
+  }, [loading]);
 
   if (loading) {
     return (
@@ -65,7 +79,7 @@ export default function MapPage() {
       </div>
 
       {/* Map container with scrollbars */}
-      <div className="flex-1 relative overflow-auto">
+      <div ref={scrollContainerRef} className="flex-1 relative overflow-auto">
         <div className="w-[2000px] h-[2000px]">
           <OrganizationMap 
             organizations={selectedCategory 
