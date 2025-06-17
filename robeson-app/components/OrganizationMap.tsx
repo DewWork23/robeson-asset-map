@@ -156,6 +156,11 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       maxZoom: 13 
     });
 
+    // Force map to recalculate its size
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+
     // Add layer control
     const overlays = {
       "Resources": organizationLayer,

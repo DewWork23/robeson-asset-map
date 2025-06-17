@@ -66,7 +66,7 @@ export default function MapPage() {
 
       {/* Map container with scrollbars */}
       <div className="flex-1 relative overflow-auto">
-        <div className="min-w-[150%] min-h-[150%]">
+        <div className="w-[150%] h-[150%] relative">
           <OrganizationMap 
             organizations={selectedCategory 
               ? organizations.filter(org => 
