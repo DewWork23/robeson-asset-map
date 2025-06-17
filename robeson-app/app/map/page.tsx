@@ -40,54 +40,50 @@ export default function MapPage() {
   }
 
   return (
-    <>
-      {/* Main map view - takes full viewport */}
-      <div className="map-page-container">
-        {/* Header */}
-        <div className="bg-white shadow-sm z-10 flex-shrink-0">
-          <div className="px-3 sm:px-4 py-2 sm:py-3">
-            <div className="flex items-center justify-between gap-2">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all text-sm sm:text-base flex-shrink-0"
-                aria-label="Go back to all categories"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span className="hidden sm:inline">Back to Categories</span>
-                <span className="sm:hidden">Back</span>
-              </Link>
-              <h1 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 text-center px-2">
-                All Resources Map
-              </h1>
-              <div className="w-16 sm:w-32 flex-shrink-0"></div> {/* Spacer for centering */}
-            </div>
+    <div className="fixed inset-0 flex flex-col">
+      {/* Header */}
+      <div className="bg-white shadow-sm z-10 flex-shrink-0">
+        <div className="px-3 sm:px-4 py-2 sm:py-3">
+          <div className="flex items-center justify-between gap-2">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all text-sm sm:text-base flex-shrink-0"
+              aria-label="Go back to all categories"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="hidden sm:inline">Back to Categories</span>
+              <span className="sm:hidden">Back</span>
+            </Link>
+            <h1 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 text-center px-2">
+              All Resources Map
+            </h1>
+            <div className="w-16 sm:w-32 flex-shrink-0"></div> {/* Spacer for centering */}
           </div>
-        </div>
-
-        {/* Map container */}
-        <div className="map-page-content">
-          <OrganizationMap 
-            organizations={selectedCategory 
-              ? organizations.filter(org => 
-                  org.category === selectedCategory ||
-                  (selectedCategory === 'Crisis Services' && org.crisisService)
-                )
-              : organizations
-            }
-            allOrganizations={organizations}
-            selectedCategory={selectedCategory}
-            onCategorySelect={(cat) => {
-              setSelectedCategory(cat);
-            }}
-            onOrganizationClick={(org) => {
-              console.log('Organization clicked:', org);
-            }}
-          />
         </div>
       </div>
 
-    </>
+      {/* Map container */}
+      <div className="flex-1 relative overflow-hidden">
+        <OrganizationMap 
+          organizations={selectedCategory 
+            ? organizations.filter(org => 
+                org.category === selectedCategory ||
+                (selectedCategory === 'Crisis Services' && org.crisisService)
+              )
+            : organizations
+          }
+          allOrganizations={organizations}
+          selectedCategory={selectedCategory}
+          onCategorySelect={(cat) => {
+            setSelectedCategory(cat);
+          }}
+          onOrganizationClick={(org) => {
+            console.log('Organization clicked:', org);
+          }}
+        />
+      </div>
+    </div>
   );
 }

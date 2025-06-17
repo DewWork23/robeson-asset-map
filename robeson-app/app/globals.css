@@ -99,16 +99,3 @@ button, a {
   transform: scale(1.1);
 }
 
-/* Map page layout - ensure map takes full viewport on mobile */
-.map-page-container {
-  height: 100vh;
-  height: 100dvh; /* Dynamic viewport height for mobile */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.map-page-content {
-  flex: 1;
-  min-height: 0; /* Important for flex children */
-}
