@@ -9,7 +9,6 @@ import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import ManifestLink from '@/components/ManifestLink';
 import ChatBot from '@/components/ChatBot';
 import { categoryToSlug } from '@/utils/categoryUtils';
-import CrisisBanner from '@/components/CrisisBanner';
 import { CONSOLIDATED_CATEGORIES } from '@/utils/categoryConsolidation';
 import FeedbackBanner from '@/components/FeedbackBanner';
 
@@ -92,7 +91,6 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto p-4">
-        <CrisisBanner organizations={organizations.filter(org => org.crisisService)} />
 
         {loading ? (
           <div className="space-y-4">
