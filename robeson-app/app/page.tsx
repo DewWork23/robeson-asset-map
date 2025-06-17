@@ -125,10 +125,10 @@ export default function Home() {
           <>
             {/* Categories */}
             <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex-1" />
+              <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
+                <div className="sm:flex-1" />
                 <h2 className="text-lg font-semibold text-gray-900">Select a Category</h2>
-                <div className="flex-1 flex justify-end">
+                <div className="sm:flex-1 flex justify-center sm:justify-end">
                   <div className="flex gap-2">
                     <button
                       onClick={handleNearMe}
