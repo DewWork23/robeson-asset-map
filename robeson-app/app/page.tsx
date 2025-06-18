@@ -78,12 +78,32 @@ export default function Home() {
               <span className="text-green-600">Help is here.</span>{' '}
               <span className="text-purple-600">Take your first step today.</span>
             </p>
-            <div className="bg-red-700 text-white px-6 py-3 rounded-lg inline-block">
-              <p className="text-lg font-semibold">
-                ⚠️ In case of emergency, call 911
+            <div className="bg-red-700 text-white px-6 py-4 rounded-lg inline-block">
+              <p className="text-lg font-semibold mb-3">
+                ⚠️ In case of emergency
               </p>
-              <p className="text-sm mt-1">
-                For mental health crisis, call or text 988
+              <div className="flex gap-3 justify-center">
+                <a
+                  href="tel:911"
+                  className="bg-white text-red-700 px-4 py-2 rounded-md font-bold hover:bg-gray-100 transition-colors flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  Call 911
+                </a>
+                <a
+                  href="sms:988"
+                  className="bg-white text-red-700 px-4 py-2 rounded-md font-bold hover:bg-gray-100 transition-colors flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  Text 988
+                </a>
+              </div>
+              <p className="text-xs mt-2 text-center">
+                Mental health crisis support available 24/7
               </p>
             </div>
           </div>
