@@ -80,6 +80,7 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
       community: '🏘️ I need community services',
       faith: '⛪ I need faith-based services',
       legal: '⚖️ I need legal services',
+      lawenforcement: '🚓 I need law enforcement',
       education: '📚 I need education resources',
       pharmacy: '💊 I need pharmacy services',
       other: '❓ I need other help'
@@ -930,6 +931,62 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
         </div>
       );
     }
+    // Law Enforcement category
+    else if (input === 'lawenforcement' || input.includes('police') || input.includes('sheriff') || input.includes('law enforcement')) {
+      const lawEnforcementOrgs = orgs.filter(org => org.category === 'Law Enforcement').slice(0, 5);
+      component = (
+        <div>
+          <p className="font-medium mb-3">Here are law enforcement services:</p>
+          {viewMode === 'map' && (
+            <div className="space-y-2 mb-3">
+              <button
+                onClick={() => handleMapCategorySelect('Law Enforcement')}
+                className="w-full p-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors border border-red-300"
+              >
+                📍 Show all law enforcement on map
+              </button>
+              <button
+                onClick={() => handleMapCategorySelect(null)}
+                className="w-full p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                🗺️ Show all categories
+              </button>
+            </div>
+          )}
+          <div className="space-y-2">
+            {lawEnforcementOrgs.length > 0 ? (
+              lawEnforcementOrgs.map(org => (
+                <div key={org.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="font-medium text-gray-900">{org.organizationName}</p>
+                  <p className="text-sm text-gray-600 mt-1">{org.serviceType}</p>
+                  <p className="text-sm text-gray-600">{org.address}</p>
+                  <div className="flex gap-2 mt-2">
+                    {org.phone && (
+                      <a 
+                        href={`tel:${formatPhoneForTel(org.phone)}`} 
+                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+                      >
+                        Call {org.phone}
+                      </a>
+                    )}
+                    <a 
+                      href={getDirectionsUrl(org.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                    >
+                      📍 Directions
+                    </a>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-600">No law enforcement services found. In case of emergency, call 911.</p>
+            )}
+          </div>
+        </div>
+      );
+    }
     // Legal category
     else if (input === 'legal' || input.includes('legal') || input.includes('lawyer') || input.includes('attorney')) {
       const legalOrgs = orgs.filter(org => {
@@ -1118,6 +1175,12 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
                   className="p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-medium transition-colors"
                 >
                   🚨 Crisis Help
+                </button>
+                <button
+                  onClick={() => handleQuickOption('lawenforcement')}
+                  className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors"
+                >
+                  🚓 Law Enforcement
                 </button>
                 <button
                   onClick={() => handleQuickOption('food')}
