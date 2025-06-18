@@ -8,7 +8,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'A:N'; // Use default sheet, no specific sheet name
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v11'; // Force cache refresh for Google Sheets data
+const CACHE_KEY = 'robeson_resources_cache_v12'; // Force cache refresh again
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {
@@ -103,6 +103,9 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     
     console.log(`Successfully fetched ${rows.length} rows from Google Sheets`);
     
+    // Log first few organizations to verify data
+    console.log('First organization from Google Sheets:', rows[1]);
+    
     // Skip header row and map data
     const organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => ({
       id: (index + 1).toString(),
@@ -121,6 +124,12 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
       languages: row[12] || '',
       specialNotes: row[13] || ''
     }));
+    
+    // Find and log the Al-Anon organization to verify the change
+    const alAnon = organizations.find(org => org.organizationName.includes('Al-Anon'));
+    if (alAnon) {
+      console.log('Al-Anon organization from Google Sheets:', alAnon.organizationName);
+    }
     
     // Cache the data
     setCachedData(organizations);
