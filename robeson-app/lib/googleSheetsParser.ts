@@ -17,6 +17,10 @@ interface CachedData {
 }
 
 function getCachedData(): Organization[] | null {
+  // Temporarily disable cache to force fresh data
+  return null;
+  
+  /* ORIGINAL CACHE CODE - TEMPORARILY DISABLED
   if (typeof window === 'undefined') return null;
   
   try {
@@ -39,6 +43,7 @@ function getCachedData(): Organization[] | null {
     console.error('Error reading cache:', error);
     return null;
   }
+  */
 }
 
 function setCachedData(organizations: Organization[]): void {
@@ -64,6 +69,13 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
   
   try {
     // Check if credentials are available
+    console.log('Google Sheets credentials check:', {
+      hasSheetId: !!SHEET_ID,
+      sheetIdLength: SHEET_ID.length,
+      hasApiKey: !!API_KEY,
+      apiKeyLength: API_KEY.length
+    });
+    
     if (!SHEET_ID || !API_KEY) {
       console.warn('Google Sheets credentials not found, falling back to CSV');
       return loadOrganizationsFromCSV();
