@@ -1,0 +1,20 @@
+{
+  "name": "Robeson County Community Resources",
+  "short_name": "Robeson Resources",
+  "description": "Find community support services in Robeson County, NC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e40af",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "medical", "lifestyle"],
+  "lang": "en-US"
+}
