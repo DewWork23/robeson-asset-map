@@ -8,7 +8,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'Sheet1!A:N'; // Adjust range as needed
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v10'; // Exclude support groups from Healthcare while keeping dual-category
+const CACHE_KEY = 'robeson_resources_cache_v11'; // Force cache refresh for Google Sheets data
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {

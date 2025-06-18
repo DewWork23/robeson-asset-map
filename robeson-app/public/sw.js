@@ -1,4 +1,4 @@
-const CACHE_NAME = 'robeson-recovery-v1';
+const CACHE_NAME = 'robeson-recovery-v2';
 const urlsToCache = [
   '/',
   '/robeson_county.csv',
@@ -36,12 +36,7 @@ self.addEventListener('fetch', (event) => {
               return cachedResponse;
             });
 
-          // If we have a cached response, return it immediately
-          // but still try to update the cache in the background
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-
+          // For Google Sheets, always try network first
           return fetchPromise;
         });
       })
