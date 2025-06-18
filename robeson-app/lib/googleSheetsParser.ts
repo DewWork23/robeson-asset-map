@@ -1,6 +1,6 @@
 import { Organization } from '@/types/organization';
 import { calculateDistance, getCoordinatesFromAddress } from './locationUtils';
-import { CONSOLIDATED_CATEGORIES } from '@/utils/categoryConsolidation';
+import { CONSOLIDATED_CATEGORIES, CATEGORY_MIGRATION_MAP } from '@/utils/categoryConsolidation';
 
 // Google Sheets API configuration
 // These values are injected at build time via GitHub Actions
@@ -9,7 +9,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'A:N'; // Use default sheet, no specific sheet name
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v13'; // Force refresh to debug categories
+const CACHE_KEY = 'robeson_resources_cache_v14'; // Force refresh with category normalization
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {
@@ -115,23 +115,57 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     console.log('First organization from Google Sheets:', rows[1]);
     
     // Skip header row and map data
-    const organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => ({
-      id: (index + 1).toString(),
-      organizationName: row[0] || '',
-      category: row[1] || '',
-      serviceType: row[2] || '',
-      address: row[3] || '',
-      phone: row[4] || '',
-      email: row[5] || '',
-      website: row[6] || '',
-      hours: row[7] || '',
-      servicesOffered: row[8] || '',
-      costPayment: row[9] || '',
-      description: row[10] || '',
-      crisisService: row[11]?.toLowerCase() === 'yes',
-      languages: row[12] || '',
-      specialNotes: row[13] || ''
-    }));
+    const organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => {
+      const originalCategory = row[1] || '';
+      
+      // Normalize category using migration map
+      let normalizedCategory = CATEGORY_MIGRATION_MAP[originalCategory] || originalCategory;
+      
+      // Special handling for Tribal Services
+      if (originalCategory === 'Government/Tribal Services' && row[2]) {
+        // Check service type to determine if it's tribal
+        const serviceType = row[2].toLowerCase();
+        if (serviceType.includes('tribal')) {
+          normalizedCategory = 'Tribal Services';
+        }
+      }
+      
+      // Handle Food Services (not in original categories but needed)
+      if (!CONSOLIDATED_CATEGORIES.includes(normalizedCategory as any)) {
+        const services = (row[8] || '').toLowerCase();
+        const name = (row[0] || '').toLowerCase();
+        
+        if (services.includes('food') || services.includes('meal') || 
+            services.includes('pantry') || services.includes('kitchen') ||
+            name.includes('food bank') || name.includes('soup kitchen')) {
+          normalizedCategory = 'Food Services';
+        } else if (services.includes('crisis') || row[11]?.toLowerCase() === 'yes') {
+          normalizedCategory = 'Crisis Services';
+        } else {
+          // Default unmapped categories to Community Services
+          console.warn(`Unmapped category: ${originalCategory} for ${row[0]}`);
+          normalizedCategory = 'Community Services';
+        }
+      }
+      
+      return {
+        id: (index + 1).toString(),
+        organizationName: row[0] || '',
+        category: normalizedCategory,
+        serviceType: row[2] || '',
+        address: row[3] || '',
+        phone: row[4] || '',
+        email: row[5] || '',
+        website: row[6] || '',
+        hours: row[7] || '',
+        servicesOffered: row[8] || '',
+        costPayment: row[9] || '',
+        description: row[10] || '',
+        crisisService: row[11]?.toLowerCase() === 'yes',
+        languages: row[12] || '',
+        specialNotes: row[13] || ''
+      };
+    });
     
     // Find and log the Al-Anon organization to verify the change
     const alAnon = organizations.find(org => org.organizationName.includes('Al-Anon'));
@@ -182,10 +216,39 @@ async function loadOrganizationsFromCSV(): Promise<Organization[]> {
     for (let i = 1; i < lines.length; i++) {
       const values = parseCSVLine(lines[i]);
       if (values.length >= 14) {
+        const originalCategory = values[1] || '';
+        
+        // Normalize category using migration map
+        let normalizedCategory = CATEGORY_MIGRATION_MAP[originalCategory] || originalCategory;
+        
+        // Special handling for Tribal Services
+        if (originalCategory === 'Government/Tribal Services' && values[2]) {
+          const serviceType = values[2].toLowerCase();
+          if (serviceType.includes('tribal')) {
+            normalizedCategory = 'Tribal Services';
+          }
+        }
+        
+        // Handle Food Services (not in original categories but needed)
+        if (!CONSOLIDATED_CATEGORIES.includes(normalizedCategory as any)) {
+          const services = (values[8] || '').toLowerCase();
+          const name = (values[0] || '').toLowerCase();
+          
+          if (services.includes('food') || services.includes('meal') || 
+              services.includes('pantry') || services.includes('kitchen') ||
+              name.includes('food bank') || name.includes('soup kitchen')) {
+            normalizedCategory = 'Food Services';
+          } else if (services.includes('crisis') || values[11]?.toLowerCase() === 'yes') {
+            normalizedCategory = 'Crisis Services';
+          } else {
+            normalizedCategory = 'Community Services';
+          }
+        }
+        
         const org: Organization = {
           id: i.toString(),
           organizationName: values[0] || '',
-          category: values[1] || '',
+          category: normalizedCategory,
           serviceType: values[2] || '',
           address: values[3] || '',
           phone: values[4] || '',
