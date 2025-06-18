@@ -1,5 +1,6 @@
 import { Organization } from '@/types/organization';
 import { calculateDistance, getCoordinatesFromAddress } from './locationUtils';
+import { CONSOLIDATED_CATEGORIES } from '@/utils/categoryConsolidation';
 
 // Google Sheets API configuration
 // These values are injected at build time via GitHub Actions
@@ -8,7 +9,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'A:N'; // Use default sheet, no specific sheet name
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v12'; // Force cache refresh again
+const CACHE_KEY = 'robeson_resources_cache_v13'; // Force refresh to debug categories
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {
@@ -17,10 +18,6 @@ interface CachedData {
 }
 
 function getCachedData(): Organization[] | null {
-  // Temporarily disable cache to force fresh data
-  return null;
-  
-  /* ORIGINAL CACHE CODE - TEMPORARILY DISABLED
   if (typeof window === 'undefined') return null;
   
   try {
@@ -43,7 +40,6 @@ function getCachedData(): Organization[] | null {
     console.error('Error reading cache:', error);
     return null;
   }
-  */
 }
 
 function setCachedData(organizations: Organization[]): void {
@@ -142,6 +138,11 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     if (alAnon) {
       console.log('Al-Anon organization from Google Sheets:', alAnon.organizationName);
     }
+    
+    // Get unique categories from the data
+    const uniqueCategories = [...new Set(organizations.map(org => org.category))].sort();
+    console.log('Categories found in Google Sheets:', uniqueCategories);
+    console.log('Expected categories:', CONSOLIDATED_CATEGORIES);
     
     // Cache the data
     setCachedData(organizations);
