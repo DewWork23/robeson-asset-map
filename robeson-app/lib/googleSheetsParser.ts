@@ -9,8 +9,8 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'A:N'; // Use default sheet, no specific sheet name
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v16'; // Clean version with corrected Google Sheets data
-const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
+const CACHE_KEY = 'robeson_resources_cache_v17'; // Force new cache after cleanup
+const CACHE_DURATION = 1000 * 60 * 5; // 5 minutes for testing
 
 interface CachedData {
   organizations: Organization[];
