@@ -5,7 +5,7 @@ import { calculateDistance, getCoordinatesFromAddress } from './locationUtils';
 // These values are injected at build time via GitHub Actions
 const SHEET_ID = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || '';
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
-const RANGE = 'Sheet1!A:N'; // Adjust range as needed
+const RANGE = 'A:N'; // Use default sheet, no specific sheet name
 
 // Cache key and duration
 const CACHE_KEY = 'robeson_resources_cache_v11'; // Force cache refresh for Google Sheets data
