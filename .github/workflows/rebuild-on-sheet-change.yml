@@ -1,0 +1,44 @@
+name: Rebuild on Google Sheet Change
+
+on:
+  # Allow manual trigger
+  workflow_dispatch:
+  
+  # Trigger via webhook (from Google Apps Script)
+  repository_dispatch:
+    types: [sheet-updated]
+  
+  # Schedule periodic checks (optional - every 6 hours)
+  schedule:
+    - cron: '0 */6 * * *'
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install dependencies
+        run: |
+          cd robeson-app
+          npm ci
+          
+      - name: Build site
+        env:
+          NEXT_PUBLIC_GOOGLE_SHEET_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_SHEET_ID }}
+          NEXT_PUBLIC_GOOGLE_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_API_KEY }}
+        run: |
+          cd robeson-app
+          npm run build
+          
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./robeson-app/out

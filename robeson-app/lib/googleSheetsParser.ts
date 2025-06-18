@@ -56,10 +56,6 @@ function setCachedData(organizations: Organization[]): void {
 }
 
 export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[]> {
-  // Temporarily using CSV as primary data source
-  return loadOrganizationsFromCSV();
-  
-  /* GOOGLE SHEETS CODE - COMMENTED OUT FOR NOW
   // Try to get cached data first
   const cached = getCachedData();
   if (cached) {
@@ -142,7 +138,6 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     // Fallback to CSV if Google Sheets fails
     return loadOrganizationsFromCSV();
   }
-  */
 }
 
 // Primary function to load from CSV

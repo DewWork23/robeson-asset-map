@@ -190,10 +190,7 @@ export default function CategoryPage() {
             <OrganizationMap 
               organizations={mapSelectedCategory === null || mapSelectedCategory === category
                 ? filteredOrgs
-                : organizations.filter(org => 
-                    org.category === mapSelectedCategory ||
-                    (mapSelectedCategory === 'Crisis Services' && org.crisisService)
-                  )
+                : filterOrganizations(organizations, mapSelectedCategory)
               }
               allOrganizations={organizations}
               selectedCategory={mapSelectedCategory || category}

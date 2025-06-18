@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Organization, CATEGORY_ICONS } from '@/types/organization';
-import { loadOrganizationsFromGoogleSheets } from '@/lib/googleSheetsParser';
+import { loadOrganizationsFromGoogleSheets, filterOrganizations } from '@/lib/googleSheetsParser';
 import OrganizationMap from '@/components/OrganizationMap';
 import { categoryToSlug } from '@/utils/categoryUtils';
 
@@ -103,10 +103,7 @@ export default function MapPage() {
             <div className="text-sm text-gray-600">
               Showing <span className="font-medium">
                 {selectedCategory 
-                  ? organizations.filter(org => 
-                      org.category === selectedCategory ||
-                      (selectedCategory === 'Crisis Services' && org.crisisService)
-                    ).length
+                  ? filterOrganizations(organizations, selectedCategory).length
                   : organizations.length
                 }
               </span> of <span className="font-medium">{organizations.length}</span> locations
@@ -120,10 +117,7 @@ export default function MapPage() {
         <div className="w-[2000px] h-[2000px]">
           <OrganizationMap 
             organizations={selectedCategory 
-              ? organizations.filter(org => 
-                  org.category === selectedCategory ||
-                  (selectedCategory === 'Crisis Services' && org.crisisService)
-                )
+              ? filterOrganizations(organizations, selectedCategory)
               : organizations
             }
             allOrganizations={organizations}
