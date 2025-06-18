@@ -9,7 +9,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'A:N'; // Use default sheet, no specific sheet name
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v15'; // Force refresh with improved tribal detection
+const CACHE_KEY = 'robeson_resources_cache_v16'; // Clean version with corrected Google Sheets data
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {
@@ -65,13 +65,6 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
   
   try {
     // Check if credentials are available
-    console.log('Google Sheets credentials check:', {
-      hasSheetId: !!SHEET_ID,
-      sheetIdLength: SHEET_ID.length,
-      hasApiKey: !!API_KEY,
-      apiKeyLength: API_KEY.length
-    });
-    
     if (!SHEET_ID || !API_KEY) {
       console.warn('Google Sheets credentials not found, falling back to CSV');
       return loadOrganizationsFromCSV();
@@ -111,91 +104,26 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     
     console.log(`Successfully fetched ${rows.length} rows from Google Sheets`);
     
-    // Log first few organizations to verify data
-    console.log('First organization from Google Sheets:', rows[1]);
     
     // Skip header row and map data
-    const organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => {
-      const originalCategory = row[1] || '';
-      
-      // Normalize category using migration map
-      let normalizedCategory = CATEGORY_MIGRATION_MAP[originalCategory] || originalCategory;
-      
-      // Special handling for Tribal Services
-      if (originalCategory === 'Government/Tribal Services') {
-        // Check organization name, service type, or services offered for tribal keywords
-        const orgName = (row[0] || '').toLowerCase();
-        const serviceType = (row[2] || '').toLowerCase();
-        const servicesOffered = (row[8] || '').toLowerCase();
-        
-        if (serviceType.includes('tribal') || 
-            orgName.includes('tribe') || orgName.includes('tribal') || 
-            orgName.includes('lumbee') || orgName.includes('indian') ||
-            servicesOffered.includes('tribal')) {
-          normalizedCategory = 'Tribal Services';
-          console.log(`Categorizing as Tribal: ${row[0]} (serviceType: ${row[2]})`);
-        } else {
-          console.log(`Categorizing as Government: ${row[0]} (serviceType: ${row[2]})`);
-        }
-      }
-      
-      // Handle Food Services (not in original categories but needed)
-      if (!CONSOLIDATED_CATEGORIES.includes(normalizedCategory as any)) {
-        const services = (row[8] || '').toLowerCase();
-        const name = (row[0] || '').toLowerCase();
-        
-        if (services.includes('food') || services.includes('meal') || 
-            services.includes('pantry') || services.includes('kitchen') ||
-            name.includes('food bank') || name.includes('soup kitchen')) {
-          normalizedCategory = 'Food Services';
-        } else if (services.includes('crisis') || row[11]?.toLowerCase() === 'yes') {
-          normalizedCategory = 'Crisis Services';
-        } else {
-          // Default unmapped categories to Community Services
-          console.warn(`Unmapped category: ${originalCategory} for ${row[0]}`);
-          normalizedCategory = 'Community Services';
-        }
-      }
-      
-      return {
-        id: (index + 1).toString(),
-        organizationName: row[0] || '',
-        category: normalizedCategory,
-        serviceType: row[2] || '',
-        address: row[3] || '',
-        phone: row[4] || '',
-        email: row[5] || '',
-        website: row[6] || '',
-        hours: row[7] || '',
-        servicesOffered: row[8] || '',
-        costPayment: row[9] || '',
-        description: row[10] || '',
-        crisisService: row[11]?.toLowerCase() === 'yes',
-        languages: row[12] || '',
-        specialNotes: row[13] || ''
-      };
-    });
+    const organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => ({
+      id: (index + 1).toString(),
+      organizationName: row[0] || '',
+      category: row[1] || '',
+      serviceType: row[2] || '',
+      address: row[3] || '',
+      phone: row[4] || '',
+      email: row[5] || '',
+      website: row[6] || '',
+      hours: row[7] || '',
+      servicesOffered: row[8] || '',
+      costPayment: row[9] || '',
+      description: row[10] || '',
+      crisisService: row[11]?.toLowerCase() === 'yes',
+      languages: row[12] || '',
+      specialNotes: row[13] || ''
+    }));
     
-    // Find and log the Al-Anon organization to verify the change
-    const alAnon = organizations.find(org => org.organizationName.includes('Al-Anon'));
-    if (alAnon) {
-      console.log('Al-Anon organization from Google Sheets:', alAnon.organizationName);
-    }
-    
-    // Get unique categories from the data
-    const uniqueCategories = [...new Set(organizations.map(org => org.category))].sort();
-    console.log('Categories after normalization:', uniqueCategories);
-    
-    // Count organizations per category
-    const categoryCounts = CONSOLIDATED_CATEGORIES.reduce((acc, cat) => {
-      acc[cat] = organizations.filter(org => org.category === cat).length;
-      return acc;
-    }, {} as Record<string, number>);
-    console.log('Category counts:', categoryCounts);
-    
-    // Log tribal organizations specifically
-    const tribalOrgs = organizations.filter(org => org.category === 'Tribal Services');
-    console.log(`Found ${tribalOrgs.length} Tribal Services:`, tribalOrgs.map(org => org.organizationName));
     
     // Cache the data
     setCachedData(organizations);
