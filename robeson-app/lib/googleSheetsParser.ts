@@ -9,7 +9,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'A:N'; // Use default sheet, no specific sheet name
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v14'; // Force refresh with category normalization
+const CACHE_KEY = 'robeson_resources_cache_v15'; // Force refresh with improved tribal detection
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
 interface CachedData {
@@ -122,11 +122,20 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
       let normalizedCategory = CATEGORY_MIGRATION_MAP[originalCategory] || originalCategory;
       
       // Special handling for Tribal Services
-      if (originalCategory === 'Government/Tribal Services' && row[2]) {
-        // Check service type to determine if it's tribal
-        const serviceType = row[2].toLowerCase();
-        if (serviceType.includes('tribal')) {
+      if (originalCategory === 'Government/Tribal Services') {
+        // Check organization name, service type, or services offered for tribal keywords
+        const orgName = (row[0] || '').toLowerCase();
+        const serviceType = (row[2] || '').toLowerCase();
+        const servicesOffered = (row[8] || '').toLowerCase();
+        
+        if (serviceType.includes('tribal') || 
+            orgName.includes('tribe') || orgName.includes('tribal') || 
+            orgName.includes('lumbee') || orgName.includes('indian') ||
+            servicesOffered.includes('tribal')) {
           normalizedCategory = 'Tribal Services';
+          console.log(`Categorizing as Tribal: ${row[0]} (serviceType: ${row[2]})`);
+        } else {
+          console.log(`Categorizing as Government: ${row[0]} (serviceType: ${row[2]})`);
         }
       }
       
@@ -175,8 +184,18 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     
     // Get unique categories from the data
     const uniqueCategories = [...new Set(organizations.map(org => org.category))].sort();
-    console.log('Categories found in Google Sheets:', uniqueCategories);
-    console.log('Expected categories:', CONSOLIDATED_CATEGORIES);
+    console.log('Categories after normalization:', uniqueCategories);
+    
+    // Count organizations per category
+    const categoryCounts = CONSOLIDATED_CATEGORIES.reduce((acc, cat) => {
+      acc[cat] = organizations.filter(org => org.category === cat).length;
+      return acc;
+    }, {} as Record<string, number>);
+    console.log('Category counts:', categoryCounts);
+    
+    // Log tribal organizations specifically
+    const tribalOrgs = organizations.filter(org => org.category === 'Tribal Services');
+    console.log(`Found ${tribalOrgs.length} Tribal Services:`, tribalOrgs.map(org => org.organizationName));
     
     // Cache the data
     setCachedData(organizations);
@@ -222,9 +241,15 @@ async function loadOrganizationsFromCSV(): Promise<Organization[]> {
         let normalizedCategory = CATEGORY_MIGRATION_MAP[originalCategory] || originalCategory;
         
         // Special handling for Tribal Services
-        if (originalCategory === 'Government/Tribal Services' && values[2]) {
-          const serviceType = values[2].toLowerCase();
-          if (serviceType.includes('tribal')) {
+        if (originalCategory === 'Government/Tribal Services') {
+          const orgName = (values[0] || '').toLowerCase();
+          const serviceType = (values[2] || '').toLowerCase();
+          const servicesOffered = (values[8] || '').toLowerCase();
+          
+          if (serviceType.includes('tribal') || 
+              orgName.includes('tribe') || orgName.includes('tribal') || 
+              orgName.includes('lumbee') || orgName.includes('indian') ||
+              servicesOffered.includes('tribal')) {
             normalizedCategory = 'Tribal Services';
           }
         }
