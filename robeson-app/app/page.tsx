@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Organization, CATEGORY_ICONS } from '@/types/organization';
-import { loadOrganizationsFromGoogleSheets, filterOrganizations } from '@/lib/googleSheetsParser';
+import { CATEGORY_ICONS } from '@/types/organization';
+import { filterOrganizations } from '@/lib/googleSheetsParser';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import ManifestLink from '@/components/ManifestLink';
 import ChatBot from '@/components/ChatBot';
@@ -12,11 +12,11 @@ import { categoryToSlug } from '@/utils/categoryUtils';
 import { CONSOLIDATED_CATEGORIES } from '@/utils/categoryConsolidation';
 import FeedbackBanner from '@/components/FeedbackBanner';
 import SpeechButton from '@/components/SpeechButton';
+import { useOrganizations } from '@/contexts/OrganizationsContext';
 
 export default function Home() {
   const router = useRouter();
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { organizations, loading } = useOrganizations();
   const [chatOpen, setChatOpen] = useState(false);
 
   const handleNearMe = () => {
@@ -52,7 +52,7 @@ export default function Home() {
     for (const [phrase, category] of Object.entries(specificPhrases)) {
       if (normalizedTranscript.includes(phrase)) {
         console.log(`Matched specific phrase: "${phrase}" -> ${category}`);
-        router.push(`/category/${categoryToSlug(category)}`);
+        router.push(`/category/${categoryToSlug(category)}?from=voice`);
         return;
       }
     }
@@ -63,7 +63,7 @@ export default function Home() {
       
       // Direct match or partial match
       if (categoryLower.includes(normalizedTranscript) || normalizedTranscript.includes(categoryLower)) {
-        router.push(`/category/${categoryToSlug(category)}`);
+        router.push(`/category/${categoryToSlug(category)}?from=voice`);
         return;
       }
       
@@ -88,7 +88,8 @@ export default function Home() {
       
       const keywords = keywordMap[category] || [];
       if (keywords.some(keyword => normalizedTranscript.includes(keyword))) {
-        router.push(`/category/${categoryToSlug(category)}`);
+        console.log(`Matched keyword for category: ${category}`);
+        router.push(`/category/${categoryToSlug(category)}?from=voice`);
         return;
       }
     }
@@ -99,30 +100,6 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const startTime = Date.now();
-        
-        const orgs = await loadOrganizationsFromGoogleSheets();
-        
-        // Ensure minimum loading time for smooth transition
-        const loadTime = Date.now() - startTime;
-        const minLoadTime = 300; // 300ms minimum
-        
-        if (loadTime < minLoadTime) {
-          await new Promise(resolve => setTimeout(resolve, minLoadTime - loadTime));
-        }
-        
-        setOrganizations(orgs);
-        setLoading(false);
-      } catch (error) {
-        console.error('Failed to load organizations:', error);
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
 
   // Get categories with counts
   const categoriesWithCounts = CONSOLIDATED_CATEGORIES.map(categoryName => {

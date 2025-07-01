@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Organization, CATEGORY_ICONS, Category } from '@/types/organization';
-import { loadOrganizationsFromGoogleSheets, filterOrganizations } from '@/lib/googleSheetsParser';
+import { filterOrganizations } from '@/lib/googleSheetsParser';
 import OrganizationMap from '@/components/OrganizationMap';
 import CategorySelectionPrompt from '@/components/CategorySelectionPrompt';
 import MapSidebar from '@/components/MapSidebar';
@@ -12,11 +12,11 @@ import MobileOrganizationDetail from '@/components/MobileOrganizationDetail';
 import MobileMapGuide from '@/components/MobileMapGuide';
 import { categoryToSlug } from '@/utils/categoryUtils';
 import { calculateDistance, getCoordinatesFromAddress } from '@/lib/locationUtils';
+import { useOrganizations } from '@/contexts/OrganizationsContext';
 
 export default function MapPage() {
   const router = useRouter();
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { organizations, loading } = useOrganizations();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showPrompt, setShowPrompt] = useState(true);
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
@@ -42,19 +42,6 @@ export default function MapPage() {
     };
   }, []);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const orgs = await loadOrganizationsFromGoogleSheets();
-        setOrganizations(orgs);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error loading organizations:', error);
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
 
   // Handle custom event for showing organization details on mobile
   useEffect(() => {

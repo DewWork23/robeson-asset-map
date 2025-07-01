@@ -1,28 +1,33 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Organization, CATEGORY_ICONS } from '@/types/organization';
-import { loadOrganizationsFromGoogleSheets, filterOrganizations } from '@/lib/googleSheetsParser';
+import { filterOrganizations } from '@/lib/googleSheetsParser';
 import OrganizationCard from '@/components/OrganizationCard';
 import SimpleSearchBar from '@/components/SimpleSearchBar';
 import OrganizationMap from '@/components/OrganizationMap';
 import { slugToCategory, categoryToSlug } from '@/utils/categoryUtils';
 import FeedbackBanner from '@/components/FeedbackBanner';
+import { useOrganizations } from '@/contexts/OrganizationsContext';
 
-export default function CategoryPage() {
+function CategoryPageContent() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const slug = params.slug as string;
   const category = slugToCategory(slug);
 
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  // Use cached organizations data
+  const { organizations, loading } = useOrganizations();
   const [filteredOrgs, setFilteredOrgs] = useState<Organization[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  
+  // Default to map view if coming from voice search, otherwise list
+  const fromVoice = searchParams.get('from') === 'voice';
+  const [viewMode, setViewMode] = useState<'list' | 'map'>(fromVoice ? 'map' : 'list');
   const [mapSelectedCategory, setMapSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,18 +35,6 @@ export default function CategoryPage() {
       router.push('/');
       return;
     }
-
-    async function loadData() {
-      try {
-        const orgs = await loadOrganizationsFromGoogleSheets();
-        setOrganizations(orgs);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error loading organizations:', error);
-        setLoading(false);
-      }
-    }
-    loadData();
   }, [category, router]);
 
   useEffect(() => {
@@ -212,5 +205,17 @@ export default function CategoryPage() {
       </div>
       <FeedbackBanner />
     </main>
+  );
+}
+
+export default function CategoryPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    }>
+      <CategoryPageContent />
+    </Suspense>
   );
 }
