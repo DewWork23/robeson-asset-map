@@ -292,8 +292,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         setTimeout(() => {
           // Zoom to show all filtered resources with better framing
           map.fitBounds(bounds, { 
-            padding: [50, 50], 
-            maxZoom: 14,
+            padding: [200, 200], 
+            maxZoom: 10,
             animate: true,
             duration: 0.5
           });
