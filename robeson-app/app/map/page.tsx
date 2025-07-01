@@ -8,6 +8,7 @@ import { loadOrganizationsFromGoogleSheets, filterOrganizations } from '@/lib/go
 import OrganizationMap from '@/components/OrganizationMap';
 import CategorySelectionPrompt from '@/components/CategorySelectionPrompt';
 import MapSidebar from '@/components/MapSidebar';
+import HelpButton from '@/components/HelpButton';
 import { categoryToSlug } from '@/utils/categoryUtils';
 import { calculateDistance } from '@/lib/locationUtils';
 
@@ -154,6 +155,9 @@ export default function MapPage() {
           )}
         </div>
       </div>
+      
+      {/* Help button */}
+      <HelpButton />
     </div>
   );
 }

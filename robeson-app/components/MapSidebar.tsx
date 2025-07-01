@@ -37,6 +37,7 @@ export default function MapSidebar({
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [isListening, setIsListening] = useState(false);
 
   // Get user's current location
   const getCurrentLocation = () => {
@@ -120,6 +121,51 @@ export default function MapSidebar({
     } finally {
       setIsSearching(false);
     }
+  };
+
+  // Handle voice search
+  const startVoiceSearch = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      setLocationError('Voice search is not supported in your browser');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      setLocationError(null);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setSearchAddress(transcript);
+      setIsListening(false);
+      // Automatically search after voice input
+      setTimeout(() => {
+        handleAddressSearch();
+      }, 500);
+    };
+
+    recognition.onerror = (event: any) => {
+      setIsListening(false);
+      if (event.error === 'no-speech') {
+        setLocationError('No speech detected. Please try again.');
+      } else {
+        setLocationError('Voice search error. Please try typing instead.');
+      }
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
   };
 
   return (
@@ -247,23 +293,49 @@ export default function MapSidebar({
                     placeholder="e.g., Lumberton or 28358"
                     value={searchAddress}
                     onChange={(e) => setSearchAddress(e.target.value)}
-                    className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 pr-20 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
-                  <button 
-                    type="submit"
-                    disabled={isSearching || !searchAddress.trim()}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
-                    aria-label="Search location"
-                  >
-                    {isSearching ? (
-                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-400 border-t-transparent" />
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    {/* Voice search button */}
+                    <button
+                      type="button"
+                      onClick={startVoiceSearch}
+                      disabled={isListening}
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        isListening 
+                          ? 'bg-red-100 text-red-600 animate-pulse' 
+                          : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                      }`}
+                      aria-label={isListening ? "Listening..." : "Search by voice"}
+                      title={isListening ? "Listening..." : "Search by voice"}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                       </svg>
-                    )}
-                  </button>
+                    </button>
+                    
+                    {/* Search button */}
+                    <button 
+                      type="submit"
+                      disabled={isSearching || !searchAddress.trim()}
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+                      aria-label="Search location"
+                    >
+                      {isSearching ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent" />
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
+                {isListening && (
+                  <p className="text-xs text-red-600 animate-pulse">
+                    🎤 Listening... speak now
+                  </p>
+                )}
               </form>
             </div>
 
