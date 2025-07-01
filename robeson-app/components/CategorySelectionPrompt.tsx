@@ -92,18 +92,32 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
       <div className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="max-w-4xl w-full">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Need help finding something?
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">
+              Find Resources in Robeson County
             </h1>
-            <p className="text-lg text-gray-600 mb-6">
-              Use voice search or select a category below
-            </p>
             
-            {/* Voice Search - Prominent Position */}
-            <SpeechButton 
-              onSpeechResult={handleSpeechResult}
-              prompt="Try saying: 'food', 'doctor', 'housing', 'mental health', 'church', or 'all categories'"
-            />
+            {/* Voice Search - Primary Focus */}
+            <div className="mb-6">
+              <SpeechButton 
+                onSpeechResult={handleSpeechResult}
+                prompt="Try saying: 'food', 'doctor', 'housing', 'mental health', 'church', or 'all categories'"
+              />
+            </div>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-gray-50 px-4 text-lg text-gray-600">
+                  Need help finding something?
+                </span>
+              </div>
+            </div>
+            
+            <p className="text-base text-gray-500 mt-3">
+              Select a category below to browse resources
+            </p>
           </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
