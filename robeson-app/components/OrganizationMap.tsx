@@ -141,14 +141,15 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         html: `<div style="
           font-weight: ${town.isCountySeat ? 'bold' : '600'};
           font-size: ${town.isCountySeat ? '15px' : '13px'};
-          color: #1e293b;
-          background-color: rgba(255, 255, 255, 0.95);
-          padding: 2px 6px;
+          color: #ffffff;
+          background-color: ${town.isCountySeat ? 'rgba(220, 38, 38, 0.9)' : 'rgba(59, 130, 246, 0.9)'};
+          padding: 3px 8px;
           border-radius: 4px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
           white-space: nowrap;
           pointer-events: none;
           transform: translateY(-8px);
+          border: 1px solid rgba(255, 255, 255, 0.3);
         ">${town.name}${town.isCountySeat ? ' (County Seat)' : ''}</div>`,
         className: 'town-label',
         iconSize: [0, 0],
