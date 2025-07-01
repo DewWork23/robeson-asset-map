@@ -18,7 +18,14 @@ export default function MapPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showPrompt, setShowPrompt] = useState(true);
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Set sidebar open on desktop by default
+  useEffect(() => {
+    if (window.innerWidth >= 1024) {
+      setSidebarOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     async function loadData() {
