@@ -151,6 +151,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       animate: true,
       animateAddingMarkers: true,
       removeOutsideVisibleBounds: true,
+      spiderfyDistanceMultiplier: 1.5, // Increase distance between spiderfied markers
+      spiderLegPolylineOptions: { weight: 1.5, color: '#222', opacity: 0.5 },
       // Custom cluster icon creation
       iconCreateFunction: function(cluster: any) {
         const count = cluster.getChildCount();
@@ -173,6 +175,32 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       }
     }).addTo(map);
     organizationLayerRef.current = organizationLayer;
+    
+    // Add cluster event handlers
+    organizationLayer.on('clustermouseover', (e: any) => {
+      e.propagatedFrom.setOpacity(0.8);
+    });
+    
+    organizationLayer.on('clustermouseout', (e: any) => {
+      e.propagatedFrom.setOpacity(1);
+    });
+    
+    // Prevent map reset when interacting with clusters
+    organizationLayer.on('clusterclick', (e: any) => {
+      L.DomEvent.stopPropagation(e);
+    });
+    
+    organizationLayer.on('spiderfied', (e: any) => {
+      // When cluster is spiderfied, ensure markers are clickable
+      preventZoomRef.current = true;
+    });
+    
+    organizationLayer.on('unspiderfied', (e: any) => {
+      // Reset zoom prevention after unspiderfy
+      setTimeout(() => {
+        preventZoomRef.current = false;
+      }, 100);
+    });
     
     majorTowns.forEach(town => {
       const circle = L.circleMarker([town.coords.lat, town.coords.lon], {
@@ -234,6 +262,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       const currentZoom = map.getZoom();
       setIsZoomedIn(currentZoom > 11);
     });
+    
 
     // Cleanup on unmount
     return () => {
@@ -269,6 +298,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
 
     // Check if mobile at the start of the effect
     const isMobile = window.innerWidth < 768;
+    
+    // Setup global function for popup details button
+    if (typeof window !== 'undefined') {
+      (window as any).showOrgDetails = (orgId: string) => {
+        window.dispatchEvent(new CustomEvent('showOrgDetails', { detail: orgId }));
+      };
+    }
 
     // Add new markers
     organizations.forEach(org => {
@@ -353,7 +389,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           <div style="margin-top: 8px; display: flex; gap: 4px;">
             ${org.phone ? `<a href="tel:${org.phone.replace(/\D/g, '')}" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #16a34a; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500;">Call</a>` : ''}
             <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500;">Directions</a>
-            <button onclick="window.dispatchEvent(new CustomEvent('showOrgDetails', { detail: '${org.id}' }))" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #6b7280; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500; border: none; cursor: pointer;">Details</button>
+            <button onclick="window.showOrgDetails && window.showOrgDetails('${org.id}')" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #6b7280; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500; border: none; cursor: pointer;">Details</button>
           </div>
         </div>
       ` : `
@@ -379,9 +415,19 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         maxWidth: isMobile ? 250 : 350
       });
       
-      marker.on('click', () => {
+      marker.on('click', (e: any) => {
+        // Prevent event bubbling that might trigger map click
+        L.DomEvent.stopPropagation(e);
+        
         if (onOrganizationClick) {
           onOrganizationClick(org);
+        }
+        
+        // On mobile, ensure popup opens properly
+        if (isMobile) {
+          setTimeout(() => {
+            marker.openPopup();
+          }, 100);
         }
       });
     });
@@ -432,7 +478,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     setOnResetView(() => resetViewFunction);
 
     // Handle zoom based on selected category
-    const shouldSkipZoom = !isMobile && isJustOrgSelection;
+    const shouldSkipZoom = (!isMobile && isJustOrgSelection) || preventZoomRef.current;
     
     if (selectedCategory && organizations.length > 0 && !shouldSkipZoom) {
       console.log(`Zooming to category: ${selectedCategory}, organizations: ${organizations.length}`);
