@@ -371,7 +371,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         </div>
       `;
       
-      marker.bindPopup(popupContent);
+      marker.bindPopup(popupContent, {
+        autoPan: true,
+        autoPanPaddingTopLeft: [50, 100],
+        autoPanPaddingBottomRight: [50, 50],
+        keepInView: true,
+        maxWidth: isMobile ? 250 : 350
+      });
       
       marker.on('click', () => {
         if (onOrganizationClick) {
@@ -520,16 +526,22 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     );
     
     if (selectedMarker) {
-      // Open popup for selected marker
-      selectedMarker.openPopup();
-      
-      // Pan to the selected marker
+      // Pan to the selected marker with offset to account for popup
       const coords = getCoordinatesFromAddress(selectedOrganization.address);
       if (coords) {
-        map.panTo([coords.lat, coords.lon], {
+        // Calculate offset to ensure popup is visible
+        const isMobile = window.innerWidth < 768;
+        const popupOffset = isMobile ? 0.002 : 0.001; // Slight offset to center popup in view
+        
+        map.panTo([coords.lat - popupOffset, coords.lon], {
           animate: true,
           duration: 0.5
         });
+        
+        // Open popup after pan completes
+        setTimeout(() => {
+          selectedMarker.openPopup();
+        }, 600);
       }
     }
   }, [mapReady, L, selectedOrganization]);
@@ -542,17 +554,17 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     <div className="h-full w-full relative">
       <div id="map" className="h-full w-full" />
       
-      {/* Reset View Button */}
+      {/* Reset View Button - moved to bottom right to avoid popup interference */}
       {isZoomedIn && onResetView && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] px-4 w-full max-w-xs">
+        <div className="absolute bottom-20 right-4 z-[1000]">
           <button
             onClick={onResetView}
-            className="w-full bg-white shadow-xl rounded-full px-4 py-2.5 flex items-center justify-center gap-2 hover:bg-gray-50 active:bg-gray-100 transition-colors border border-gray-300"
+            className="bg-white shadow-xl rounded-full px-4 py-2.5 flex items-center gap-2 hover:bg-gray-50 active:bg-gray-100 transition-colors border border-gray-300"
           >
             <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
             </svg>
-            <span className="text-sm font-semibold text-gray-800 truncate">
+            <span className="text-sm font-semibold text-gray-800 whitespace-nowrap">
               {selectedCategory ? `Show All ${selectedCategory}` : 'Reset View'}
             </span>
           </button>

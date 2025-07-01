@@ -27,6 +27,9 @@ export default function Home() {
     // Try to match the transcript to a category
     const normalizedTranscript = transcript.toLowerCase().trim();
     
+    console.log('Voice search transcript:', transcript);
+    console.log('Normalized transcript:', normalizedTranscript);
+    
     // First check for specific multi-word phrases
     const specificPhrases: Record<string, string> = {
       'mental health': 'Mental Health & Substance Use',
@@ -48,6 +51,7 @@ export default function Home() {
     // Check specific phrases first
     for (const [phrase, category] of Object.entries(specificPhrases)) {
       if (normalizedTranscript.includes(phrase)) {
+        console.log(`Matched specific phrase: "${phrase}" -> ${category}`);
         router.push(`/category/${categoryToSlug(category)}`);
         return;
       }
@@ -68,7 +72,7 @@ export default function Home() {
         'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger', 'urgent', 'immediate'],
         'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry', 'breakfast', 'lunch', 'dinner', 'nutrition', 'groceries', "i'm hungry", 'starving'],
         'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent', 'apartment', 'eviction', 'utilities', "i'm homeless", 'place to stay', 'nowhere to go'],
-        'Healthcare Services': ['health', 'doctor', 'medical', 'hospital', 'clinic', 'sick', 'pain', 'nurse', 'urgent care', "i'm sick", 'hurt', 'injured'],
+        'Healthcare Services': ['doctor', 'medical', 'hospital', 'clinic', 'sick', 'pain', 'nurse', 'urgent care', "i'm sick", 'hurt', 'injured', 'physician', 'emergency room'],
         'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'depressed', 'anxiety', 'anxious', 'sad', 'worried', 'stress', 'stressed', 'drugs', 'alcohol', 'recovery', "i'm depressed", "i'm anxious", "i'm sad"],
         'Government Services': ['government', 'benefits', 'assistance', 'social services', 'welfare', 'medicaid', 'medicare', 'snap'],
         'Tribal Services': ['tribal', 'lumbee', 'native', 'indian', 'indigenous'],
