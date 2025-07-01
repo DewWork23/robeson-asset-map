@@ -22,6 +22,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   const markersRef = useRef<any[]>([]);
   const countyBorderRef = useRef<any>(null);
   const organizationLayerRef = useRef<any>(null);
+  const lastSelectedOrgRef = useRef<string | null>(null);
+  const preventZoomRef = useRef(false);
 
   useEffect(() => {
     // Dynamically import leaflet
@@ -198,6 +200,12 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     const organizationLayer = organizationLayerRef.current;
     const countyBorder = countyBorderRef.current;
 
+    // Check if this is just an organization selection change (not category change)
+    const isJustOrgSelection = selectedOrganization?.id !== lastSelectedOrgRef.current && 
+                               selectedOrganization?.id && 
+                               !preventZoomRef.current;
+    lastSelectedOrgRef.current = selectedOrganization?.id || null;
+
     console.log('Updating markers, selectedCategory:', selectedCategory, 'organizations:', organizations.length);
 
     // Clear existing markers
@@ -283,7 +291,18 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       const encodedAddress = encodeURIComponent(org.address);
       const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
       
-      const popupContent = `
+      // Create compact popup for mobile
+      const popupContent = isMobile ? `
+        <div style="max-width: 200px;">
+          <h3 style="font-weight: bold; margin: 0 0 4px 0; font-size: 14px; line-height: 1.2;">${org.organizationName}</h3>
+          <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">${org.category}</p>
+          <div style="margin-top: 8px; display: flex; gap: 4px;">
+            ${org.phone ? `<a href="tel:${org.phone.replace(/\D/g, '')}" style="flex: 1; display: inline-block; padding: 6px 8px; background-color: #16a34a; color: white; text-align: center; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500;">Call</a>` : ''}
+            <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; display: inline-block; padding: 6px 8px; background-color: #2563eb; color: white; text-align: center; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500;">Directions</a>
+            <button onclick="window.dispatchEvent(new CustomEvent('showOrgDetails', { detail: '${org.id}' }))" style="flex: 1; display: inline-block; padding: 6px 8px; background-color: #6b7280; color: white; text-align: center; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500; border: none; cursor: pointer;">Details</button>
+          </div>
+        </div>
+      ` : `
         <div style="max-width: 300px;">
           <h3 style="font-weight: bold; margin: 0 0 4px 0; font-size: 16px;">${org.organizationName}</h3>
           <p style="margin: 0 0 4px 0; font-size: 14px; color: #666;">${org.category}</p>
@@ -308,7 +327,10 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     });
 
     // Handle zoom based on selected category
-    if (selectedCategory && organizations.length > 0) {
+    const isMobile = window.innerWidth < 768;
+    const shouldSkipZoom = !isMobile && isJustOrgSelection;
+    
+    if (selectedCategory && organizations.length > 0 && !shouldSkipZoom) {
       console.log(`Zooming to category: ${selectedCategory}, organizations: ${organizations.length}`);
       
       // Always start by centering on Robeson County

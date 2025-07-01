@@ -185,31 +185,39 @@ export default function MapSidebar({
       {/* Toggle button for mobile with descriptive text */}
       <button
         onClick={onToggle}
-        className="fixed bottom-4 right-4 z-20 lg:hidden bg-blue-600 text-white rounded-full shadow-lg border border-blue-700 flex items-center gap-2 px-4 py-3 hover:bg-blue-700 transition-colors"
+        className="fixed bottom-4 right-4 z-20 lg:hidden bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full shadow-xl border border-blue-800 flex items-center gap-2 px-5 py-3.5 hover:shadow-2xl transition-all transform hover:scale-105"
         aria-label={isOpen ? 'Close resource list' : 'View resource list'}
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           {isOpen ? (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           ) : (
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           )}
         </svg>
-        <span className="font-medium">
+        <span className="font-semibold">
           {isOpen ? 'Close' : 'View List'}
         </span>
       </button>
 
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-10 lg:hidden"
+          onClick={onToggle}
+        />
+      )}
+
       {/* Sidebar/Bottom Sheet */}
       <div className={`
-        fixed lg:relative bg-white border-gray-200 shadow-lg lg:shadow-none
-        transition-all duration-300 ease-in-out z-10
+        fixed lg:relative bg-white border-gray-200 shadow-2xl lg:shadow-none
+        transition-all duration-300 ease-in-out z-20 lg:z-10
         
         /* Mobile: Bottom sheet */
         bottom-0 left-0 right-0 lg:bottom-auto lg:left-auto lg:right-auto
-        h-[70vh] lg:h-full
-        rounded-t-2xl lg:rounded-none
-        border-t-2 lg:border-t-0 lg:border-r
+        h-[75vh] lg:h-full
+        rounded-t-3xl lg:rounded-none
+        border-t lg:border-t-0 lg:border-r
         ${isOpen ? 'translate-y-0' : 'translate-y-full lg:translate-y-0'}
         
         /* Desktop: Side panel */
@@ -218,8 +226,11 @@ export default function MapSidebar({
       `}>
         <div className="h-full flex flex-col">
           {/* Mobile drag handle */}
-          <div className="lg:hidden flex justify-center py-2">
-            <div className="w-12 h-1 bg-gray-300 rounded-full"></div>
+          <div 
+            className="lg:hidden flex justify-center py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={onToggle}
+          >
+            <div className="w-16 h-1.5 bg-gray-400 rounded-full"></div>
           </div>
           
           {/* Header */}

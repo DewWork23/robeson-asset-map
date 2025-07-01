@@ -8,8 +8,9 @@ import { loadOrganizationsFromGoogleSheets, filterOrganizations } from '@/lib/go
 import OrganizationMap from '@/components/OrganizationMap';
 import CategorySelectionPrompt from '@/components/CategorySelectionPrompt';
 import MapSidebar from '@/components/MapSidebar';
+import MobileOrganizationDetail from '@/components/MobileOrganizationDetail';
 import { categoryToSlug } from '@/utils/categoryUtils';
-import { calculateDistance } from '@/lib/locationUtils';
+import { calculateDistance, getCoordinatesFromAddress } from '@/lib/locationUtils';
 
 export default function MapPage() {
   const router = useRouter();
@@ -19,12 +20,25 @@ export default function MapPage() {
   const [showPrompt, setShowPrompt] = useState(true);
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showMobileDetail, setShowMobileDetail] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Set sidebar open on desktop by default
+  // Set sidebar open on desktop by default and check if mobile
   useEffect(() => {
-    if (window.innerWidth >= 1024) {
-      setSidebarOpen(true);
-    }
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 1024) {
+        setSidebarOpen(true);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
 
   useEffect(() => {
@@ -40,6 +54,55 @@ export default function MapPage() {
     }
     loadData();
   }, []);
+
+  // Handle custom event for showing organization details on mobile
+  useEffect(() => {
+    const handleShowDetails = (event: any) => {
+      const orgId = event.detail;
+      const org = organizations.find(o => o.id === orgId);
+      if (org) {
+        setSelectedOrganization(org);
+        setShowMobileDetail(true);
+      }
+    };
+
+    window.addEventListener('showOrgDetails', handleShowDetails);
+    return () => {
+      window.removeEventListener('showOrgDetails', handleShowDetails);
+    };
+  }, [organizations]);
+
+  // Get user location when component mounts
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.log('Location permission denied or error:', error);
+        }
+      );
+    }
+  }, []);
+
+  // Calculate distance for selected organization
+  useEffect(() => {
+    if (selectedOrganization && userLocation) {
+      const coords = getCoordinatesFromAddress(selectedOrganization.address);
+      if (coords) {
+        selectedOrganization.distance = calculateDistance(
+          userLocation.lat,
+          userLocation.lon,
+          coords.lat,
+          coords.lon
+        );
+      }
+    }
+  }, [selectedOrganization, userLocation]);
 
 
   const handleCategorySelect = (category: Category | 'all') => {
@@ -154,6 +217,15 @@ export default function MapPage() {
           )}
         </div>
       </div>
+      
+      {/* Mobile Organization Detail View */}
+      {isMobile && (
+        <MobileOrganizationDetail
+          organization={showMobileDetail ? selectedOrganization : null}
+          onClose={() => setShowMobileDetail(false)}
+          userLocation={userLocation}
+        />
+      )}
     </div>
   );
 }
