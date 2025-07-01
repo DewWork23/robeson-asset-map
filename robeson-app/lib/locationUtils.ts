@@ -65,11 +65,30 @@ export function getCoordinatesFromAddress(address: string): { lat: number; lon: 
   let baseCoords: { lat: number; lon: number } | null = null;
   
   // Check for specific locations
+  // Look for city/town names but avoid matching them in street names
   for (const [key, coords] of Object.entries(locationCoordinates)) {
     if (key === 'default') continue;
-    if (addressLower.includes(key)) {
-      baseCoords = { ...coords };
-      break;
+    
+    // For cities outside Robeson County, only match if they appear as the city name
+    // This prevents matching "Fayetteville Road" as Fayetteville city
+    if (key === 'fayetteville' || key === 'raeford' || key === 'laurinburg') {
+      // Look for pattern where the city name appears before NC/North Carolina
+      // but NOT as part of a street name (e.g., "Fayetteville Road")
+      // Pattern matches: "City NC" but not "City Road/Street/Ave/etc"
+      const cityPattern = new RegExp(`\\b${key}\\s+(nc|north carolina)\\b`, 'i');
+      const streetPattern = new RegExp(`\\b${key}\\s+(road|rd|street|st|avenue|ave|boulevard|blvd|drive|dr|lane|ln|way|court|ct|place|pl)\\b`, 'i');
+      
+      // Match if it's followed by NC/North Carolina and NOT followed by a street suffix
+      if (cityPattern.test(address) && !streetPattern.test(address)) {
+        baseCoords = { ...coords };
+        break;
+      }
+    } else {
+      // For Robeson County locations, use normal matching
+      if (addressLower.includes(key)) {
+        baseCoords = { ...coords };
+        break;
+      }
     }
   }
   

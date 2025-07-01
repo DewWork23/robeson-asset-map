@@ -204,6 +204,19 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       const coords = getCoordinatesFromAddress(org.address);
       if (!coords) return;
       
+      // Filter out organizations too far from Robeson County
+      const robesonCenter = { lat: 34.6400, lon: -79.1100 };
+      const distance = Math.sqrt(
+        Math.pow(coords.lat - robesonCenter.lat, 2) + 
+        Math.pow(coords.lon - robesonCenter.lon, 2)
+      );
+      
+      // Skip if location is too far from county center (roughly 0.7 degrees ~ 50 miles)
+      if (distance >= 0.7) {
+        console.log(`Skipping organization outside Robeson County area: ${org.organizationName} at ${org.address}`);
+        return;
+      }
+      
       const categoryIcon = CATEGORY_ICONS[org.category as keyof typeof CATEGORY_ICONS] || '📍';
       
       const icon = L.divIcon({
@@ -274,46 +287,70 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Handle zoom based on selected category
     if (selectedCategory && organizations.length > 0) {
       console.log(`Zooming to category: ${selectedCategory}, organizations: ${organizations.length}`);
+      
+      // Always start by centering on Robeson County
+      const robesonCenter = [34.6400, -79.1100] as [number, number];
+      
+      // Build bounds only from organizations within Robeson County area
       const bounds = L.latLngBounds([]);
       let hasValidCoords = false;
-      
-      // Only include organizations within reasonable distance of Robeson County
-      const robesonCenter = { lat: 34.6400, lon: -79.1100 };
-      const maxDistance = 50; // miles
+      let debugLocations: string[] = [];
       
       organizations.forEach(org => {
         const coords = getCoordinatesFromAddress(org.address);
         if (coords) {
           // Check if location is within reasonable distance of county center
           const distance = Math.sqrt(
-            Math.pow(coords.lat - robesonCenter.lat, 2) + 
-            Math.pow(coords.lon - robesonCenter.lon, 2)
+            Math.pow(coords.lat - robesonCenter[0], 2) + 
+            Math.pow(coords.lon - robesonCenter[1], 2)
           );
           
           // Only include if within reasonable bounds (roughly 0.7 degrees ~ 50 miles)
           if (distance < 0.7) {
             bounds.extend([coords.lat, coords.lon]);
             hasValidCoords = true;
+            debugLocations.push(`${org.organizationName}: ${coords.lat}, ${coords.lon}`);
+          } else {
+            console.log(`Filtering out distant location: ${org.organizationName} at ${coords.lat}, ${coords.lon} (distance: ${distance})`);
           }
         }
       });
       
+      console.log('Valid locations for bounds:', debugLocations);
+      
       if (hasValidCoords && bounds.isValid()) {
-        console.log('Bounds are valid, zooming to:', bounds.toBBoxString());
+        // Check if bounds center is reasonable
+        const boundsCenter = bounds.getCenter();
+        const centerDistance = Math.sqrt(
+          Math.pow(boundsCenter.lat - robesonCenter[0], 2) + 
+          Math.pow(boundsCenter.lng - robesonCenter[1], 2)
+        );
         
-        // Small delay to ensure map is ready before zooming
-        setTimeout(() => {
-          // Zoom to show all filtered resources with better framing
-          map.fitBounds(bounds, { 
-            padding: [200, 200], 
-            maxZoom: 10,
+        console.log(`Bounds center: ${boundsCenter.lat}, ${boundsCenter.lng} (distance from Robeson: ${centerDistance})`);
+        
+        // If bounds center is too far from Robeson, just center on Robeson
+        if (centerDistance > 0.5) {
+          console.log('Bounds center too far from Robeson County, using county center instead');
+          map.setView(robesonCenter, 10, {
             animate: true,
             duration: 0.5
           });
-        }, 100);
+        } else {
+          // Small delay to ensure map is ready before zooming
+          setTimeout(() => {
+            // Zoom to show all filtered resources with better framing
+            map.fitBounds(bounds, { 
+              padding: [200, 200], 
+              maxZoom: 10,
+              animate: true,
+              duration: 0.5
+            });
+          }, 100);
+        }
       } else {
         // If no valid coordinates or all filtered out, center on Robeson County
-        map.setView([34.6400, -79.1100], 10, {
+        console.log('No valid coordinates found, centering on Robeson County');
+        map.setView(robesonCenter, 10, {
           animate: true,
           duration: 0.5
         });
