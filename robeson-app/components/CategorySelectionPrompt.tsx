@@ -91,31 +91,25 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
       {/* Main content */}
       <div className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="max-w-4xl w-full">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">
-              Find Resources in Robeson County
-            </h1>
-            
-            {/* Voice Search - Primary Focus */}
-            <div className="mb-6">
-              <SpeechButton 
-                onSpeechResult={handleSpeechResult}
-                prompt="Try saying: 'food', 'doctor', 'housing', 'mental health', 'church', or 'all categories'"
-              />
-            </div>
-            
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-gray-50 px-4 text-lg text-gray-600">
-                  Need help finding something?
-                </span>
-              </div>
-            </div>
-            
-            <p className="text-base text-gray-500 mt-3">
+          {/* Fixed voice search and help text */}
+          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-10 text-center">
+            <SpeechButton 
+              onSpeechResult={handleSpeechResult}
+              prompt="Try saying: 'food', 'doctor', 'housing', 'mental health', 'church', or 'all categories'"
+            />
+            <button 
+              onClick={() => window.scrollTo({ top: 300, behavior: 'smooth' })}
+              className="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors shadow-sm"
+            >
+              Need help finding something? ↓
+            </button>
+          </div>
+          
+          {/* Spacer for fixed elements */}
+          <div className="h-32"></div>
+          
+          <div className="text-center mb-6">
+            <p className="text-lg text-gray-600">
               Select a category below to browse resources
             </p>
           </div>
