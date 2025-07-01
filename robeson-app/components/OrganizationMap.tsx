@@ -26,9 +26,12 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   const preventZoomRef = useRef(false);
 
   useEffect(() => {
-    // Dynamically import leaflet
-    import('leaflet').then((leaflet) => {
-      const L = leaflet.default;
+    // Dynamically import leaflet and marker cluster
+    Promise.all([
+      import('leaflet'),
+      import('leaflet.markercluster')
+    ]).then(([leafletModule, markerClusterModule]) => {
+      const L = leafletModule.default;
       
       // Fix for default markers in Next.js
       delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -48,6 +51,17 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
         link.crossOrigin = '';
         document.head.appendChild(link);
+        
+        // Add marker cluster CSS
+        const clusterLink = document.createElement('link');
+        clusterLink.rel = 'stylesheet';
+        clusterLink.href = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css';
+        document.head.appendChild(clusterLink);
+        
+        const clusterDefaultLink = document.createElement('link');
+        clusterDefaultLink.rel = 'stylesheet';
+        clusterDefaultLink.href = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css';
+        document.head.appendChild(clusterDefaultLink);
       }
       
       setMapReady(true);
@@ -125,7 +139,37 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
 
     // Create layer groups
     const townLayer = L.layerGroup().addTo(map);
-    const organizationLayer = L.layerGroup().addTo(map);
+    
+    // Create marker cluster group with custom options
+    const organizationLayer = (L as any).markerClusterGroup({
+      showCoverageOnHover: false,
+      maxClusterRadius: 50, // Smaller radius for more granular clustering
+      spiderfyOnMaxZoom: true,
+      disableClusteringAtZoom: 16, // Show individual markers when zoomed in enough
+      animate: true,
+      animateAddingMarkers: true,
+      removeOutsideVisibleBounds: true,
+      // Custom cluster icon creation
+      iconCreateFunction: function(cluster: any) {
+        const count = cluster.getChildCount();
+        let size = 'small';
+        let className = 'marker-cluster-small';
+        
+        if (count > 10) {
+          size = 'large';
+          className = 'marker-cluster-large';
+        } else if (count > 5) {
+          size = 'medium';
+          className = 'marker-cluster-medium';
+        }
+        
+        return new (L as any).DivIcon({
+          html: `<div><span>${count}</span></div>`,
+          className: `marker-cluster ${className}`,
+          iconSize: new (L as any).Point(40, 40)
+        });
+      }
+    }).addTo(map);
     organizationLayerRef.current = organizationLayer;
     
     majorTowns.forEach(town => {
@@ -208,10 +252,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
 
     console.log('Updating markers, selectedCategory:', selectedCategory, 'organizations:', organizations.length);
 
-    // Clear existing markers
-    markersRef.current.forEach(marker => {
-      organizationLayer.removeLayer(marker);
-    });
+    // Clear existing markers from cluster group
+    organizationLayer.clearLayers();
     markersRef.current = [];
 
     // Reset offsets for consistent positioning
@@ -285,7 +327,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         popupAnchor: [0, isSelected ? -46 : -38],
       });
 
-      const marker = L.marker([coords.lat, coords.lon], { icon }).addTo(organizationLayer);
+      const marker = L.marker([coords.lat, coords.lon], { icon });
+      organizationLayer.addLayer(marker);
       markersRef.current.push(marker);
       
       // Store organization reference on marker for later use

@@ -158,3 +158,62 @@ button, a {
     animation: none;
   }
 }
+
+/* Marker cluster styles */
+.marker-cluster {
+  background-clip: padding-box;
+  border-radius: 50%;
+}
+
+.marker-cluster div {
+  width: 36px;
+  height: 36px;
+  margin-left: 2px;
+  margin-top: 2px;
+  text-align: center;
+  border-radius: 50%;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+}
+
+.marker-cluster-small {
+  background-color: rgba(110, 204, 57, 0.6);
+}
+
+.marker-cluster-small div {
+  background-color: rgba(110, 204, 57, 0.9);
+}
+
+.marker-cluster-medium {
+  background-color: rgba(240, 194, 12, 0.6);
+}
+
+.marker-cluster-medium div {
+  background-color: rgba(240, 194, 12, 0.9);
+}
+
+.marker-cluster-large {
+  background-color: rgba(241, 128, 23, 0.6);
+}
+
+.marker-cluster-large div {
+  background-color: rgba(241, 128, 23, 0.9);
+}
+
+/* Cluster spiderfy lines */
+.leaflet-cluster-anim .leaflet-marker-icon, 
+.leaflet-cluster-anim .leaflet-marker-shadow {
+  transition: transform 0.3s ease-out, opacity 0.3s ease-in;
+}
+
+/* Make cluster numbers more visible on mobile */
+@media (max-width: 768px) {
+  .marker-cluster div {
+    font-size: 16px;
+    font-weight: 900;
+  }
+}
