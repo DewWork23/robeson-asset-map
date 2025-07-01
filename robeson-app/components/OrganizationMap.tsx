@@ -354,17 +354,21 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         // If bounds center is too far from Robeson, just center on Robeson
         if (centerDistance > 0.5) {
           console.log('Bounds center too far from Robeson County, using county center instead');
-          map.setView(robesonCenter, 10, {
+          const isMobile = window.innerWidth < 768;
+          map.setView(robesonCenter, isMobile ? 12 : 10, {
             animate: true,
             duration: 0.5
           });
         } else {
           // Small delay to ensure map is ready before zooming
           setTimeout(() => {
+            // Check if mobile device
+            const isMobile = window.innerWidth < 768;
+            
             // Zoom to show all filtered resources with better framing
             map.fitBounds(bounds, { 
-              padding: [200, 200], 
-              maxZoom: 10,
+              padding: isMobile ? [100, 100] : [200, 200], 
+              maxZoom: isMobile ? 13 : 11,
               animate: true,
               duration: 0.5
             });
@@ -373,7 +377,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       } else {
         // If no valid coordinates or all filtered out, center on Robeson County
         console.log('No valid coordinates found, centering on Robeson County');
-        map.setView(robesonCenter, 10, {
+        const isMobile = window.innerWidth < 768;
+        map.setView(robesonCenter, isMobile ? 12 : 10, {
           animate: true,
           duration: 0.5
         });
