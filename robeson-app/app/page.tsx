@@ -11,6 +11,7 @@ import ChatBot from '@/components/ChatBot';
 import { categoryToSlug } from '@/utils/categoryUtils';
 import { CONSOLIDATED_CATEGORIES } from '@/utils/categoryConsolidation';
 import FeedbackBanner from '@/components/FeedbackBanner';
+import SpeechButton from '@/components/SpeechButton';
 
 export default function Home() {
   const router = useRouter();
@@ -19,6 +20,48 @@ export default function Home() {
 
   const handleNearMe = () => {
     router.push('/near-me');
+  };
+
+  const handleSpeechResult = (transcript: string) => {
+    // Try to match the transcript to a category
+    const normalizedTranscript = transcript.toLowerCase().trim();
+    
+    // Check for direct category matches or keywords
+    for (const category of CONSOLIDATED_CATEGORIES) {
+      const categoryLower = category.toLowerCase();
+      
+      // Direct match or partial match
+      if (categoryLower.includes(normalizedTranscript) || normalizedTranscript.includes(categoryLower)) {
+        router.push(`/category/${categoryToSlug(category)}`);
+        return;
+      }
+      
+      // Check for common keywords
+      const keywordMap: Record<string, string[]> = {
+        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger'],
+        'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry'],
+        'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent'],
+        'Healthcare Services': ['health', 'doctor', 'medical', 'hospital', 'clinic'],
+        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance'],
+        'Government Services': ['government', 'benefits', 'assistance'],
+        'Tribal Services': ['tribal', 'lumbee', 'native', 'indian'],
+        'Community Services': ['community', 'support'],
+        'Law Enforcement': ['police', 'sheriff', 'law'],
+        'Education': ['education', 'school', 'learning', 'library'],
+        'Pharmacy': ['pharmacy', 'medicine', 'prescription', 'drug'],
+      };
+      
+      const keywords = keywordMap[category] || [];
+      if (keywords.some(keyword => normalizedTranscript.includes(keyword))) {
+        router.push(`/category/${categoryToSlug(category)}`);
+        return;
+      }
+    }
+    
+    // If no match, try "near me" functionality
+    if (normalizedTranscript.includes('near') || normalizedTranscript.includes('close') || normalizedTranscript.includes('nearby')) {
+      router.push('/near-me');
+    }
   };
 
   useEffect(() => {
@@ -217,6 +260,14 @@ export default function Home() {
                     </div>
                   </div>
                 </Link>
+              </div>
+              
+              {/* Voice Search */}
+              <div className="mt-8">
+                <SpeechButton 
+                  onSpeechResult={handleSpeechResult}
+                  prompt="Say a category like 'food', 'healthcare', or 'near me'"
+                />
               </div>
             </div>
           </>

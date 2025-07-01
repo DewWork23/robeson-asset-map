@@ -1,6 +1,8 @@
 'use client';
 
 import { Category, CATEGORY_ICONS, CATEGORY_COLORS } from '@/types/organization';
+import Link from 'next/link';
+import SpeechButton from '@/components/SpeechButton';
 
 interface CategorySelectionPromptProps {
   onCategorySelect: (category: Category | 'all') => void;
@@ -25,17 +27,78 @@ const categories: Category[] = [
 ];
 
 export default function CategorySelectionPrompt({ onCategorySelect }: CategorySelectionPromptProps) {
+  const handleSpeechResult = (transcript: string) => {
+    const normalizedTranscript = transcript.toLowerCase().trim();
+    
+    // Check for "all" or "everything"
+    if (normalizedTranscript.includes('all') || normalizedTranscript.includes('everything')) {
+      onCategorySelect('all');
+      return;
+    }
+    
+    // Try to match to a category
+    for (const category of categories) {
+      const categoryLower = category.toLowerCase();
+      
+      if (categoryLower.includes(normalizedTranscript) || normalizedTranscript.includes(categoryLower)) {
+        onCategorySelect(category);
+        return;
+      }
+      
+      // Check for common keywords
+      const keywordMap: Record<Category, string[]> = {
+        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger'],
+        'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry'],
+        'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent'],
+        'Healthcare Services': ['health', 'doctor', 'medical', 'hospital', 'clinic'],
+        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance'],
+        'Government Services': ['government', 'benefits', 'assistance'],
+        'Tribal Services': ['tribal', 'lumbee', 'native', 'indian'],
+        'Community Services': ['community', 'support'],
+        'Community Groups & Development': ['group', 'development'],
+        'Faith-Based Services': ['faith', 'church', 'religious', 'prayer'],
+        'Legal Services': ['legal', 'lawyer', 'attorney', 'court'],
+        'Law Enforcement': ['police', 'sheriff', 'law'],
+        'Education': ['education', 'school', 'learning', 'library'],
+        'Pharmacy': ['pharmacy', 'medicine', 'prescription', 'drug'],
+        'Cultural & Information Services': ['cultural', 'information', 'culture']
+      };
+      
+      const keywords = keywordMap[category] || [];
+      if (keywords.some(keyword => normalizedTranscript.includes(keyword))) {
+        onCategorySelect(category);
+        return;
+      }
+    }
+  };
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-4xl w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Need help finding something?
-          </h1>
-          <p className="text-lg text-gray-600">
-            Select a category below to view resources on the map
-          </p>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* Header with back button */}
+      <div className="bg-white shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span className="font-medium">Back to Home</span>
+          </Link>
         </div>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="max-w-4xl w-full">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Need help finding something?
+            </h1>
+            <p className="text-lg text-gray-600">
+              Select a category below to view resources on the map
+            </p>
+          </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {categories.map((category) => (
@@ -50,14 +113,23 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
           ))}
         </div>
 
-        <div className="mt-8">
-          <button
-            onClick={() => onCategorySelect('all')}
-            className="w-full bg-gray-700 text-white rounded-lg p-4 hover:bg-gray-800 transition-colors flex items-center justify-center space-x-3 shadow-md"
-          >
-            <span className="text-2xl">🗺️</span>
-            <span className="font-medium">View All Categories</span>
-          </button>
+          <div className="mt-8">
+            <button
+              onClick={() => onCategorySelect('all')}
+              className="w-full bg-gray-700 text-white rounded-lg p-4 hover:bg-gray-800 transition-colors flex items-center justify-center space-x-3 shadow-md"
+            >
+              <span className="text-2xl">🗺️</span>
+              <span className="font-medium">View All Categories</span>
+            </button>
+          </div>
+
+          {/* Voice Search */}
+          <div className="mt-6">
+            <SpeechButton 
+              onSpeechResult={handleSpeechResult}
+              prompt="Say a category like 'food', 'healthcare', or 'all categories'"
+            />
+          </div>
         </div>
       </div>
     </div>
