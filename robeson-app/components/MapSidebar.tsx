@@ -237,13 +237,25 @@ export default function MapSidebar({
           <div className="p-4 pt-2 lg:pt-4 border-b border-gray-200 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Resources</h2>
-              <span className="text-sm text-gray-500">
-                {selectedCategory ? (
-                  <>Showing {organizations.length} of {allOrganizations.length} locations</>
-                ) : (
-                  <>{organizations.length} locations</>
-                )}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">
+                  {selectedCategory ? (
+                    <>Showing {organizations.length} of {allOrganizations.length} locations</>
+                  ) : (
+                    <>{organizations.length} locations</>
+                  )}
+                </span>
+                {/* Mobile close button */}
+                <button
+                  onClick={onToggle}
+                  className="lg:hidden p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Close list"
+                >
+                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {/* Category Filter */}
