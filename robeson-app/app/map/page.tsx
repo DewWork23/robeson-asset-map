@@ -15,7 +15,6 @@ export default function MapPage() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showPrompt, setShowPrompt] = useState(true);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -31,18 +30,6 @@ export default function MapPage() {
     loadData();
   }, []);
 
-  // Center the scrollable container when component mounts
-  useEffect(() => {
-    if (!loading && scrollContainerRef.current) {
-      // Scroll to center of the 2000x2000 container
-      const container = scrollContainerRef.current;
-      const centerX = (2000 - container.clientWidth) / 2;
-      const centerY = (2000 - container.clientHeight) / 2;
-      
-      container.scrollLeft = centerX;
-      container.scrollTop = centerY;
-    }
-  }, [loading]);
 
   const handleCategorySelect = (category: Category | 'all') => {
     if (category === 'all') {
@@ -139,24 +126,22 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* Map container with scrollbars */}
-      <div ref={scrollContainerRef} className="flex-1 relative overflow-auto">
-        <div className="w-[2000px] h-[2000px]">
-          <OrganizationMap 
-            organizations={selectedCategory 
-              ? filterOrganizations(organizations, selectedCategory)
-              : organizations
-            }
-            allOrganizations={organizations}
-            selectedCategory={selectedCategory}
-            onCategorySelect={(cat) => {
-              setSelectedCategory(cat);
-            }}
-            onOrganizationClick={(org) => {
-              console.log('Organization clicked:', org);
-            }}
-          />
-        </div>
+      {/* Map container - full screen without scrollbars */}
+      <div className="flex-1 relative">
+        <OrganizationMap 
+          organizations={selectedCategory 
+            ? filterOrganizations(organizations, selectedCategory)
+            : organizations
+          }
+          allOrganizations={organizations}
+          selectedCategory={selectedCategory}
+          onCategorySelect={(cat) => {
+            setSelectedCategory(cat);
+          }}
+          onOrganizationClick={(org) => {
+            console.log('Organization clicked:', org);
+          }}
+        />
       </div>
     </div>
   );

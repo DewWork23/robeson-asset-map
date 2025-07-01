@@ -56,7 +56,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   useEffect(() => {
     if (!mapReady || !L || mapRef.current) return;
 
-    console.log('Initializing map...');
+    console.log('Initializing map with center:', [34.6400, -79.1100]);
     
     // Create map with explicit options for better mobile experience
     // Start very zoomed out to ensure we see everything
@@ -77,6 +77,16 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       worldCopyJump: true
     });
     mapRef.current = map;
+    
+    // Immediately log where the map actually centered
+    const actualCenter = map.getCenter();
+    console.log('Map actually centered at:', actualCenter.lat, actualCenter.lng);
+    
+    // Force immediate re-center if it's wrong
+    if (Math.abs(actualCenter.lat - 34.6400) > 0.1 || Math.abs(actualCenter.lng - (-79.1100)) > 0.1) {
+      console.log('Map center is wrong! Force re-centering to Robeson County');
+      map.setView([34.6400, -79.1100], 9);
+    }
 
     // Create custom panes for better layer control
     map.createPane('townLabels');
