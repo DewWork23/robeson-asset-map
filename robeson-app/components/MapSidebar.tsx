@@ -30,7 +30,7 @@ export default function MapSidebar({
   isOpen,
   onToggle
 }: MapSidebarProps) {
-  const [sortBy, setSortBy] = useState<SortOption>('name');
+  const [sortBy, setSortBy] = useState<SortOption>('distance');
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [searchAddress, setSearchAddress] = useState('');
   const [searchLocation, setSearchLocation] = useState<{ lat: number; lon: number } | null>(null);
@@ -38,6 +38,7 @@ export default function MapSidebar({
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [hasPromptedForLocation, setHasPromptedForLocation] = useState(false);
 
   // Get user's current location
   const getCurrentLocation = () => {
@@ -87,6 +88,17 @@ export default function MapSidebar({
     }
     return 0;
   });
+
+  // Prompt for location on mount if not already prompted
+  useEffect(() => {
+    if (!hasPromptedForLocation && isOpen && !userLocation && !searchLocation) {
+      setHasPromptedForLocation(true);
+      // Small delay to let the sidebar render first
+      setTimeout(() => {
+        getCurrentLocation();
+      }, 500);
+    }
+  }, [isOpen, hasPromptedForLocation, userLocation, searchLocation]);
 
   // Calculate distances when location changes
   useEffect(() => {
@@ -361,9 +373,13 @@ export default function MapSidebar({
                   <option value="category">Category</option>
                 </select>
               </div>
-              {(userLocation || searchLocation) && sortBy === 'distance' && (
-                <p className="text-xs text-green-600 mt-1">
-                  ✓ Showing nearest resources first
+              {sortBy === 'distance' && (
+                <p className="text-xs mt-1">
+                  {(userLocation || searchLocation) ? (
+                    <span className="text-green-600">✓ Showing nearest resources first</span>
+                  ) : (
+                    <span className="text-amber-600">⚠️ Set location to sort by distance</span>
+                  )}
                 </p>
               )}
             </div>
