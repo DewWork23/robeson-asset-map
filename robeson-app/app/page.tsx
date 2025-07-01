@@ -196,6 +196,11 @@ export default function Home() {
                 onSpeechResult={handleSpeechResult}
                 prompt="Try saying: 'food', 'healthcare', 'mental health', 'housing', or 'near me'"
               />
+              <button 
+                className="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors shadow-sm"
+              >
+                Need help finding something?
+              </button>
             </div>
 
             {/* Categories */}
