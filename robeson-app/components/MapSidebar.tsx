@@ -5,7 +5,7 @@ import { Organization, CATEGORY_ICONS, CATEGORY_COLORS } from '@/types/organizat
 import { calculateDistance, getCoordinatesFromAddress } from '@/lib/locationUtils';
 import { geocodeAddress } from '@/lib/geocoding';
 import { filterOrganizations } from '@/lib/googleSheetsParser';
-import OrganizationCard from './OrganizationCard';
+import CompactOrganizationCard from './CompactOrganizationCard';
 
 interface MapSidebarProps {
   organizations: Organization[];
@@ -371,7 +371,7 @@ export default function MapSidebar({
 
           {/* List */}
           <div className="flex-1 overflow-y-auto">
-            <div className="p-4 space-y-3">
+            <div className="p-3 space-y-2">
               {sortedOrganizations.map((org) => (
                 <div
                   key={org.id}
@@ -382,7 +382,7 @@ export default function MapSidebar({
                       : ''
                   }`}
                 >
-                  <OrganizationCard
+                  <CompactOrganizationCard
                     organization={org}
                     showDistance={sortBy === 'distance' && (!!userLocation || !!searchLocation)}
                   />
