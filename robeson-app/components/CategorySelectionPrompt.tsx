@@ -103,9 +103,15 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
                 prompt="Try saying: 'food', 'doctor', 'housing', 'mental health', 'church', or 'all categories'"
               />
               <button 
+                onClick={() => {
+                  const categoriesGrid = document.getElementById('categories-grid');
+                  if (categoriesGrid) {
+                    categoriesGrid.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 className="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors shadow-sm"
               >
-                Need help finding something?
+                Need help finding something? ↓
               </button>
             </div>
             
@@ -114,7 +120,7 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
             </p>
           </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div id="categories-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {categories.map((category) => (
             <button
               key={category}

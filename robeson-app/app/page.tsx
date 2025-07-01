@@ -197,14 +197,20 @@ export default function Home() {
                 prompt="Try saying: 'food', 'healthcare', 'mental health', 'housing', or 'near me'"
               />
               <button 
+                onClick={() => {
+                  const categoriesSection = document.getElementById('categories-section');
+                  if (categoriesSection) {
+                    categoriesSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 className="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors shadow-sm"
               >
-                Need help finding something?
+                Need help finding something? ↓
               </button>
             </div>
 
             {/* Categories */}
-            <div className="mb-6">
+            <div id="categories-section" className="mb-6">
               <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
                 <div className="sm:flex-1" />
                 <h2 className="text-lg font-semibold text-gray-900">Or Select a Category Below</h2>
