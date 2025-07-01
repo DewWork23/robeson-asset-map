@@ -288,6 +288,11 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     lastSelectedOrgRef.current = selectedOrganization?.id || null;
 
     console.log('Updating markers, selectedCategory:', selectedCategory, 'organizations:', organizations.length);
+    
+    // Store current map state before updating
+    const currentZoom = map.getZoom();
+    const currentCenter = map.getCenter();
+    const shouldPreserveView = isJustOrgSelection || preventZoomRef.current;
 
     // Clear existing markers from cluster group
     organizationLayer.clearLayers();
@@ -325,24 +330,23 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       }
       
       const categoryIcon = CATEGORY_ICONS[org.category as keyof typeof CATEGORY_ICONS] || '📍';
-      const isSelected = selectedOrganization?.id === org.id;
       
       const icon = L.divIcon({
         html: `
           <div style="
-            background-color: ${isSelected ? '#3b82f6' : 'white'};
-            border: ${isSelected ? '3px' : '2px'} solid ${isSelected ? '#1e40af' : '#1e293b'};
+            background-color: white;
+            border: 2px solid #1e293b;
             border-radius: 50%;
-            width: ${isSelected ? '40px' : '32px'};
-            height: ${isSelected ? '40px' : '32px'};
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: ${isSelected ? '22px' : '18px'};
-            box-shadow: 0 ${isSelected ? '4px 8px' : '2px 4px'} rgba(0,0,0,${isSelected ? '0.4' : '0.3'});
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             position: relative;
-            z-index: ${isSelected ? '1000' : '1'};
-            animation: ${isSelected ? 'pulse 2s infinite' : 'none'};
+            z-index: 1;
+            animation: none;
           ">
             ${categoryIcon}
           </div>
@@ -355,20 +359,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
             height: 0;
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
-            border-top: 6px solid ${isSelected ? '#1e40af' : '#1e293b'};
+            border-top: 6px solid #1e293b;
           "></div>
-          ${isSelected ? `<style>
-            @keyframes pulse {
-              0% { transform: scale(1); }
-              50% { transform: scale(1.1); }
-              100% { transform: scale(1); }
-            }
-          </style>` : ''}
         `,
         className: 'custom-emoji-marker',
-        iconSize: isSelected ? [40, 46] : [32, 38],
-        iconAnchor: isSelected ? [20, 46] : [16, 38],
-        popupAnchor: [0, isSelected ? -46 : -38],
+        iconSize: [32, 38],
+        iconAnchor: [16, 38],
+        popupAnchor: [0, -38],
       });
 
       const marker = L.marker([coords.lat, coords.lon], { icon });
@@ -558,36 +555,100 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         duration: 0.5
       });
     }
-  }, [mapReady, L, organizations, selectedCategory, selectedOrganization, onOrganizationClick]);
+    
+    // Restore view if we should preserve it
+    if (shouldPreserveView && currentCenter && currentZoom) {
+      setTimeout(() => {
+        map.setView(currentCenter, currentZoom, {
+          animate: false
+        });
+      }, 0);
+    }
+  }, [mapReady, L, organizations, selectedCategory, onOrganizationClick]);
 
-  // Handle selected organization changes
+  // Handle selected organization changes - update marker style
   useEffect(() => {
-    if (!mapReady || !L || !mapRef.current || !selectedOrganization) return;
+    if (!mapReady || !L || !mapRef.current) return;
 
     const map = mapRef.current;
     
-    // Find the marker for the selected organization
-    const selectedMarker = markersRef.current.find(marker => 
-      (marker as any).organization?.id === selectedOrganization.id
-    );
+    // Update all marker styles based on selection
+    markersRef.current.forEach(marker => {
+      const org = (marker as any).organization;
+      if (!org) return;
+      
+      const isSelected = selectedOrganization?.id === org.id;
+      const categoryIcon = CATEGORY_ICONS[org.category as keyof typeof CATEGORY_ICONS] || '📍';
+      
+      const icon = L.divIcon({
+        html: `
+          <div style="
+            background-color: ${isSelected ? '#3b82f6' : 'white'};
+            border: ${isSelected ? '3px' : '2px'} solid ${isSelected ? '#1e40af' : '#1e293b'};
+            border-radius: 50%;
+            width: ${isSelected ? '40px' : '32px'};
+            height: ${isSelected ? '40px' : '32px'};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: ${isSelected ? '22px' : '18px'};
+            box-shadow: 0 ${isSelected ? '4px 8px' : '2px 4px'} rgba(0,0,0,${isSelected ? '0.4' : '0.3'});
+            position: relative;
+            z-index: ${isSelected ? '1000' : '1'};
+            animation: ${isSelected ? 'pulse 2s infinite' : 'none'};
+          ">
+            ${categoryIcon}
+          </div>
+          <div style="
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #1e293b;
+          "></div>
+        `,
+        className: 'custom-emoji-marker',
+        iconSize: [32, 38],
+        iconAnchor: [16, 38],
+        popupAnchor: [0, -38],
+      });
+      
+      marker.setIcon(icon);
+    });
     
-    if (selectedMarker) {
-      // Pan to the selected marker with offset to account for popup
-      const coords = getCoordinatesFromAddress(selectedOrganization.address);
-      if (coords) {
-        // Calculate offset to ensure popup is visible
-        const isMobile = window.innerWidth < 768;
-        const popupOffset = isMobile ? 0.002 : 0.001; // Slight offset to center popup in view
-        
-        map.panTo([coords.lat - popupOffset, coords.lon], {
-          animate: true,
-          duration: 0.5
-        });
-        
-        // Open popup after pan completes
-        setTimeout(() => {
+    // If there's a selected organization, pan to it and open popup
+    if (selectedOrganization) {
+      const selectedMarker = markersRef.current.find(marker => 
+        (marker as any).organization?.id === selectedOrganization.id
+      );
+      
+      if (selectedMarker) {
+        // Don't pan if we're in the middle of cluster interaction
+        if (!preventZoomRef.current) {
+          const coords = getCoordinatesFromAddress(selectedOrganization.address);
+          if (coords) {
+            // Calculate offset to ensure popup is visible
+            const isMobile = window.innerWidth < 768;
+            const popupOffset = isMobile ? 0.002 : 0.001;
+            
+            map.panTo([coords.lat - popupOffset, coords.lon], {
+              animate: true,
+              duration: 0.5
+            });
+            
+            // Open popup after pan completes
+            setTimeout(() => {
+              selectedMarker.openPopup();
+            }, 600);
+          }
+        } else {
+          // If preventing zoom, just open the popup
           selectedMarker.openPopup();
-        }, 600);
+        }
       }
     }
   }, [mapReady, L, selectedOrganization]);
