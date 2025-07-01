@@ -42,7 +42,7 @@ export const locationCoordinates: Record<string, { lat: number; lon: number }> =
   'laurinburg': { lat: 34.7741, lon: -79.4628 },
   
   // Default center of Robeson County
-  'default': { lat: 34.6293, lon: -79.1148 }
+  'default': { lat: 34.6400, lon: -79.1100 }
 };
 
 // Track addresses to add offsets for duplicate locations

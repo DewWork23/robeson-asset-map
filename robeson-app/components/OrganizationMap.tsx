@@ -61,7 +61,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Create map with explicit options for better mobile experience
     // Start very zoomed out to ensure we see everything
     const map = L.map('map', {
-      center: [34.6341, -79.0073], // Center of Robeson County
+      center: [34.6400, -79.1100], // Center of Robeson County
       zoom: 9, // Start zoomed out
       minZoom: 6,
       maxZoom: 18,
@@ -161,7 +161,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     setTimeout(() => {
       map.invalidateSize();
       // After resize, ensure we're at the right zoom
-      map.setView([34.6341, -79.0073], 9);
+      map.setView([34.6400, -79.1100], 9);
     }, 100);
 
     // Add layer control
@@ -277,11 +277,24 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       const bounds = L.latLngBounds([]);
       let hasValidCoords = false;
       
+      // Only include organizations within reasonable distance of Robeson County
+      const robesonCenter = { lat: 34.6400, lon: -79.1100 };
+      const maxDistance = 50; // miles
+      
       organizations.forEach(org => {
         const coords = getCoordinatesFromAddress(org.address);
         if (coords) {
-          bounds.extend([coords.lat, coords.lon]);
-          hasValidCoords = true;
+          // Check if location is within reasonable distance of county center
+          const distance = Math.sqrt(
+            Math.pow(coords.lat - robesonCenter.lat, 2) + 
+            Math.pow(coords.lon - robesonCenter.lon, 2)
+          );
+          
+          // Only include if within reasonable bounds (roughly 0.7 degrees ~ 50 miles)
+          if (distance < 0.7) {
+            bounds.extend([coords.lat, coords.lon]);
+            hasValidCoords = true;
+          }
         }
       });
       
@@ -298,11 +311,17 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
             duration: 0.5
           });
         }, 100);
+      } else {
+        // If no valid coordinates or all filtered out, center on Robeson County
+        map.setView([34.6400, -79.1100], 10, {
+          animate: true,
+          duration: 0.5
+        });
       }
     } else if (!selectedCategory && countyBorder) {
       console.log('No category selected, keeping wide view');
       // Keep the wide view when showing all resources
-      map.setView([34.6341, -79.0073], 9, {
+      map.setView([34.6400, -79.1100], 9, {
         animate: true,
         duration: 0.5
       });
