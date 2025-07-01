@@ -3,9 +3,10 @@ import { formatDistance } from '@/lib/locationUtils';
 
 interface OrganizationCardProps {
   organization: Organization;
+  showDistance?: boolean;
 }
 
-export default function OrganizationCard({ organization }: OrganizationCardProps) {
+export default function OrganizationCard({ organization, showDistance = true }: OrganizationCardProps) {
   const categoryIcon = CATEGORY_ICONS[organization.category as Category] || '📍';
   
   const formatPhoneForTel = (phone: string) => {
@@ -35,7 +36,7 @@ export default function OrganizationCard({ organization }: OrganizationCardProps
             </span>
           )}
         </div>
-        {organization.distance !== undefined && (
+        {showDistance && organization.distance !== undefined && (
           <span className="inline-flex items-center mt-2 px-2 py-1 bg-gray-200 text-gray-700 text-xs font-medium rounded-full">
             📍 {formatDistance(organization.distance)} away
           </span>

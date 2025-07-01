@@ -228,21 +228,24 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       }
       
       const categoryIcon = CATEGORY_ICONS[org.category as keyof typeof CATEGORY_ICONS] || '📍';
+      const isSelected = selectedOrganization?.id === org.id;
       
       const icon = L.divIcon({
         html: `
           <div style="
-            background-color: white;
-            border: 2px solid #1e293b;
+            background-color: ${isSelected ? '#3b82f6' : 'white'};
+            border: ${isSelected ? '3px' : '2px'} solid ${isSelected ? '#1e40af' : '#1e293b'};
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: ${isSelected ? '40px' : '32px'};
+            height: ${isSelected ? '40px' : '32px'};
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: ${isSelected ? '22px' : '18px'};
+            box-shadow: 0 ${isSelected ? '4px 8px' : '2px 4px'} rgba(0,0,0,${isSelected ? '0.4' : '0.3'});
             position: relative;
+            z-index: ${isSelected ? '1000' : '1'};
+            animation: ${isSelected ? 'pulse 2s infinite' : 'none'};
           ">
             ${categoryIcon}
           </div>
@@ -255,17 +258,27 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
             height: 0;
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
-            border-top: 6px solid #1e293b;
+            border-top: 6px solid ${isSelected ? '#1e40af' : '#1e293b'};
           "></div>
+          ${isSelected ? `<style>
+            @keyframes pulse {
+              0% { transform: scale(1); }
+              50% { transform: scale(1.1); }
+              100% { transform: scale(1); }
+            }
+          </style>` : ''}
         `,
         className: 'custom-emoji-marker',
-        iconSize: [32, 38],
-        iconAnchor: [16, 38],
-        popupAnchor: [0, -38],
+        iconSize: isSelected ? [40, 46] : [32, 38],
+        iconAnchor: isSelected ? [20, 46] : [16, 38],
+        popupAnchor: [0, isSelected ? -46 : -38],
       });
 
       const marker = L.marker([coords.lat, coords.lon], { icon }).addTo(organizationLayer);
       markersRef.current.push(marker);
+      
+      // Store organization reference on marker for later use
+      (marker as any).organization = org;
       
       const encodedAddress = encodeURIComponent(org.address);
       const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
@@ -373,7 +386,33 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         duration: 0.5
       });
     }
-  }, [mapReady, L, organizations, selectedCategory, onOrganizationClick]);
+  }, [mapReady, L, organizations, selectedCategory, selectedOrganization, onOrganizationClick]);
+
+  // Handle selected organization changes
+  useEffect(() => {
+    if (!mapReady || !L || !mapRef.current || !selectedOrganization) return;
+
+    const map = mapRef.current;
+    
+    // Find the marker for the selected organization
+    const selectedMarker = markersRef.current.find(marker => 
+      (marker as any).organization?.id === selectedOrganization.id
+    );
+    
+    if (selectedMarker) {
+      // Open popup for selected marker
+      selectedMarker.openPopup();
+      
+      // Pan to the selected marker
+      const coords = getCoordinatesFromAddress(selectedOrganization.address);
+      if (coords) {
+        map.panTo([coords.lat, coords.lon], {
+          animate: true,
+          duration: 0.5
+        });
+      }
+    }
+  }, [mapReady, L, selectedOrganization]);
 
   if (!mapReady) {
     return <div className="h-full flex items-center justify-center">Loading map...</div>;

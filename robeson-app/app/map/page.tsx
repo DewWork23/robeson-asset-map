@@ -7,7 +7,9 @@ import { Organization, CATEGORY_ICONS, Category } from '@/types/organization';
 import { loadOrganizationsFromGoogleSheets, filterOrganizations } from '@/lib/googleSheetsParser';
 import OrganizationMap from '@/components/OrganizationMap';
 import CategorySelectionPrompt from '@/components/CategorySelectionPrompt';
+import MapSidebar from '@/components/MapSidebar';
 import { categoryToSlug } from '@/utils/categoryUtils';
+import { calculateDistance } from '@/lib/locationUtils';
 
 export default function MapPage() {
   const router = useRouter();
@@ -15,6 +17,8 @@ export default function MapPage() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showPrompt, setShowPrompt] = useState(true);
+  const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     async function loadData() {
@@ -126,22 +130,40 @@ export default function MapPage() {
         </div>
       </div>
 
-      {/* Map container - full screen without scrollbars */}
-      <div className="flex-1 relative">
-        <OrganizationMap 
+      {/* Map and sidebar container */}
+      <div className="flex-1 flex relative overflow-hidden">
+        {/* Sidebar */}
+        <MapSidebar
           organizations={selectedCategory 
             ? filterOrganizations(organizations, selectedCategory)
             : organizations
           }
-          allOrganizations={organizations}
-          selectedCategory={selectedCategory}
-          onCategorySelect={(cat) => {
-            setSelectedCategory(cat);
-          }}
+          selectedOrganization={selectedOrganization}
           onOrganizationClick={(org) => {
-            console.log('Organization clicked:', org);
+            setSelectedOrganization(org);
           }}
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
         />
+        
+        {/* Map container */}
+        <div className="flex-1 relative">
+          <OrganizationMap 
+            organizations={selectedCategory 
+              ? filterOrganizations(organizations, selectedCategory)
+              : organizations
+            }
+            allOrganizations={organizations}
+            selectedCategory={selectedCategory}
+            selectedOrganization={selectedOrganization}
+            onCategorySelect={(cat) => {
+              setSelectedCategory(cat);
+            }}
+            onOrganizationClick={(org) => {
+              setSelectedOrganization(org);
+            }}
+          />
+        </div>
       </div>
     </div>
   );
