@@ -27,6 +27,32 @@ export default function Home() {
     // Try to match the transcript to a category
     const normalizedTranscript = transcript.toLowerCase().trim();
     
+    // First check for specific multi-word phrases
+    const specificPhrases: Record<string, string> = {
+      'mental health': 'Mental Health & Substance Use',
+      'substance abuse': 'Mental Health & Substance Use',
+      'substance use': 'Mental Health & Substance Use',
+      'law enforcement': 'Law Enforcement',
+      'legal services': 'Legal Services',
+      'crisis services': 'Crisis Services',
+      'food services': 'Food Services',
+      'housing services': 'Housing Services',
+      'healthcare services': 'Healthcare Services',
+      'government services': 'Government Services',
+      'tribal services': 'Tribal Services',
+      'community services': 'Community Services',
+      'faith based': 'Faith-Based Services',
+      'faith-based': 'Faith-Based Services'
+    };
+    
+    // Check specific phrases first
+    for (const [phrase, category] of Object.entries(specificPhrases)) {
+      if (normalizedTranscript.includes(phrase)) {
+        router.push(`/category/${categoryToSlug(category)}`);
+        return;
+      }
+    }
+    
     // Check for direct category matches or keywords
     for (const category of CONSOLIDATED_CATEGORIES) {
       const categoryLower = category.toLowerCase();
@@ -195,7 +221,7 @@ export default function Home() {
             <div className="mb-8 text-center">
               <SpeechButton 
                 onSpeechResult={handleSpeechResult}
-                prompt="Try saying: 'food', 'healthcare', 'mental health', 'housing', or 'near me'"
+                prompt="Try saying: 'food', 'mental health', 'housing', 'healthcare', or 'near me'"
               />
               <button
                 onClick={() => setChatOpen(true)}

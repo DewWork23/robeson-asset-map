@@ -36,6 +36,32 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
       return;
     }
     
+    // First check for specific multi-word phrases
+    const specificPhrases: Record<string, Category> = {
+      'mental health': 'Mental Health & Substance Use',
+      'substance abuse': 'Mental Health & Substance Use',
+      'substance use': 'Mental Health & Substance Use',
+      'law enforcement': 'Law Enforcement',
+      'legal services': 'Legal Services',
+      'crisis services': 'Crisis Services',
+      'food services': 'Food Services',
+      'housing services': 'Housing Services',
+      'healthcare services': 'Healthcare Services',
+      'government services': 'Government Services',
+      'tribal services': 'Tribal Services',
+      'community services': 'Community Services',
+      'faith based': 'Faith-Based Services',
+      'faith-based': 'Faith-Based Services'
+    };
+    
+    // Check specific phrases first
+    for (const [phrase, category] of Object.entries(specificPhrases)) {
+      if (normalizedTranscript.includes(phrase)) {
+        onCategorySelect(category);
+        return;
+      }
+    }
+    
     // Try to match to a category
     for (const category of categories) {
       const categoryLower = category.toLowerCase();
