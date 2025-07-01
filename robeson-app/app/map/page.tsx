@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Organization, CATEGORY_ICONS } from '@/types/organization';
+import { Organization, CATEGORY_ICONS, Category } from '@/types/organization';
 import { loadOrganizationsFromGoogleSheets, filterOrganizations } from '@/lib/googleSheetsParser';
 import OrganizationMap from '@/components/OrganizationMap';
+import CategorySelectionPrompt from '@/components/CategorySelectionPrompt';
 import { categoryToSlug } from '@/utils/categoryUtils';
 
 export default function MapPage() {
@@ -13,6 +14,7 @@ export default function MapPage() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [showPrompt, setShowPrompt] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,6 +44,15 @@ export default function MapPage() {
     }
   }, [loading]);
 
+  const handleCategorySelect = (category: Category | 'all') => {
+    if (category === 'all') {
+      setSelectedCategory(null);
+    } else {
+      setSelectedCategory(category);
+    }
+    setShowPrompt(false);
+  };
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-gray-50 flex items-center justify-center">
@@ -53,27 +64,43 @@ export default function MapPage() {
     );
   }
 
+  if (showPrompt) {
+    return <CategorySelectionPrompt onCategorySelect={handleCategorySelect} />;
+  }
+
   return (
     <div className="fixed inset-0 flex flex-col">
       {/* Header */}
       <div className="bg-white shadow-sm z-10 flex-shrink-0">
         <div className="px-3 sm:px-4 py-2 sm:py-3">
           <div className="flex items-center justify-between gap-2 mb-3">
-            <Link
-              href="/"
+            <button
+              onClick={() => {
+                setShowPrompt(true);
+                setSelectedCategory(null);
+              }}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all text-sm sm:text-base flex-shrink-0"
-              aria-label="Go back to all categories"
+              aria-label="Go back to category selection"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              <span className="hidden sm:inline">Back to Categories</span>
+              <span className="hidden sm:inline">Change Category</span>
               <span className="sm:hidden">Back</span>
-            </Link>
+            </button>
             <h1 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 text-center px-2">
-              All Resources Map
+              {selectedCategory ? `${selectedCategory} Resources` : 'All Resources Map'}
             </h1>
-            <div className="w-16 sm:w-32 flex-shrink-0"></div> {/* Spacer for centering */}
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-all text-sm sm:text-base flex-shrink-0"
+              aria-label="Go to home page"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+              <span className="hidden sm:inline">Home</span>
+            </Link>
           </div>
           
           {/* Category Filter */}

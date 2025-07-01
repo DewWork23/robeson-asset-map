@@ -35,7 +35,7 @@ export type Category =
   | 'Cultural & Information Services';
 
 export const CATEGORY_ICONS: Record<string, string> = {
-  'Crisis Services': '🆘',
+  'Crisis Services': '🚨',
   'Food Services': '🍽️',
   'Housing Services': '🏠',
   'Healthcare Services': '🏥',
