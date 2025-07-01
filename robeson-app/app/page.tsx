@@ -12,12 +12,12 @@ import { categoryToSlug } from '@/utils/categoryUtils';
 import { CONSOLIDATED_CATEGORIES } from '@/utils/categoryConsolidation';
 import FeedbackBanner from '@/components/FeedbackBanner';
 import SpeechButton from '@/components/SpeechButton';
-import HelpButton from '@/components/HelpButton';
 
 export default function Home() {
   const router = useRouter();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
 
   const handleNearMe = () => {
     router.push('/near-me');
@@ -197,7 +197,12 @@ export default function Home() {
                 onSpeechResult={handleSpeechResult}
                 prompt="Try saying: 'food', 'healthcare', 'mental health', 'housing', or 'near me'"
               />
-              <HelpButton stationary />
+              <button
+                onClick={() => setChatOpen(true)}
+                className="mt-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg shadow-xl px-4 py-2 text-sm font-semibold border border-blue-700 hover:scale-105 transition-transform"
+              >
+                Need help finding something? 💬
+              </button>
             </div>
 
             {/* Categories */}
@@ -284,7 +289,12 @@ export default function Home() {
       <FeedbackBanner />
       
       {/* Floating Chat Button */}
-      <ChatBot organizations={organizations} />
+      <ChatBot 
+        organizations={organizations} 
+        isOpen={chatOpen}
+        onOpenChange={setChatOpen}
+        hideFloatingHelpButton={true}
+      />
     </div>
   );
 }

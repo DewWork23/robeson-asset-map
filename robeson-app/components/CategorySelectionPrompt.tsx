@@ -3,7 +3,6 @@
 import { Category, CATEGORY_ICONS, CATEGORY_COLORS } from '@/types/organization';
 import Link from 'next/link';
 import SpeechButton from '@/components/SpeechButton';
-import HelpButton from '@/components/HelpButton';
 
 interface CategorySelectionPromptProps {
   onCategorySelect: (category: Category | 'all') => void;
@@ -103,7 +102,9 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
                 onSpeechResult={handleSpeechResult}
                 prompt="Try saying: 'food', 'doctor', 'housing', 'mental health', 'church', or 'all categories'"
               />
-              <HelpButton stationary />
+              <p className="mt-3 text-sm text-gray-600">
+                Looking for help? Return to the <Link href="/" className="text-blue-600 hover:underline">home page</Link> to use our chat assistant.
+              </p>
             </div>
             
             <p className="text-lg text-gray-600">

@@ -8,6 +8,9 @@ interface ChatBotProps {
   viewMode?: 'list' | 'map';
   onCategorySelect?: (category: string | null) => void;
   onViewModeChange?: (mode: 'list' | 'map') => void;
+  isOpen?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
+  hideFloatingHelpButton?: boolean;
 }
 
 interface Message {
@@ -18,8 +21,24 @@ interface Message {
   component?: React.ReactNode;
 }
 
-export default function ChatBot({ organizations, viewMode = 'list', onCategorySelect, onViewModeChange }: ChatBotProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function ChatBot({ 
+  organizations, 
+  viewMode = 'list', 
+  onCategorySelect, 
+  onViewModeChange,
+  isOpen: controlledIsOpen,
+  onOpenChange,
+  hideFloatingHelpButton = false
+}: ChatBotProps) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+  const setIsOpen = (value: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(value);
+    } else {
+      setInternalIsOpen(value);
+    }
+  };
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [hideHelpButton, setHideHelpButton] = useState(false);
@@ -1358,7 +1377,7 @@ export default function ChatBot({ organizations, viewMode = 'list', onCategorySe
   return (
     <>
       {/* Help message above chat button */}
-      {!isOpen && !hideHelpButton && (
+      {!isOpen && !hideHelpButton && !hideFloatingHelpButton && (
         <button
           onClick={() => setIsOpen(true)}
           className="fixed bottom-32 sm:bottom-24 right-2 sm:right-4 z-40 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg shadow-xl px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base font-semibold border border-blue-700 animate-pulse hover:animate-none hover:scale-105 transition-transform cursor-pointer"
