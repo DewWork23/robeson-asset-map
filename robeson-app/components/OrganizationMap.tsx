@@ -288,13 +288,16 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       if (hasValidCoords && bounds.isValid()) {
         console.log('Bounds are valid, zooming to:', bounds.toBBoxString());
         
-        // Keep a reasonable zoom level even when filtering
-        map.fitBounds(bounds, { 
-          padding: [150, 150], 
-          maxZoom: 11,
-          animate: true,
-          duration: 0.5
-        });
+        // Small delay to ensure map is ready before zooming
+        setTimeout(() => {
+          // Zoom to show all filtered resources with better framing
+          map.fitBounds(bounds, { 
+            padding: [50, 50], 
+            maxZoom: 14,
+            animate: true,
+            duration: 0.5
+          });
+        }, 100);
       }
     } else if (!selectedCategory && countyBorder) {
       console.log('No category selected, keeping wide view');
