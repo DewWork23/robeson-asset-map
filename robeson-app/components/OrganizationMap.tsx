@@ -24,6 +24,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   const organizationLayerRef = useRef<any>(null);
   const lastSelectedOrgRef = useRef<string | null>(null);
   const preventZoomRef = useRef(false);
+  const [isZoomedIn, setIsZoomedIn] = useState(false);
+  const [onResetView, setOnResetView] = useState<(() => void) | null>(null);
 
   useEffect(() => {
     // Dynamically import leaflet and marker cluster
@@ -226,6 +228,12 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       "Towns": townLayer
     };
     L.control.layers(null, overlays, { position: 'topright', collapsed: false }).addTo(map);
+    
+    // Track zoom level changes
+    map.on('zoomend', () => {
+      const currentZoom = map.getZoom();
+      setIsZoomedIn(currentZoom > 11);
+    });
 
     // Cleanup on unmount
     return () => {
@@ -372,6 +380,51 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       });
     });
 
+    // Create reset view function
+    const resetViewFunction = () => {
+      if (!map) return;
+      
+      if (selectedCategory && organizations.length > 0) {
+        // Reset to show all resources in category
+        const bounds = L.latLngBounds([]);
+        let hasValidCoords = false;
+        
+        organizations.forEach(org => {
+          const coords = getCoordinatesFromAddress(org.address);
+          if (coords) {
+            const robesonCenter = [34.6400, -79.1100] as [number, number];
+            const distance = Math.sqrt(
+              Math.pow(coords.lat - robesonCenter[0], 2) + 
+              Math.pow(coords.lon - robesonCenter[1], 2)
+            );
+            
+            if (distance < 0.7) {
+              bounds.extend([coords.lat, coords.lon]);
+              hasValidCoords = true;
+            }
+          }
+        });
+        
+        if (hasValidCoords && bounds.isValid()) {
+          map.fitBounds(bounds, { 
+            padding: isMobile ? [100, 100] : [200, 200], 
+            maxZoom: isMobile ? 13 : 11,
+            animate: true,
+            duration: 0.5
+          });
+        }
+      } else {
+        // Reset to county view
+        map.setView([34.6400, -79.1100], 9, {
+          animate: true,
+          duration: 0.5
+        });
+      }
+    };
+    
+    // Store the reset function
+    setOnResetView(() => resetViewFunction);
+
     // Handle zoom based on selected category
     const shouldSkipZoom = !isMobile && isJustOrgSelection;
     
@@ -488,6 +541,23 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   return (
     <div className="h-full w-full relative">
       <div id="map" className="h-full w-full" />
+      
+      {/* Reset View Button */}
+      {isZoomedIn && onResetView && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] px-4 w-full max-w-xs">
+          <button
+            onClick={onResetView}
+            className="w-full bg-white shadow-xl rounded-full px-4 py-2.5 flex items-center justify-center gap-2 hover:bg-gray-50 active:bg-gray-100 transition-colors border border-gray-300"
+          >
+            <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+            </svg>
+            <span className="text-sm font-semibold text-gray-800 truncate">
+              {selectedCategory ? `Show All ${selectedCategory}` : 'Reset View'}
+            </span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
