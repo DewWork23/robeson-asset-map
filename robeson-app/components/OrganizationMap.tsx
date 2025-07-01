@@ -300,9 +300,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           <h3 style="font-weight: bold; margin: 0 0 4px 0; font-size: 14px; line-height: 1.2;">${org.organizationName}</h3>
           <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">${org.category}</p>
           <div style="margin-top: 8px; display: flex; gap: 4px;">
-            ${org.phone ? `<a href="tel:${org.phone.replace(/\D/g, '')}" style="flex: 1; display: inline-block; padding: 6px 8px; background-color: #16a34a; color: white; text-align: center; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500;">Call</a>` : ''}
-            <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; display: inline-block; padding: 6px 8px; background-color: #2563eb; color: white; text-align: center; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500;">Directions</a>
-            <button onclick="window.dispatchEvent(new CustomEvent('showOrgDetails', { detail: '${org.id}' }))" style="flex: 1; display: inline-block; padding: 6px 8px; background-color: #6b7280; color: white; text-align: center; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500; border: none; cursor: pointer;">Details</button>
+            ${org.phone ? `<a href="tel:${org.phone.replace(/\D/g, '')}" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #16a34a; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500;">Call</a>` : ''}
+            <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500;">Directions</a>
+            <button onclick="window.dispatchEvent(new CustomEvent('showOrgDetails', { detail: '${org.id}' }))" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #6b7280; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500; border: none; cursor: pointer;">Details</button>
           </div>
         </div>
       ` : `
