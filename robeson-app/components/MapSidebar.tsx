@@ -4,12 +4,16 @@ import { useState, useEffect } from 'react';
 import { Organization, CATEGORY_ICONS, CATEGORY_COLORS } from '@/types/organization';
 import { calculateDistance, getCoordinatesFromAddress } from '@/lib/locationUtils';
 import { geocodeAddress } from '@/lib/geocoding';
+import { filterOrganizations } from '@/lib/googleSheetsParser';
 import OrganizationCard from './OrganizationCard';
 
 interface MapSidebarProps {
   organizations: Organization[];
+  allOrganizations: Organization[];
   selectedOrganization?: Organization | null;
+  selectedCategory?: string | null;
   onOrganizationClick?: (org: Organization) => void;
+  onCategoryChange?: (category: string | null) => void;
   isOpen: boolean;
   onToggle: () => void;
 }
@@ -17,9 +21,12 @@ interface MapSidebarProps {
 type SortOption = 'distance' | 'name' | 'category';
 
 export default function MapSidebar({ 
-  organizations, 
+  organizations,
+  allOrganizations,
   selectedOrganization,
+  selectedCategory,
   onOrganizationClick,
+  onCategoryChange,
   isOpen,
   onToggle
 }: MapSidebarProps) {
@@ -144,7 +151,37 @@ export default function MapSidebar({
           <div className="p-4 border-b border-gray-200 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Resources</h2>
-              <span className="text-sm text-gray-500">{organizations.length} locations</span>
+              <span className="text-sm text-gray-500">
+                {selectedCategory ? (
+                  <>Showing {organizations.length} of {allOrganizations.length} locations</>
+                ) : (
+                  <>{organizations.length} locations</>
+                )}
+              </span>
+            </div>
+
+            {/* Category Filter */}
+            <div className="space-y-2">
+              <label htmlFor="category-filter" className="text-sm font-medium text-gray-700">
+                Filter by category:
+              </label>
+              <select
+                id="category-filter"
+                value={selectedCategory || ''}
+                onChange={(e) => onCategoryChange?.(e.target.value || null)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">All Categories ({allOrganizations.length} locations)</option>
+                {Array.from(new Set(allOrganizations.map(org => org.category))).sort().map((category) => {
+                  const icon = CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || '📍';
+                  const count = filterOrganizations(allOrganizations, category).length;
+                  return (
+                    <option key={category} value={category}>
+                      {icon} {category} ({count} locations)
+                    </option>
+                  );
+                })}
+              </select>
             </div>
 
             {/* Location controls */}

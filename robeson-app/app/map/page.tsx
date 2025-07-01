@@ -64,7 +64,7 @@ export default function MapPage() {
       {/* Header */}
       <div className="bg-white shadow-sm z-10 flex-shrink-0">
         <div className="px-3 sm:px-4 py-2 sm:py-3">
-          <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="flex items-center justify-between gap-2">
             <button
               onClick={() => {
                 setShowPrompt(true);
@@ -93,40 +93,6 @@ export default function MapPage() {
               <span className="hidden sm:inline">Home</span>
             </Link>
           </div>
-          
-          {/* Category Filter */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 border-t pt-3">
-            <label htmlFor="category-filter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
-              Filter by category:
-            </label>
-            
-            <select
-              id="category-filter"
-              value={selectedCategory || ''}
-              onChange={(e) => setSelectedCategory(e.target.value || null)}
-              className="w-full sm:w-auto px-4 py-2 pr-10 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-            >
-              <option value="">All Categories ({organizations.length} locations)</option>
-              {Array.from(new Set(organizations.map(org => org.category))).sort().map((category) => {
-                const icon = CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || '📍';
-                const count = filterOrganizations(organizations, category).length;
-                return (
-                  <option key={category} value={category}>
-                    {icon} {category} ({count} locations)
-                  </option>
-                );
-              })}
-            </select>
-            
-            <div className="text-sm text-gray-600">
-              Showing <span className="font-medium">
-                {selectedCategory 
-                  ? filterOrganizations(organizations, selectedCategory).length
-                  : organizations.length
-                }
-              </span> of <span className="font-medium">{organizations.length}</span> locations
-            </div>
-          </div>
         </div>
       </div>
 
@@ -138,9 +104,14 @@ export default function MapPage() {
             ? filterOrganizations(organizations, selectedCategory)
             : organizations
           }
+          allOrganizations={organizations}
           selectedOrganization={selectedOrganization}
+          selectedCategory={selectedCategory}
           onOrganizationClick={(org) => {
             setSelectedOrganization(org);
+          }}
+          onCategoryChange={(category) => {
+            setSelectedCategory(category);
           }}
           isOpen={sidebarOpen}
           onToggle={() => setSidebarOpen(!sidebarOpen)}
