@@ -9,6 +9,7 @@ import OrganizationMap from '@/components/OrganizationMap';
 import CategorySelectionPrompt from '@/components/CategorySelectionPrompt';
 import MapSidebar from '@/components/MapSidebar';
 import MobileOrganizationDetail from '@/components/MobileOrganizationDetail';
+import MobileMapGuide from '@/components/MobileMapGuide';
 import { categoryToSlug } from '@/utils/categoryUtils';
 import { calculateDistance, getCoordinatesFromAddress } from '@/lib/locationUtils';
 
@@ -226,6 +227,9 @@ export default function MapPage() {
           userLocation={userLocation}
         />
       )}
+      
+      {/* Mobile Map Guide for first-time users */}
+      <MobileMapGuide />
     </div>
   );
 }
