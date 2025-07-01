@@ -38,17 +38,21 @@ export default function Home() {
       
       // Check for common keywords
       const keywordMap: Record<string, string[]> = {
-        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger'],
-        'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry'],
-        'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent'],
-        'Healthcare Services': ['health', 'doctor', 'medical', 'hospital', 'clinic'],
-        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance'],
-        'Government Services': ['government', 'benefits', 'assistance'],
-        'Tribal Services': ['tribal', 'lumbee', 'native', 'indian'],
-        'Community Services': ['community', 'support'],
-        'Law Enforcement': ['police', 'sheriff', 'law'],
-        'Education': ['education', 'school', 'learning', 'library'],
-        'Pharmacy': ['pharmacy', 'medicine', 'prescription', 'drug'],
+        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger', 'urgent', 'immediate'],
+        'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry', 'breakfast', 'lunch', 'dinner', 'nutrition', 'groceries'],
+        'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent', 'apartment', 'eviction', 'utilities'],
+        'Healthcare Services': ['health', 'doctor', 'medical', 'hospital', 'clinic', 'sick', 'pain', 'nurse', 'urgent care'],
+        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'anxiety', 'drugs', 'alcohol', 'recovery'],
+        'Government Services': ['government', 'benefits', 'assistance', 'social services', 'welfare', 'medicaid', 'medicare', 'snap'],
+        'Tribal Services': ['tribal', 'lumbee', 'native', 'indian', 'indigenous'],
+        'Community Services': ['community', 'support', 'volunteer', 'help', 'services'],
+        'Community Groups & Development': ['group', 'development', 'organization', 'nonprofit', 'charity'],
+        'Faith-Based Services': ['faith', 'church', 'religious', 'prayer', 'spiritual', 'ministry', 'worship'],
+        'Legal Services': ['legal', 'lawyer', 'attorney', 'court', 'justice', 'rights', 'lawsuit'],
+        'Law Enforcement': ['police', 'sheriff', 'law', 'crime', 'safety', 'report'],
+        'Education': ['education', 'school', 'learning', 'library', 'study', 'class', 'training', 'ged'],
+        'Pharmacy': ['pharmacy', 'medicine', 'prescription', 'drug', 'medication', 'pills'],
+        'Cultural & Information Services': ['cultural', 'information', 'culture', 'arts', 'museum', 'history']
       };
       
       const keywords = keywordMap[category] || [];
@@ -186,11 +190,19 @@ export default function Home() {
           </div>
         ) : (
           <>
+            {/* Voice Search - Prominent Position */}
+            <div className="mb-8 text-center">
+              <SpeechButton 
+                onSpeechResult={handleSpeechResult}
+                prompt="Try saying: 'food', 'healthcare', 'mental health', 'housing', or 'near me'"
+              />
+            </div>
+
             {/* Categories */}
             <div className="mb-6">
               <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
                 <div className="sm:flex-1" />
-                <h2 className="text-lg font-semibold text-gray-900">Select a Category</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Or Select a Category Below</h2>
                 <div className="sm:flex-1 flex justify-center sm:justify-end">
                   <div className="flex gap-2">
                     <button
@@ -260,14 +272,6 @@ export default function Home() {
                     </div>
                   </div>
                 </Link>
-              </div>
-              
-              {/* Voice Search */}
-              <div className="mt-8">
-                <SpeechButton 
-                  onSpeechResult={handleSpeechResult}
-                  prompt="Say a category like 'food', 'healthcare', or 'near me'"
-                />
               </div>
             </div>
           </>

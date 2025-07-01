@@ -47,21 +47,21 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
       
       // Check for common keywords
       const keywordMap: Record<Category, string[]> = {
-        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger'],
-        'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry'],
-        'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent'],
-        'Healthcare Services': ['health', 'doctor', 'medical', 'hospital', 'clinic'],
-        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance'],
-        'Government Services': ['government', 'benefits', 'assistance'],
-        'Tribal Services': ['tribal', 'lumbee', 'native', 'indian'],
-        'Community Services': ['community', 'support'],
-        'Community Groups & Development': ['group', 'development'],
-        'Faith-Based Services': ['faith', 'church', 'religious', 'prayer'],
-        'Legal Services': ['legal', 'lawyer', 'attorney', 'court'],
-        'Law Enforcement': ['police', 'sheriff', 'law'],
-        'Education': ['education', 'school', 'learning', 'library'],
-        'Pharmacy': ['pharmacy', 'medicine', 'prescription', 'drug'],
-        'Cultural & Information Services': ['cultural', 'information', 'culture']
+        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger', 'urgent', 'immediate'],
+        'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry', 'breakfast', 'lunch', 'dinner', 'nutrition', 'groceries'],
+        'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent', 'apartment', 'eviction', 'utilities'],
+        'Healthcare Services': ['health', 'doctor', 'medical', 'hospital', 'clinic', 'sick', 'pain', 'nurse', 'urgent care'],
+        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'anxiety', 'drugs', 'alcohol', 'recovery'],
+        'Government Services': ['government', 'benefits', 'assistance', 'social services', 'welfare', 'medicaid', 'medicare', 'snap'],
+        'Tribal Services': ['tribal', 'lumbee', 'native', 'indian', 'indigenous'],
+        'Community Services': ['community', 'support', 'volunteer', 'help', 'services'],
+        'Community Groups & Development': ['group', 'development', 'organization', 'nonprofit', 'charity'],
+        'Faith-Based Services': ['faith', 'church', 'religious', 'prayer', 'spiritual', 'ministry', 'worship', 'god'],
+        'Legal Services': ['legal', 'lawyer', 'attorney', 'court', 'justice', 'rights', 'lawsuit', 'divorce'],
+        'Law Enforcement': ['police', 'sheriff', 'law', 'crime', 'safety', 'report', 'officer'],
+        'Education': ['education', 'school', 'learning', 'library', 'study', 'class', 'training', 'ged', 'college'],
+        'Pharmacy': ['pharmacy', 'medicine', 'prescription', 'drug', 'medication', 'pills', 'rx'],
+        'Cultural & Information Services': ['cultural', 'information', 'culture', 'arts', 'museum', 'history', 'heritage']
       };
       
       const keywords = keywordMap[category] || [];
@@ -95,9 +95,15 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
               Need help finding something?
             </h1>
-            <p className="text-lg text-gray-600">
-              Select a category below to view resources on the map
+            <p className="text-lg text-gray-600 mb-6">
+              Use voice search or select a category below
             </p>
+            
+            {/* Voice Search - Prominent Position */}
+            <SpeechButton 
+              onSpeechResult={handleSpeechResult}
+              prompt="Try saying: 'food', 'doctor', 'housing', 'mental health', 'church', or 'all categories'"
+            />
           </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
@@ -123,13 +129,6 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
             </button>
           </div>
 
-          {/* Voice Search */}
-          <div className="mt-6">
-            <SpeechButton 
-              onSpeechResult={handleSpeechResult}
-              prompt="Say a category like 'food', 'healthcare', or 'all categories'"
-            />
-          </div>
         </div>
       </div>
     </div>

@@ -80,15 +80,22 @@ export default function SpeechButton({ onSpeechResult, prompt = "Say a category 
       </button>
       
       {isListening && (
-        <p className="text-sm text-gray-600 mt-2 animate-pulse">
-          {prompt}
-        </p>
+        <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200 animate-pulse">
+          <p className="text-base font-medium text-blue-900">
+            🎤 Listening... Speak now!
+          </p>
+          <p className="text-sm text-blue-700 mt-1">
+            {prompt}
+          </p>
+        </div>
       )}
       
       {error && (
-        <p className="text-sm text-red-600 mt-2">
-          {error}
-        </p>
+        <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
+          <p className="text-sm text-red-700">
+            {error}
+          </p>
+        </div>
       )}
     </div>
   );
