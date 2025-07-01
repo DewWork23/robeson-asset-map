@@ -105,7 +105,7 @@ export default function MapPage() {
               <option value="">All Categories ({organizations.length} locations)</option>
               {Array.from(new Set(organizations.map(org => org.category))).sort().map((category) => {
                 const icon = CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || '📍';
-                const count = organizations.filter(org => org.category === category).length;
+                const count = filterOrganizations(organizations, category).length;
                 return (
                   <option key={category} value={category}>
                     {icon} {category} ({count} locations)
