@@ -124,19 +124,22 @@ export default function MapSidebar({
 
   return (
     <>
-      {/* Toggle button for mobile */}
+      {/* Toggle button for mobile with descriptive text */}
       <button
         onClick={onToggle}
-        className="fixed bottom-4 right-4 z-20 lg:hidden bg-white rounded-full p-3 shadow-lg border border-gray-200"
-        aria-label={isOpen ? 'Close list' : 'Open list'}
+        className="fixed bottom-4 right-4 z-20 lg:hidden bg-blue-600 text-white rounded-full shadow-lg border border-blue-700 flex items-center gap-2 px-4 py-3 hover:bg-blue-700 transition-colors"
+        aria-label={isOpen ? 'Close resource list' : 'View resource list'}
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           {isOpen ? (
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           )}
         </svg>
+        <span className="font-medium">
+          {isOpen ? 'Close' : 'View List'}
+        </span>
       </button>
 
       {/* Sidebar/Bottom Sheet */}
@@ -200,6 +203,9 @@ export default function MapSidebar({
 
             {/* Location controls */}
             <div className="space-y-2">
+              <p className="text-xs text-gray-600">
+                Find resources near you:
+              </p>
               <button
                 onClick={getCurrentLocation}
                 disabled={isGettingLocation}
@@ -208,7 +214,7 @@ export default function MapSidebar({
                 {isGettingLocation ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                    Getting location...
+                    Finding your location...
                   </>
                 ) : (
                   <>
@@ -216,7 +222,7 @@ export default function MapSidebar({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    Use My Location
+                    Use My Current Location
                   </>
                 )}
               </button>
@@ -225,45 +231,69 @@ export default function MapSidebar({
                 <p className="text-xs text-red-600">{locationError}</p>
               )}
 
+              <div className="text-center text-xs text-gray-500 my-1">
+                — OR —
+              </div>
+
               {/* Address search */}
-              <form onSubmit={(e) => { e.preventDefault(); handleAddressSearch(); }} className="relative">
-                <input
-                  type="text"
-                  placeholder="Enter an address in Robeson County..."
-                  value={searchAddress}
-                  onChange={(e) => setSearchAddress(e.target.value)}
-                  className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <button 
-                  type="submit"
-                  disabled={isSearching || !searchAddress.trim()}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
-                >
-                  {isSearching ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-400 border-t-transparent" />
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  )}
-                </button>
+              <form onSubmit={(e) => { e.preventDefault(); handleAddressSearch(); }} className="space-y-1">
+                <label htmlFor="address-search" className="text-xs text-gray-600">
+                  Search by town or zip code:
+                </label>
+                <div className="relative">
+                  <input
+                    id="address-search"
+                    type="text"
+                    placeholder="e.g., Lumberton or 28358"
+                    value={searchAddress}
+                    onChange={(e) => setSearchAddress(e.target.value)}
+                    className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <button 
+                    type="submit"
+                    disabled={isSearching || !searchAddress.trim()}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                    aria-label="Search location"
+                  >
+                    {isSearching ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-400 border-t-transparent" />
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </form>
             </div>
 
             {/* Sort options */}
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Sort by:</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="name">Name</option>
-                <option value="distance" disabled={!userLocation && !searchLocation}>
-                  Distance {(!userLocation && !searchLocation) && '(set location first)'}
-                </option>
-                <option value="category">Category</option>
-              </select>
+            <div className="pt-2 border-t border-gray-200">
+              <div className="flex items-center gap-2">
+                <label htmlFor="sort-select" className="text-sm text-gray-600">
+                  Sort list by:
+                </label>
+                <select
+                  id="sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="name">Name (A-Z)</option>
+                  <option value="distance" disabled={!userLocation && !searchLocation}>
+                    {(!userLocation && !searchLocation) 
+                      ? 'Distance (set location first)' 
+                      : 'Distance (nearest first)'
+                    }
+                  </option>
+                  <option value="category">Category</option>
+                </select>
+              </div>
+              {(userLocation || searchLocation) && sortBy === 'distance' && (
+                <p className="text-xs text-green-600 mt-1">
+                  ✓ Showing nearest resources first
+                </p>
+              )}
             </div>
           </div>
 

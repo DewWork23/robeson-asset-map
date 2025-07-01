@@ -141,6 +141,17 @@ export default function MapPage() {
               setSelectedOrganization(org);
             }}
           />
+          
+          {/* Mobile help text when sidebar is closed */}
+          {!sidebarOpen && (
+            <div className="lg:hidden absolute top-4 left-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-md border border-gray-200">
+              <p className="text-sm text-gray-700 text-center">
+                <span className="font-medium">Tap markers on the map</span> to see details, or use the 
+                <span className="font-medium text-blue-600"> "View List" </span> 
+                button to browse all resources
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
