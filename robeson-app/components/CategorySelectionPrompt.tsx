@@ -4,7 +4,6 @@ import { Category, CATEGORY_ICONS, CATEGORY_COLORS } from '@/types/organization'
 import Link from 'next/link';
 import SpeechButton from '@/components/SpeechButton';
 import { useRouter } from 'next/navigation';
-import { useOrganizations } from '@/contexts/OrganizationsContext';
 
 interface CategorySelectionPromptProps {
   onCategorySelect: (category: Category | 'all') => void;
@@ -30,24 +29,9 @@ const categories: Category[] = [
 
 export default function CategorySelectionPrompt({ onCategorySelect }: CategorySelectionPromptProps) {
   const router = useRouter();
-  const { organizations } = useOrganizations();
   
   const handleSpeechResult = (transcript: string) => {
     const normalizedTranscript = transcript.toLowerCase().trim();
-    
-    // First, check if the transcript matches any organization names
-    if (organizations && organizations.length > 0) {
-      const matchingOrgs = organizations.filter(org => 
-        org.organizationName.toLowerCase().includes(normalizedTranscript) ||
-        normalizedTranscript.includes(org.organizationName.toLowerCase())
-      );
-      
-      if (matchingOrgs.length > 0) {
-        console.log(`Found ${matchingOrgs.length} organization(s) matching:`, normalizedTranscript);
-        router.push(`/search?q=${encodeURIComponent(transcript)}&from=voice`);
-        return;
-      }
-    }
     
     // Check for "near me" keywords
     const nearMeKeywords = ['near me', 'nearby', 'closest', 'close to me', 'around me', 'near'];
@@ -63,9 +47,66 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
       return;
     }
     
-    // All other searches go to the search page
-    console.log('Routing to search page with query:', transcript);
-    router.push(`/search?q=${encodeURIComponent(transcript)}&from=voice`);
+    // Check for specific multi-word phrases
+    const specificPhrases: Record<string, Category> = {
+      'mental health': 'Mental Health & Substance Use',
+      'substance abuse': 'Mental Health & Substance Use',
+      'substance use': 'Mental Health & Substance Use',
+      'law enforcement': 'Law Enforcement',
+      'legal services': 'Legal Services',
+      'crisis services': 'Crisis Services',
+      'food services': 'Food Services',
+      'housing services': 'Housing Services',
+      'healthcare services': 'Healthcare Services',
+      'government services': 'Government Services',
+      'tribal services': 'Tribal Services',
+      'community services': 'Community Services',
+      'faith based': 'Faith-Based Services',
+      'faith-based': 'Faith-Based Services'
+    };
+    
+    // Check specific phrases first
+    for (const [phrase, category] of Object.entries(specificPhrases)) {
+      if (normalizedTranscript.includes(phrase)) {
+        onCategorySelect(category);
+        return;
+      }
+    }
+    
+    // Try to match to a category
+    for (const category of categories) {
+      const categoryLower = category.toLowerCase();
+      
+      if (categoryLower.includes(normalizedTranscript) || normalizedTranscript.includes(categoryLower)) {
+        onCategorySelect(category);
+        return;
+      }
+      
+      // Check for common keywords
+      const keywordMap: Record<Category, string[]> = {
+        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger', 'urgent', 'immediate'],
+        'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry', 'breakfast', 'lunch', 'dinner', 'nutrition', 'groceries', "i'm hungry", 'starving'],
+        'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent', 'apartment', 'eviction', 'utilities', "i'm homeless", 'place to stay', 'nowhere to go'],
+        'Healthcare Services': ['health', 'doctor', 'medical', 'hospital', 'clinic', 'sick', 'pain', 'nurse', 'urgent care', "i'm sick", 'hurt', 'injured'],
+        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'depressed', 'anxiety', 'anxious', 'sad', 'worried', 'stress', 'stressed', 'drugs', 'alcohol', 'recovery', "i'm depressed", "i'm anxious", "i'm sad"],
+        'Government Services': ['government', 'benefits', 'assistance', 'social services', 'welfare', 'medicaid', 'medicare', 'snap'],
+        'Tribal Services': ['tribal', 'lumbee', 'native', 'indian', 'indigenous'],
+        'Community Services': ['community', 'support', 'volunteer', 'help', 'services'],
+        'Community Groups & Development': ['group', 'development', 'organization', 'nonprofit', 'charity'],
+        'Faith-Based Services': ['faith', 'church', 'religious', 'prayer', 'spiritual', 'ministry', 'worship', 'god'],
+        'Legal Services': ['legal', 'lawyer', 'attorney', 'court', 'justice', 'rights', 'lawsuit', 'divorce'],
+        'Law Enforcement': ['police', 'sheriff', 'law', 'crime', 'safety', 'report', 'officer'],
+        'Education': ['education', 'school', 'learning', 'library', 'study', 'class', 'training', 'ged', 'college'],
+        'Pharmacy': ['pharmacy', 'medicine', 'prescription', 'drug', 'medication', 'pills', 'rx'],
+        'Cultural & Information Services': ['cultural', 'information', 'culture', 'arts', 'museum', 'history', 'heritage']
+      };
+      
+      const keywords = keywordMap[category] || [];
+      if (keywords.some(keyword => normalizedTranscript.includes(keyword))) {
+        onCategorySelect(category);
+        return;
+      }
+    }
   };
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -96,7 +137,7 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
             <div className="mb-8">
               <SpeechButton 
                 onSpeechResult={handleSpeechResult}
-                prompt="Try saying: organization names (like 'PAWSS'), service types ('food', 'doctor'), or 'near me'"
+                prompt="Try saying: 'food', 'doctor', 'housing', 'mental health', 'church', or 'all categories'"
               />
               <p className="mt-3 text-sm text-gray-600">
                 Looking for help? Return to the <Link href="/" className="text-blue-600 hover:underline">home page</Link> to use our chat assistant.
