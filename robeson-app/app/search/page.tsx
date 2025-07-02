@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Organization, CATEGORY_COLORS, CATEGORY_ICONS } from '@/types/organization';
 import { useOrganizations } from '@/contexts/OrganizationsContext';
 import { categoryToSlug } from '@/utils/categoryUtils';
 
-export default function SearchPage() {
+function SearchContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { organizations, loading } = useOrganizations();
@@ -191,5 +191,23 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-48 mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-24 bg-gray-200 rounded-lg w-96"></div>
+            <div className="h-24 bg-gray-200 rounded-lg w-96"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
   );
 }
