@@ -30,7 +30,7 @@ function SearchContent() {
       
       // Define category keywords mapping
       const categoryKeywords: Record<string, string[]> = {
-        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger', 'urgent', 'immediate', 'depressed', 'suicidal', 'kill myself', 'want to die', 'need help now', 'anxious', 'panic', 'panic attack', 'scared', 'overwhelmed'],
+        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger', 'urgent', 'immediate', 'depressed', 'suicidal', 'kill myself', 'want to die', 'need help now', 'anxious', 'panic', 'panic attack', 'scared', 'overwhelmed', 'dying', 'feel like dying', 'i feel like dying', 'end my life', 'end it all', 'hopeless', 'no hope', 'worthless', 'give up', 'dont want to live', "don't want to live", 'death', 'dead'],
         'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry', 'breakfast', 'lunch', 'dinner', 'nutrition', 'groceries', "i'm hungry", 'starving'],
         'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent', 'apartment', 'eviction', 'utilities', "i'm homeless", 'place to stay', 'nowhere to go'],
         'Healthcare Services': ['health', 'doctor', 'medical', 'hospital', 'clinic', 'sick', 'pain', 'nurse', 'urgent care', "i'm sick", 'hurt', 'injured', 'healthcare', 'physician'],
@@ -38,7 +38,7 @@ function SearchContent() {
         'Healthcare/Treatment': ['health', 'doctor', 'medical', 'treatment', 'therapy', 'clinic', 'care'],
         'Healthcare/Public Health': ['health', 'doctor', 'medical', 'public health', 'wellness', 'prevention'],
         'Mental Health': ['mental', 'counseling', 'therapy', 'psychology', 'psychiatry', 'behavioral'],
-        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'depressed', 'anxiety', 'anxious', 'sad', 'worried', 'stress', 'stressed', 'drugs', 'alcohol', 'recovery', "i'm depressed", "im depressed", "i am depressed", "feeling depressed", "i'm sad", "im sad", "i'm anxious", "im anxious", "i'm stressed", "im stressed", "feel depressed", "feeling sad", "feeling anxious", "feeling stressed", "need help", "suicide", "suicidal", "kill myself", "want to die", "i'm feeling anxious", "i am anxious", "panic", "panic attack", "scared", "i'm scared", "fearful", "overwhelmed", "i'm overwhelmed"],
+        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'depressed', 'anxiety', 'anxious', 'sad', 'worried', 'stress', 'stressed', 'drugs', 'alcohol', 'recovery', "i'm depressed", "im depressed", "i am depressed", "feeling depressed", "i'm sad", "im sad", "i'm anxious", "im anxious", "i'm stressed", "im stressed", "feel depressed", "feeling sad", "feeling anxious", "feeling stressed", "need help", "suicide", "suicidal", "kill myself", "want to die", "i'm feeling anxious", "i am anxious", "panic", "panic attack", "scared", "i'm scared", "fearful", "overwhelmed", "i'm overwhelmed", "feel like dying", "i feel like dying", "hopeless", "i feel hopeless", "worthless", "i feel worthless", "no reason to live", "end my life", "end it all", "give up", "don't want to live", "dont want to live"],
         'Government Services': ['government', 'benefits', 'assistance', 'social services', 'welfare', 'medicaid', 'medicare', 'snap'],
         'Tribal Services': ['tribal', 'lumbee', 'native', 'indian', 'indigenous'],
         'Community Services': ['community', 'support', 'volunteer', 'help', 'services', 'pawss', 'paws'],
@@ -64,7 +64,7 @@ function SearchContent() {
           // Special handling for mental health phrases
           if (category === 'Mental Health & Substance Use' || category === 'Crisis Services') {
             // Check for key mental health terms within the query
-            const mentalHealthTerms = ['depressed', 'sad', 'anxious', 'stressed', 'worried', 'anxiety', 'depression', 'mental', 'suicide', 'help', 'panic', 'scared', 'fear', 'overwhelmed'];
+            const mentalHealthTerms = ['depressed', 'sad', 'anxious', 'stressed', 'worried', 'anxiety', 'depression', 'mental', 'suicide', 'help', 'panic', 'scared', 'fear', 'overwhelmed', 'dying', 'die', 'dead', 'death', 'hopeless', 'worthless', 'end it', 'give up'];
             return mentalHealthTerms.some(term => normalizedQuery.includes(term));
           }
           
@@ -259,7 +259,9 @@ function SearchContent() {
           if (aScore !== bScore) return bScore - aScore;
         } else if (normalizedQuery.includes('depressed') || normalizedQuery.includes('sad') || 
                    normalizedQuery.includes('anxious') || normalizedQuery.includes('mental') ||
-                   normalizedQuery.includes('suicide') || normalizedQuery.includes('stressed')) {
+                   normalizedQuery.includes('suicide') || normalizedQuery.includes('stressed') ||
+                   normalizedQuery.includes('dying') || normalizedQuery.includes('die') ||
+                   normalizedQuery.includes('hopeless') || normalizedQuery.includes('worthless')) {
           // For mental health searches, prioritize mental health services
           const getMentalHealthScore = (org: Organization) => {
             let score = 0;
@@ -267,9 +269,18 @@ function SearchContent() {
             const services = (org.servicesOffered || '').toLowerCase();
             const category = org.category.toLowerCase();
             
-            // Highest priority - suicide/crisis hotlines
-            if (name.includes('suicide prevention') || name.includes('988')) score += 100;
-            if (name.includes('crisis') && (name.includes('hotline') || name.includes('text'))) score += 90;
+            // Highest priority - suicide/crisis hotlines (especially for suicide-related queries)
+            if (normalizedQuery.includes('dying') || normalizedQuery.includes('die') || 
+                normalizedQuery.includes('suicide') || normalizedQuery.includes('kill')) {
+              // Extreme priority for suicide prevention resources
+              if (name.includes('suicide prevention') || name.includes('988')) score += 200;
+              if (name.includes('crisis') && (name.includes('hotline') || name.includes('text'))) score += 180;
+              if (services.includes('crisis') && services.includes('24')) score += 150; // 24-hour crisis services
+            } else {
+              // Normal priority for other mental health queries
+              if (name.includes('suicide prevention') || name.includes('988')) score += 100;
+              if (name.includes('crisis') && (name.includes('hotline') || name.includes('text'))) score += 90;
+            }
             
             // High priority - mental health specific services
             if (name.includes('mental health') || name.includes('behavioral health')) score += 50;
