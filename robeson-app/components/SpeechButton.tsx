@@ -29,28 +29,48 @@ export default function SpeechButton({ onSpeechResult, prompt = "Say a category 
     recognition.lang = 'en-US';
     recognition.continuous = false;
     recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    
+    // Set a timeout to stop listening after 15 seconds (instead of default ~5 seconds)
+    let timeoutId: NodeJS.Timeout;
+    const stopListeningAfterTimeout = () => {
+      timeoutId = setTimeout(() => {
+        if (recognition) {
+          recognition.stop();
+          setError('Recording stopped. Please try again if needed.');
+        }
+      }, 15000); // 15 seconds
+    };
 
     recognition.onstart = () => {
       setIsListening(true);
       setError(null);
+      stopListeningAfterTimeout();
     };
 
     recognition.onresult = (event: any) => {
+      clearTimeout(timeoutId);
       const transcript = event.results[0][0].transcript.toLowerCase();
       setIsListening(false);
       onSpeechResult(transcript);
     };
 
     recognition.onerror = (event: any) => {
+      clearTimeout(timeoutId);
       setIsListening(false);
       if (event.error === 'no-speech') {
         setError('No speech detected. Please try again.');
+      } else if (event.error === 'audio-capture') {
+        setError('No microphone found. Please check your microphone.');
+      } else if (event.error === 'not-allowed') {
+        setError('Microphone access denied. Please allow microphone access.');
       } else {
         setError('Voice search error. Please try again.');
       }
     };
 
     recognition.onend = () => {
+      clearTimeout(timeoutId);
       setIsListening(false);
     };
 
@@ -80,12 +100,15 @@ export default function SpeechButton({ onSpeechResult, prompt = "Say a category 
       </button>
       
       {isListening && (
-        <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200 animate-pulse">
-          <p className="text-base font-medium text-blue-900">
+        <div className="mt-3 p-4 bg-blue-50 rounded-lg border border-blue-200 animate-pulse">
+          <p className="text-lg font-medium text-blue-900">
             🎤 Listening... Speak now!
           </p>
-          <p className="text-sm text-blue-700 mt-1">
+          <p className="text-base text-blue-800 mt-2 font-medium">
             {prompt}
+          </p>
+          <p className="text-sm text-blue-600 mt-2">
+            Recording for up to 15 seconds...
           </p>
         </div>
       )}
