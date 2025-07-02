@@ -119,17 +119,36 @@ function SearchContent() {
           
           // Also check for healthcare organizations that might be miscategorized
           // (e.g., hospitals categorized as "Crisis Services")
-          if (normalizedQuery === 'doctor' || normalizedQuery === 'medical' || normalizedQuery === 'healthcare') {
+          if (normalizedQuery === 'doctor' || normalizedQuery === 'medical' || normalizedQuery === 'healthcare' || normalizedQuery === 'physician') {
             const servicesText = (org.servicesOffered || '').toLowerCase();
             const descText = (org.description || '').toLowerCase();
-            const isHealthcare = servicesText.includes('medical') || 
-                               servicesText.includes('health') || 
-                               servicesText.includes('hospital') ||
-                               servicesText.includes('clinic') ||
-                               servicesText.includes('care') ||
-                               descText.includes('healthcare') ||
-                               descText.includes('medical');
-            return isHealthcare;
+            const orgName = org.organizationName.toLowerCase();
+            
+            // More specific medical provider detection
+            const isMedicalProvider = 
+              // Direct medical facilities
+              orgName.includes('hospital') ||
+              orgName.includes('clinic') ||
+              orgName.includes('health center') ||
+              orgName.includes('medical') ||
+              orgName.includes('physician') ||
+              orgName.includes('doctor') ||
+              orgName.includes('practice') ||
+              // Service descriptions
+              servicesText.includes('primary care') ||
+              servicesText.includes('medical care') ||
+              servicesText.includes('medical services') ||
+              servicesText.includes('acute care') ||
+              servicesText.includes('urgent care') ||
+              servicesText.includes('emergency care') ||
+              servicesText.includes('physician') ||
+              servicesText.includes('diagnosis') ||
+              servicesText.includes('treatment') && servicesText.includes('medical') ||
+              descText.includes('healthcare system') ||
+              descText.includes('medical services') ||
+              descText.includes('hospital');
+            
+            return isMedicalProvider;
           }
           
           return false;
@@ -165,6 +184,39 @@ function SearchContent() {
         // Direct matches first
         if (aIsDirectMatch && !bIsDirectMatch) return -1;
         if (!aIsDirectMatch && bIsDirectMatch) return 1;
+        
+        // For medical searches, prioritize actual medical providers
+        if (normalizedQuery === 'doctor' || normalizedQuery === 'medical' || normalizedQuery === 'physician') {
+          const aName = a.organizationName.toLowerCase();
+          const bName = b.organizationName.toLowerCase();
+          const aServices = (a.servicesOffered || '').toLowerCase();
+          const bServices = (b.servicesOffered || '').toLowerCase();
+          
+          // Calculate medical relevance scores
+          const getMedicalScore = (name: string, services: string) => {
+            let score = 0;
+            // High priority medical terms
+            if (name.includes('hospital')) score += 10;
+            if (name.includes('clinic')) score += 10;
+            if (name.includes('health') && name.includes('practice')) score += 10;
+            if (name.includes('medical')) score += 8;
+            if (services.includes('primary care')) score += 8;
+            if (services.includes('urgent care')) score += 8;
+            if (services.includes('emergency care')) score += 7;
+            if (services.includes('medical services')) score += 6;
+            // Lower priority for general health services
+            if (name.includes('pharmacy')) score += 3;
+            if (name.includes('behavioral')) score += 2;
+            if (name.includes('mental')) score += 2;
+            if (name.includes('support group')) score -= 5;
+            return score;
+          };
+          
+          const aScore = getMedicalScore(aName, aServices);
+          const bScore = getMedicalScore(bName, bServices);
+          
+          if (aScore !== bScore) return bScore - aScore;
+        }
         
         // Within direct matches, name matches first
         if (aIsDirectMatch && bIsDirectMatch) {
