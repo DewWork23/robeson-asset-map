@@ -102,28 +102,21 @@ function SearchContent() {
                          fuzzyMatch(orgName, normalizedQuery) ||
                          fuzzyMatch(searchableText, normalizedQuery);
         
-        // Check for category matches
-        const categoryMatch = matchedCategories.includes(org.category);
-        
-        return textMatch || categoryMatch;
+        // Only return true if we have an actual text match
+        return textMatch;
       });
 
-      // Determine if this is primarily a category keyword search
-      const isCategorySearch = matchedCategories.length > 0;
-      
       let allResults = [...directMatches];
       
-      if (isCategorySearch) {
-        // For category keyword searches, show ALL organizations in those categories
-        const categoryOrgs = organizations.filter(org => 
-          matchedCategories.includes(org.category) && 
-          !directMatches.some(match => match.id === org.id)
+      // If we have no direct text matches but have category keyword matches,
+      // show organizations from those categories
+      if (directMatches.length === 0 && matchedCategories.length > 0) {
+        // For pure category keyword searches with no text matches
+        allResults = organizations.filter(org => 
+          matchedCategories.includes(org.category)
         );
-        
-        // Add all organizations from matched categories
-        allResults = [...directMatches, ...categoryOrgs];
       } else if (directMatches.length > 0) {
-        // For text-based searches, show similar organizations
+        // For searches with actual text matches, show similar organizations
         const matchedCats = [...new Set(directMatches.map(org => org.category))];
         
         // Find similar organizations in the same categories
