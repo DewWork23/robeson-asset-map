@@ -30,7 +30,21 @@ export default function Home() {
     console.log('Voice search transcript:', transcript);
     console.log('Normalized transcript:', normalizedTranscript);
     
-    // First check for specific multi-word phrases
+    // First, check if the transcript matches any organization names
+    if (organizations && organizations.length > 0) {
+      const matchingOrgs = organizations.filter(org => 
+        org.organizationName.toLowerCase().includes(normalizedTranscript) ||
+        normalizedTranscript.includes(org.organizationName.toLowerCase())
+      );
+      
+      if (matchingOrgs.length > 0) {
+        console.log(`Found ${matchingOrgs.length} organization(s) matching:`, normalizedTranscript);
+        router.push(`/search?q=${encodeURIComponent(transcript)}&from=voice`);
+        return;
+      }
+    }
+    
+    // Check for specific multi-word phrases
     const specificPhrases: Record<string, string> = {
       'mental health': 'Mental Health & Substance Use',
       'substance abuse': 'Mental Health & Substance Use',
@@ -202,7 +216,7 @@ export default function Home() {
             <div className="mb-8 text-center">
               <SpeechButton 
                 onSpeechResult={handleSpeechResult}
-                prompt="Try saying: 'food', 'mental health', 'housing', 'healthcare', or 'near me'"
+                prompt="Try saying: organization names (like 'PAWSS'), service types ('food', 'doctor'), or 'near me'"
               />
               <button
                 onClick={() => setChatOpen(true)}

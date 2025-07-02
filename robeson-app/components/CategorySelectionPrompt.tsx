@@ -3,6 +3,8 @@
 import { Category, CATEGORY_ICONS, CATEGORY_COLORS } from '@/types/organization';
 import Link from 'next/link';
 import SpeechButton from '@/components/SpeechButton';
+import { useRouter } from 'next/navigation';
+import { useOrganizations } from '@/contexts/OrganizationsContext';
 
 interface CategorySelectionPromptProps {
   onCategorySelect: (category: Category | 'all') => void;
@@ -27,8 +29,33 @@ const categories: Category[] = [
 ];
 
 export default function CategorySelectionPrompt({ onCategorySelect }: CategorySelectionPromptProps) {
+  const router = useRouter();
+  const { organizations } = useOrganizations();
+  
   const handleSpeechResult = (transcript: string) => {
     const normalizedTranscript = transcript.toLowerCase().trim();
+    
+    // First, check if the transcript matches any organization names
+    if (organizations && organizations.length > 0) {
+      const matchingOrgs = organizations.filter(org => 
+        org.organizationName.toLowerCase().includes(normalizedTranscript) ||
+        normalizedTranscript.includes(org.organizationName.toLowerCase())
+      );
+      
+      if (matchingOrgs.length > 0) {
+        console.log(`Found ${matchingOrgs.length} organization(s) matching:`, normalizedTranscript);
+        router.push(`/search?q=${encodeURIComponent(transcript)}&from=voice`);
+        return;
+      }
+    }
+    
+    // Check for "near me" keywords
+    const nearMeKeywords = ['near me', 'nearby', 'closest', 'close to me', 'around me', 'near'];
+    if (nearMeKeywords.some(keyword => normalizedTranscript.includes(keyword))) {
+      console.log('Detected "near me" request, redirecting to near-me page');
+      router.push('/near-me');
+      return;
+    }
     
     // Check for "all" or "everything"
     if (normalizedTranscript.includes('all') || normalizedTranscript.includes('everything')) {
@@ -126,7 +153,7 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
             <div className="mb-8">
               <SpeechButton 
                 onSpeechResult={handleSpeechResult}
-                prompt="Try saying: 'food', 'doctor', 'housing', 'mental health', 'church', or 'all categories'"
+                prompt="Try saying: organization names (like 'PAWSS'), service types ('food', 'doctor'), or 'near me'"
               />
               <p className="mt-3 text-sm text-gray-600">
                 Looking for help? Return to the <Link href="/" className="text-blue-600 hover:underline">home page</Link> to use our chat assistant.
