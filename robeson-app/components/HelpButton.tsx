@@ -121,6 +121,12 @@ export default function HelpButton({ stationary = false }: HelpButtonProps) {
               <p className="text-sm text-gray-600 text-center">
                 Still need help? Call 211 for assistance finding resources.
               </p>
+              <p className="text-sm text-gray-600 text-center mt-2">
+                For app feedback, email{' '}
+                <a href="mailto:jordan.dew@uncp.edu" className="text-blue-600 hover:underline">
+                  jordan.dew@uncp.edu
+                </a>
+              </p>
             </div>
           </div>
         </div>
