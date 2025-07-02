@@ -30,7 +30,7 @@ function SearchContent() {
       
       // Define category keywords mapping
       const categoryKeywords: Record<string, string[]> = {
-        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger', 'urgent', 'immediate', 'depressed', 'suicidal', 'kill myself', 'want to die', 'need help now'],
+        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger', 'urgent', 'immediate', 'depressed', 'suicidal', 'kill myself', 'want to die', 'need help now', 'anxious', 'panic', 'panic attack', 'scared', 'overwhelmed'],
         'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry', 'breakfast', 'lunch', 'dinner', 'nutrition', 'groceries', "i'm hungry", 'starving'],
         'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent', 'apartment', 'eviction', 'utilities', "i'm homeless", 'place to stay', 'nowhere to go'],
         'Healthcare Services': ['health', 'doctor', 'medical', 'hospital', 'clinic', 'sick', 'pain', 'nurse', 'urgent care', "i'm sick", 'hurt', 'injured', 'healthcare', 'physician'],
@@ -38,7 +38,7 @@ function SearchContent() {
         'Healthcare/Treatment': ['health', 'doctor', 'medical', 'treatment', 'therapy', 'clinic', 'care'],
         'Healthcare/Public Health': ['health', 'doctor', 'medical', 'public health', 'wellness', 'prevention'],
         'Mental Health': ['mental', 'counseling', 'therapy', 'psychology', 'psychiatry', 'behavioral'],
-        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'depressed', 'anxiety', 'anxious', 'sad', 'worried', 'stress', 'stressed', 'drugs', 'alcohol', 'recovery', "i'm depressed", "im depressed", "i am depressed", "feeling depressed", "i'm sad", "im sad", "i'm anxious", "im anxious", "i'm stressed", "im stressed", "feel depressed", "feeling sad", "feeling anxious", "feeling stressed", "need help", "suicide", "suicidal", "kill myself", "want to die"],
+        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'depressed', 'anxiety', 'anxious', 'sad', 'worried', 'stress', 'stressed', 'drugs', 'alcohol', 'recovery', "i'm depressed", "im depressed", "i am depressed", "feeling depressed", "i'm sad", "im sad", "i'm anxious", "im anxious", "i'm stressed", "im stressed", "feel depressed", "feeling sad", "feeling anxious", "feeling stressed", "need help", "suicide", "suicidal", "kill myself", "want to die", "i'm feeling anxious", "i am anxious", "panic", "panic attack", "scared", "i'm scared", "fearful", "overwhelmed", "i'm overwhelmed"],
         'Government Services': ['government', 'benefits', 'assistance', 'social services', 'welfare', 'medicaid', 'medicare', 'snap'],
         'Tribal Services': ['tribal', 'lumbee', 'native', 'indian', 'indigenous'],
         'Community Services': ['community', 'support', 'volunteer', 'help', 'services', 'pawss', 'paws'],
@@ -62,9 +62,9 @@ function SearchContent() {
           if (keyword.includes(normalizedQuery) && normalizedQuery.split(' ').length === 1) return true;
           
           // Special handling for mental health phrases
-          if (category === 'Mental Health & Substance Use') {
+          if (category === 'Mental Health & Substance Use' || category === 'Crisis Services') {
             // Check for key mental health terms within the query
-            const mentalHealthTerms = ['depressed', 'sad', 'anxious', 'stressed', 'worried', 'anxiety', 'depression', 'mental', 'suicide', 'help'];
+            const mentalHealthTerms = ['depressed', 'sad', 'anxious', 'stressed', 'worried', 'anxiety', 'depression', 'mental', 'suicide', 'help', 'panic', 'scared', 'fear', 'overwhelmed'];
             return mentalHealthTerms.some(term => normalizedQuery.includes(term));
           }
           
