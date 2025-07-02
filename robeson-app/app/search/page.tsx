@@ -27,23 +27,86 @@ function SearchContent() {
       // Search organizations by name, services, and description
       const normalizedQuery = query.toLowerCase().trim();
       
-      // First, find direct matches
+      // Define category keywords mapping
+      const categoryKeywords: Record<string, string[]> = {
+        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger', 'urgent', 'immediate'],
+        'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry', 'breakfast', 'lunch', 'dinner', 'nutrition', 'groceries', "i'm hungry", 'starving'],
+        'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent', 'apartment', 'eviction', 'utilities', "i'm homeless", 'place to stay', 'nowhere to go'],
+        'Healthcare Services': ['health', 'doctor', 'medical', 'hospital', 'clinic', 'sick', 'pain', 'nurse', 'urgent care', "i'm sick", 'hurt', 'injured', 'healthcare', 'physician'],
+        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'depressed', 'anxiety', 'anxious', 'sad', 'worried', 'stress', 'stressed', 'drugs', 'alcohol', 'recovery'],
+        'Government Services': ['government', 'benefits', 'assistance', 'social services', 'welfare', 'medicaid', 'medicare', 'snap'],
+        'Tribal Services': ['tribal', 'lumbee', 'native', 'indian', 'indigenous'],
+        'Community Services': ['community', 'support', 'volunteer', 'help', 'services', 'pawss', 'paws'],
+        'Community Groups & Development': ['group', 'development', 'organization', 'nonprofit', 'charity'],
+        'Faith-Based Services': ['faith', 'church', 'religious', 'prayer', 'spiritual', 'ministry', 'worship', 'god'],
+        'Legal Services': ['legal', 'lawyer', 'attorney', 'court', 'justice', 'rights', 'lawsuit', 'divorce'],
+        'Law Enforcement': ['police', 'sheriff', 'law', 'crime', 'safety', 'report', 'officer'],
+        'Education': ['education', 'school', 'learning', 'library', 'study', 'class', 'training', 'ged', 'college'],
+        'Pharmacy': ['pharmacy', 'medicine', 'prescription', 'drug', 'medication', 'pills', 'rx'],
+        'Cultural & Information Services': ['cultural', 'information', 'culture', 'arts', 'museum', 'history', 'heritage']
+      };
+      
+      // First, check if query matches any category keywords
+      let matchedCategories: string[] = [];
+      for (const [category, keywords] of Object.entries(categoryKeywords)) {
+        if (keywords.some(keyword => normalizedQuery.includes(keyword) || keyword.includes(normalizedQuery))) {
+          matchedCategories.push(category);
+        }
+      }
+      
+      // Helper function for fuzzy matching
+      const fuzzyMatch = (str1: string, str2: string): boolean => {
+        // Remove spaces and special characters for comparison
+        const clean1 = str1.replace(/[^a-z0-9]/g, '');
+        const clean2 = str2.replace(/[^a-z0-9]/g, '');
+        
+        // Check if one contains the other
+        if (clean1.includes(clean2) || clean2.includes(clean1)) return true;
+        
+        // Check for common misspellings/pronunciations
+        const soundsLike: Record<string, string[]> = {
+          'pawss': ['pause', 'paws', 'poss', 'pass'],
+          'pause': ['pawss', 'paws', 'poss', 'pass'],
+        };
+        
+        if (soundsLike[clean1]?.includes(clean2) || soundsLike[clean2]?.includes(clean1)) return true;
+        
+        return false;
+      };
+      
+      // Find direct matches in organization names, services, and descriptions
       const directMatches = organizations.filter(org => {
         const orgName = org.organizationName.toLowerCase();
         const searchableText = `${org.organizationName} ${org.servicesOffered || ''} ${org.description || ''}`.toLowerCase();
         
-        // Check for exact match or contains
-        return orgName.includes(normalizedQuery) || 
-               normalizedQuery.includes(orgName) ||
-               searchableText.includes(normalizedQuery);
+        // Check for text matches (including fuzzy)
+        const textMatch = orgName.includes(normalizedQuery) || 
+                         normalizedQuery.includes(orgName) ||
+                         searchableText.includes(normalizedQuery) ||
+                         fuzzyMatch(orgName, normalizedQuery);
+        
+        // Check for category matches
+        const categoryMatch = matchedCategories.includes(org.category);
+        
+        return textMatch || categoryMatch;
       });
 
-      // If we found direct matches, also find similar organizations in the same category
+      // If we only have category matches and not many direct text matches, 
+      // just show all organizations in those categories
       let allResults = [...directMatches];
       
-      if (directMatches.length > 0) {
-        // Get categories of matched organizations
-        const matchedCategories = [...new Set(directMatches.map(org => org.category))];
+      if (matchedCategories.length > 0 && directMatches.length < 20) {
+        // Get all organizations in matched categories
+        const categoryOrgs = organizations.filter(org => 
+          matchedCategories.includes(org.category) && 
+          !directMatches.some(match => match.id === org.id)
+        );
+        
+        // Add all category matches if we have keyword matches
+        allResults = [...directMatches, ...categoryOrgs];
+      } else if (directMatches.length > 0) {
+        // Original logic for when we have text matches
+        const matchedCats = [...new Set(directMatches.map(org => org.category))];
         
         // Find similar organizations in the same categories
         const similarOrgs = organizations.filter(org => {
@@ -51,7 +114,7 @@ function SearchContent() {
           if (directMatches.some(match => match.id === org.id)) return false;
           
           // Include if in same category
-          return matchedCategories.includes(org.category);
+          return matchedCats.includes(org.category);
         });
         
         // Add up to 10 similar organizations
