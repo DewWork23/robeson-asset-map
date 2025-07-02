@@ -37,9 +37,9 @@ export default function SpeechButton({ onSpeechResult, prompt = "Say a category 
       timeoutId = setTimeout(() => {
         if (recognition) {
           recognition.stop();
-          setError('Recording stopped. Please try again if needed.');
+          setError('Recording time limit reached (1 minute). Click the button to try again.');
         }
-      }, 15000); // 15 seconds
+      }, 60000); // 60 seconds (1 minute)
     };
 
     recognition.onstart = () => {
@@ -102,13 +102,13 @@ export default function SpeechButton({ onSpeechResult, prompt = "Say a category 
       {isListening && (
         <div className="mt-3 p-4 bg-blue-50 rounded-lg border border-blue-200 animate-pulse">
           <p className="text-lg font-medium text-blue-900">
-            🎤 Listening... Speak now!
+            🎤 Listening... Speak when ready!
           </p>
           <p className="text-base text-blue-800 mt-2 font-medium">
             {prompt}
           </p>
           <p className="text-sm text-blue-600 mt-2">
-            Recording for up to 15 seconds...
+            You have up to 60 seconds - take your time to think about what you need.
           </p>
         </div>
       )}
