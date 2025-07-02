@@ -54,34 +54,20 @@ function SearchContent() {
         }
       }
       
-      // Helper function for fuzzy matching
+      // Helper function for fuzzy matching - only for specific known variations
       const fuzzyMatch = (str1: string, str2: string): boolean => {
-        // Split into words for better matching
-        const words1 = str1.toLowerCase().split(/\s+/);
-        const words2 = str2.toLowerCase().split(/\s+/);
+        const clean1 = str1.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const clean2 = str2.toLowerCase().replace(/[^a-z0-9]/g, '');
         
-        // Check if any word matches
-        for (const word1 of words1) {
-          for (const word2 of words2) {
-            // Remove special characters for comparison
-            const clean1 = word1.replace(/[^a-z0-9]/g, '');
-            const clean2 = word2.replace(/[^a-z0-9]/g, '');
-            
-            // Check if one contains the other
-            if (clean1.includes(clean2) || clean2.includes(clean1)) return true;
-            
-            // Check for common misspellings/pronunciations
-            const soundsLike: Record<string, string[]> = {
-              'pawss': ['pause', 'paws', 'poss', 'pass', 'pauss'],
-              'pause': ['pawss', 'paws', 'poss', 'pass', 'pauss'],
-              'paws': ['pause', 'pawss', 'poss', 'pass', 'pauss'],
-            };
-            
-            if (soundsLike[clean1]?.includes(clean2) || soundsLike[clean2]?.includes(clean1)) return true;
-          }
-        }
+        // Only match specific known variations, not partial matches
+        const soundsLike: Record<string, string[]> = {
+          'pause': ['pawss', 'paws'],
+          'pawss': ['pause', 'paws'],
+          'paws': ['pause', 'pawss'],
+        };
         
-        return false;
+        // Check if the search term matches any known variations
+        return soundsLike[clean2]?.some(variant => clean1.includes(variant)) || false;
       };
       
       // Find direct matches in organization names, services, and descriptions
@@ -95,12 +81,20 @@ function SearchContent() {
           return true;
         }
         
-        // Check for text matches (including fuzzy)
-        const textMatch = orgName.includes(normalizedQuery) || 
-                         normalizedQuery.includes(orgName) ||
-                         searchableText.includes(normalizedQuery) ||
-                         fuzzyMatch(orgName, normalizedQuery) ||
-                         fuzzyMatch(searchableText, normalizedQuery);
+        // For short queries, only match whole words to avoid false positives
+        let textMatch = false;
+        
+        if (normalizedQuery.length <= 5) {
+          // For short queries like "pause", match whole words only
+          const wordBoundaryRegex = new RegExp(`\\b${normalizedQuery}\\b`, 'i');
+          textMatch = wordBoundaryRegex.test(orgName) || 
+                     wordBoundaryRegex.test(searchableText) ||
+                     fuzzyMatch(orgName, normalizedQuery);
+        } else {
+          // For longer queries, use contains matching
+          textMatch = orgName.includes(normalizedQuery) || 
+                     searchableText.includes(normalizedQuery);
+        }
         
         // Only return true if we have an actual text match
         return textMatch;
