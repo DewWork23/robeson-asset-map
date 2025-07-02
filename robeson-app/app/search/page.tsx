@@ -159,21 +159,21 @@ function SearchContent() {
                   <div
                     className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
                   >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-1">
-                      {org.organizationName}
-                    </h2>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-xl">{CATEGORY_ICONS[org.category as keyof typeof CATEGORY_ICONS] || '📍'}</span>
-                      <span className={`px-2 py-1 rounded-full text-white text-xs font-medium ${CATEGORY_COLORS[org.category as keyof typeof CATEGORY_COLORS] || 'bg-gray-500'}`}>
-                        {org.category}
-                      </span>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-1">
+                          {org.organizationName}
+                        </h2>
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-xl">{CATEGORY_ICONS[org.category as keyof typeof CATEGORY_ICONS] || '📍'}</span>
+                          <span className={`px-2 py-1 rounded-full text-white text-xs font-medium ${CATEGORY_COLORS[org.category as keyof typeof CATEGORY_COLORS] || 'bg-gray-500'}`}>
+                            {org.category}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="space-y-2 text-sm text-gray-600 mb-4">
+                    <div className="space-y-2 text-sm text-gray-600 mb-4">
                   <p className="flex items-start gap-2">
                     <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -197,9 +197,9 @@ function SearchContent() {
                       {org.servicesOffered.length > 150 && '...'}
                     </p>
                   )}
-                </div>
+                    </div>
 
-                <div className="flex gap-3">
+                    <div className="flex gap-3">
                   <Link
                     href={`/category/${categoryToSlug(org.category)}?org=${org.id}`}
                     className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center"
@@ -222,6 +222,7 @@ function SearchContent() {
                       Call Now
                     </a>
                   )}
+                    </div>
                   </div>
                 </div>
               );
