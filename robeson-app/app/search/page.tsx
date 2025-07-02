@@ -33,6 +33,10 @@ function SearchContent() {
         'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry', 'breakfast', 'lunch', 'dinner', 'nutrition', 'groceries', "i'm hungry", 'starving'],
         'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent', 'apartment', 'eviction', 'utilities', "i'm homeless", 'place to stay', 'nowhere to go'],
         'Healthcare Services': ['health', 'doctor', 'medical', 'hospital', 'clinic', 'sick', 'pain', 'nurse', 'urgent care', "i'm sick", 'hurt', 'injured', 'healthcare', 'physician'],
+        'Healthcare/Medical': ['health', 'doctor', 'medical', 'hospital', 'clinic', 'sick', 'pain', 'nurse', 'urgent care', "i'm sick", 'hurt', 'injured', 'healthcare', 'physician'],
+        'Healthcare/Treatment': ['health', 'doctor', 'medical', 'treatment', 'therapy', 'clinic', 'care'],
+        'Healthcare/Public Health': ['health', 'doctor', 'medical', 'public health', 'wellness', 'prevention'],
+        'Mental Health': ['mental', 'counseling', 'therapy', 'psychology', 'psychiatry', 'behavioral'],
         'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'depressed', 'anxiety', 'anxious', 'sad', 'worried', 'stress', 'stressed', 'drugs', 'alcohol', 'recovery'],
         'Government Services': ['government', 'benefits', 'assistance', 'social services', 'welfare', 'medicaid', 'medicare', 'snap'],
         'Tribal Services': ['tribal', 'lumbee', 'native', 'indian', 'indigenous'],
@@ -84,14 +88,17 @@ function SearchContent() {
         // For short queries, only match whole words to avoid false positives
         let textMatch = false;
         
-        if (normalizedQuery.length <= 5) {
-          // For short queries like "pause", match whole words only
+        // Always use word boundary matching for single-word queries to avoid partial matches
+        const isSingleWord = !normalizedQuery.includes(' ');
+        
+        if (isSingleWord && normalizedQuery.length <= 10) {
+          // For single words like "pause" or "doctor", match whole words only
           const wordBoundaryRegex = new RegExp(`\\b${normalizedQuery}\\b`, 'i');
           textMatch = wordBoundaryRegex.test(orgName) || 
                      wordBoundaryRegex.test(searchableText) ||
                      fuzzyMatch(orgName, normalizedQuery);
         } else {
-          // For longer queries, use contains matching
+          // For longer queries or phrases, use contains matching
           textMatch = orgName.includes(normalizedQuery) || 
                      searchableText.includes(normalizedQuery);
         }
@@ -109,6 +116,7 @@ function SearchContent() {
         allResults = organizations.filter(org => 
           matchedCategories.includes(org.category)
         );
+        console.log(`Category search for "${normalizedQuery}" found ${allResults.length} organizations in categories:`, matchedCategories);
       } else if (directMatches.length > 0) {
         // For searches with actual text matches, show similar organizations
         const matchedCats = [...new Set(directMatches.map(org => org.category))];
