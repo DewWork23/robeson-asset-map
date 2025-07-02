@@ -12,6 +12,7 @@ function SearchContent() {
   const searchParams = useSearchParams();
   const { organizations, loading } = useOrganizations();
   const [searchResults, setSearchResults] = useState<Organization[]>([]);
+  const [directMatchIds, setDirectMatchIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [isVoiceSearch, setIsVoiceSearch] = useState(false);
 
@@ -25,21 +26,60 @@ function SearchContent() {
     if (query && organizations.length > 0) {
       // Search organizations by name, services, and description
       const normalizedQuery = query.toLowerCase().trim();
-      const results = organizations.filter(org => {
+      
+      // First, find direct matches
+      const directMatches = organizations.filter(org => {
+        const orgName = org.organizationName.toLowerCase();
         const searchableText = `${org.organizationName} ${org.servicesOffered || ''} ${org.description || ''}`.toLowerCase();
-        return searchableText.includes(normalizedQuery);
+        
+        // Check for exact match or contains
+        return orgName.includes(normalizedQuery) || 
+               normalizedQuery.includes(orgName) ||
+               searchableText.includes(normalizedQuery);
       });
 
-      // Sort results by relevance (name matches first)
-      results.sort((a, b) => {
-        const aNameMatch = a.organizationName.toLowerCase().includes(normalizedQuery);
-        const bNameMatch = b.organizationName.toLowerCase().includes(normalizedQuery);
-        if (aNameMatch && !bNameMatch) return -1;
-        if (!aNameMatch && bNameMatch) return 1;
+      // If we found direct matches, also find similar organizations in the same category
+      let allResults = [...directMatches];
+      
+      if (directMatches.length > 0) {
+        // Get categories of matched organizations
+        const matchedCategories = [...new Set(directMatches.map(org => org.category))];
+        
+        // Find similar organizations in the same categories
+        const similarOrgs = organizations.filter(org => {
+          // Don't include if already in direct matches
+          if (directMatches.some(match => match.id === org.id)) return false;
+          
+          // Include if in same category
+          return matchedCategories.includes(org.category);
+        });
+        
+        // Add up to 10 similar organizations
+        allResults = [...directMatches, ...similarOrgs.slice(0, 10)];
+      }
+
+      // Sort results by relevance
+      allResults.sort((a, b) => {
+        const aIsDirectMatch = directMatches.some(match => match.id === a.id);
+        const bIsDirectMatch = directMatches.some(match => match.id === b.id);
+        
+        // Direct matches first
+        if (aIsDirectMatch && !bIsDirectMatch) return -1;
+        if (!aIsDirectMatch && bIsDirectMatch) return 1;
+        
+        // Within direct matches, name matches first
+        if (aIsDirectMatch && bIsDirectMatch) {
+          const aNameMatch = a.organizationName.toLowerCase().includes(normalizedQuery);
+          const bNameMatch = b.organizationName.toLowerCase().includes(normalizedQuery);
+          if (aNameMatch && !bNameMatch) return -1;
+          if (!aNameMatch && bNameMatch) return 1;
+        }
+        
         return 0;
       });
 
-      setSearchResults(results);
+      setSearchResults(allResults);
+      setDirectMatchIds(new Set(directMatches.map(org => org.id)));
     }
   }, [searchParams, organizations]);
 
@@ -84,7 +124,14 @@ function SearchContent() {
           </h1>
           <p className="text-lg text-gray-600">
             {searchResults.length > 0 
-              ? `Found ${searchResults.length} result${searchResults.length > 1 ? 's' : ''} for "${searchQuery}"`
+              ? (
+                <>
+                  Found {directMatchIds.size} direct match{directMatchIds.size !== 1 ? 'es' : ''} for "{searchQuery}"
+                  {searchResults.length > directMatchIds.size && (
+                    <span className="text-sm"> (showing {searchResults.length - directMatchIds.size} similar resources too)</span>
+                  )}
+                </>
+              )
               : `No results found for "${searchQuery}"`
             }
           </p>
@@ -92,11 +139,26 @@ function SearchContent() {
 
         {searchResults.length > 0 ? (
           <div className="space-y-4">
-            {searchResults.map((org) => (
-              <div
-                key={org.id}
-                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
-              >
+            {searchResults.map((org, index) => {
+              const isDirectMatch = directMatchIds.has(org.id);
+              const prevIsDirectMatch = index > 0 ? directMatchIds.has(searchResults[index - 1].id) : true;
+              const showSimilarDivider = !isDirectMatch && prevIsDirectMatch && directMatchIds.size > 0;
+              
+              return (
+                <div key={org.id}>
+                  {showSimilarDivider && (
+                    <div className="my-8 relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300"></div>
+                      </div>
+                      <div className="relative flex justify-center text-sm">
+                        <span className="px-3 bg-gray-50 text-gray-500 font-medium">Similar resources in the same category</span>
+                      </div>
+                    </div>
+                  )}
+                  <div
+                    className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
+                  >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <h2 className="text-xl font-semibold text-gray-900 mb-1">
@@ -144,6 +206,14 @@ function SearchContent() {
                   >
                     View on Map
                   </Link>
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(org.address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors text-center"
+                  >
+                    Directions
+                  </a>
                   {org.phone && (
                     <a
                       href={`tel:${org.phone.replace(/\D/g, '')}`}
@@ -152,9 +222,10 @@ function SearchContent() {
                       Call Now
                     </a>
                   )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md p-8 text-center">

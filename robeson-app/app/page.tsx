@@ -44,74 +44,17 @@ export default function Home() {
       }
     }
     
-    // Check for specific multi-word phrases
-    const specificPhrases: Record<string, string> = {
-      'mental health': 'Mental Health & Substance Use',
-      'substance abuse': 'Mental Health & Substance Use',
-      'substance use': 'Mental Health & Substance Use',
-      'law enforcement': 'Law Enforcement',
-      'legal services': 'Legal Services',
-      'crisis services': 'Crisis Services',
-      'food services': 'Food Services',
-      'housing services': 'Housing Services',
-      'healthcare services': 'Healthcare Services',
-      'government services': 'Government Services',
-      'tribal services': 'Tribal Services',
-      'community services': 'Community Services',
-      'faith based': 'Faith-Based Services',
-      'faith-based': 'Faith-Based Services'
-    };
-    
-    // Check specific phrases first
-    for (const [phrase, category] of Object.entries(specificPhrases)) {
-      if (normalizedTranscript.includes(phrase)) {
-        console.log(`Matched specific phrase: "${phrase}" -> ${category}`);
-        router.push(`/category/${categoryToSlug(category)}?from=voice`);
-        return;
-      }
-    }
-    
-    // Check for direct category matches or keywords
-    for (const category of CONSOLIDATED_CATEGORIES) {
-      const categoryLower = category.toLowerCase();
-      
-      // Direct match or partial match
-      if (categoryLower.includes(normalizedTranscript) || normalizedTranscript.includes(categoryLower)) {
-        router.push(`/category/${categoryToSlug(category)}?from=voice`);
-        return;
-      }
-      
-      // Check for common keywords
-      const keywordMap: Record<string, string[]> = {
-        'Crisis Services': ['crisis', 'emergency', 'help', '911', 'suicide', 'danger', 'urgent', 'immediate'],
-        'Food Services': ['food', 'hungry', 'meal', 'eat', 'pantry', 'breakfast', 'lunch', 'dinner', 'nutrition', 'groceries', "i'm hungry", 'starving'],
-        'Housing Services': ['housing', 'shelter', 'home', 'homeless', 'rent', 'apartment', 'eviction', 'utilities', "i'm homeless", 'place to stay', 'nowhere to go'],
-        'Healthcare Services': ['doctor', 'medical', 'hospital', 'clinic', 'sick', 'pain', 'nurse', 'urgent care', "i'm sick", 'hurt', 'injured', 'physician', 'emergency room'],
-        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'depressed', 'anxiety', 'anxious', 'sad', 'worried', 'stress', 'stressed', 'drugs', 'alcohol', 'recovery', "i'm depressed", "i'm anxious", "i'm sad"],
-        'Government Services': ['government', 'benefits', 'assistance', 'social services', 'welfare', 'medicaid', 'medicare', 'snap'],
-        'Tribal Services': ['tribal', 'lumbee', 'native', 'indian', 'indigenous'],
-        'Community Services': ['community', 'support', 'volunteer', 'help', 'services'],
-        'Community Groups & Development': ['group', 'development', 'organization', 'nonprofit', 'charity'],
-        'Faith-Based Services': ['faith', 'church', 'religious', 'prayer', 'spiritual', 'ministry', 'worship'],
-        'Legal Services': ['legal', 'lawyer', 'attorney', 'court', 'justice', 'rights', 'lawsuit'],
-        'Law Enforcement': ['police', 'sheriff', 'law', 'crime', 'safety', 'report'],
-        'Education': ['education', 'school', 'learning', 'library', 'study', 'class', 'training', 'ged'],
-        'Pharmacy': ['pharmacy', 'medicine', 'prescription', 'drug', 'medication', 'pills'],
-        'Cultural & Information Services': ['cultural', 'information', 'culture', 'arts', 'museum', 'history']
-      };
-      
-      const keywords = keywordMap[category] || [];
-      if (keywords.some(keyword => normalizedTranscript.includes(keyword))) {
-        console.log(`Matched keyword for category: ${category}`);
-        router.push(`/category/${categoryToSlug(category)}?from=voice`);
-        return;
-      }
-    }
-    
-    // If no match, try "near me" functionality
-    if (normalizedTranscript.includes('near') || normalizedTranscript.includes('close') || normalizedTranscript.includes('nearby')) {
+    // Check for "near me" keywords first
+    const nearMeKeywords = ['near me', 'nearby', 'closest', 'close to me', 'around me', 'near'];
+    if (nearMeKeywords.some(keyword => normalizedTranscript.includes(keyword))) {
+      console.log('Detected "near me" request, redirecting to near-me page');
       router.push('/near-me');
+      return;
     }
+    
+    // All other searches go to the search page
+    console.log('Routing to search page with query:', transcript);
+    router.push(`/search?q=${encodeURIComponent(transcript)}&from=voice`);
   };
 
 
