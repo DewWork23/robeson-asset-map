@@ -257,6 +257,51 @@ function SearchContent() {
           
           // Always sort by medical score for medical searches
           if (aScore !== bScore) return bScore - aScore;
+        } else if (normalizedQuery.includes('depressed') || normalizedQuery.includes('sad') || 
+                   normalizedQuery.includes('anxious') || normalizedQuery.includes('mental') ||
+                   normalizedQuery.includes('suicide') || normalizedQuery.includes('stressed')) {
+          // For mental health searches, prioritize mental health services
+          const getMentalHealthScore = (org: Organization) => {
+            let score = 0;
+            const name = org.organizationName.toLowerCase();
+            const services = (org.servicesOffered || '').toLowerCase();
+            const category = org.category.toLowerCase();
+            
+            // Highest priority - suicide/crisis hotlines
+            if (name.includes('suicide prevention') || name.includes('988')) score += 100;
+            if (name.includes('crisis') && (name.includes('hotline') || name.includes('text'))) score += 90;
+            
+            // High priority - mental health specific services
+            if (name.includes('mental health') || name.includes('behavioral health')) score += 50;
+            if (name.includes('counseling') || name.includes('therapy')) score += 45;
+            if (name.includes('psychiatric') || name.includes('psychiatry')) score += 45;
+            if (services.includes('mental health treatment')) score += 40;
+            if (services.includes('depression') || services.includes('anxiety')) score += 40;
+            if (name.includes('carter clinic')) score += 40; // Known mental health provider
+            
+            // Medium priority - integrated care with mental health
+            if (name.includes('integrated care') && services.includes('mental')) score += 30;
+            if (services.includes('therapy') || services.includes('counseling')) score += 25;
+            if (services.includes('behavioral health')) score += 25;
+            
+            // Lower priority - general crisis services
+            if (category === 'crisis services' && !services.includes('mental')) score += 10;
+            
+            // Deprioritize unrelated services
+            if (name.includes('domestic violence') && !normalizedQuery.includes('domestic')) score -= 50;
+            if (name.includes('sexual assault') && !normalizedQuery.includes('sexual')) score -= 50;
+            if (name.includes('district attorney') || name.includes('court')) score -= 40;
+            if (name.includes('substance') && !normalizedQuery.includes('substance') && !normalizedQuery.includes('drug')) score -= 20;
+            if (name.includes('disaster') || name.includes('hurricane')) score -= 30;
+            if (name.includes('harm reduction') && !services.includes('mental')) score -= 25;
+            
+            return score;
+          };
+          
+          const aScore = getMentalHealthScore(a);
+          const bScore = getMentalHealthScore(b);
+          
+          if (aScore !== bScore) return bScore - aScore;
         } else {
           // For non-medical searches, direct matches first
           if (aIsDirectMatch && !bIsDirectMatch) return -1;
