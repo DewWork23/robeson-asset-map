@@ -196,10 +196,11 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     });
     
     organizationLayer.on('unspiderfied', (e: any) => {
-      // Reset zoom prevention after unspiderfy
+      // Reset zoom prevention after unspiderfy with longer delay
+      // to avoid conflicts with marker clicks
       setTimeout(() => {
         preventZoomRef.current = false;
-      }, 100);
+      }, 300);
     });
     
     majorTowns.forEach(town => {
@@ -415,6 +416,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       marker.on('click', (e: any) => {
         // Prevent event bubbling that might trigger map click
         L.DomEvent.stopPropagation(e);
+        
+        // Reset preventZoom when clicking a marker to ensure proper behavior
+        preventZoomRef.current = false;
         
         if (onOrganizationClick) {
           onOrganizationClick(org);
