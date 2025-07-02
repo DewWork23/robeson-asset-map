@@ -56,20 +56,30 @@ function SearchContent() {
       
       // Helper function for fuzzy matching
       const fuzzyMatch = (str1: string, str2: string): boolean => {
-        // Remove spaces and special characters for comparison
-        const clean1 = str1.replace(/[^a-z0-9]/g, '');
-        const clean2 = str2.replace(/[^a-z0-9]/g, '');
+        // Split into words for better matching
+        const words1 = str1.toLowerCase().split(/\s+/);
+        const words2 = str2.toLowerCase().split(/\s+/);
         
-        // Check if one contains the other
-        if (clean1.includes(clean2) || clean2.includes(clean1)) return true;
-        
-        // Check for common misspellings/pronunciations
-        const soundsLike: Record<string, string[]> = {
-          'pawss': ['pause', 'paws', 'poss', 'pass'],
-          'pause': ['pawss', 'paws', 'poss', 'pass'],
-        };
-        
-        if (soundsLike[clean1]?.includes(clean2) || soundsLike[clean2]?.includes(clean1)) return true;
+        // Check if any word matches
+        for (const word1 of words1) {
+          for (const word2 of words2) {
+            // Remove special characters for comparison
+            const clean1 = word1.replace(/[^a-z0-9]/g, '');
+            const clean2 = word2.replace(/[^a-z0-9]/g, '');
+            
+            // Check if one contains the other
+            if (clean1.includes(clean2) || clean2.includes(clean1)) return true;
+            
+            // Check for common misspellings/pronunciations
+            const soundsLike: Record<string, string[]> = {
+              'pawss': ['pause', 'paws', 'poss', 'pass', 'pauss'],
+              'pause': ['pawss', 'paws', 'poss', 'pass', 'pauss'],
+              'paws': ['pause', 'pawss', 'poss', 'pass', 'pauss'],
+            };
+            
+            if (soundsLike[clean1]?.includes(clean2) || soundsLike[clean2]?.includes(clean1)) return true;
+          }
+        }
         
         return false;
       };
@@ -79,11 +89,18 @@ function SearchContent() {
         const orgName = org.organizationName.toLowerCase();
         const searchableText = `${org.organizationName} ${org.servicesOffered || ''} ${org.description || ''}`.toLowerCase();
         
+        // Special handling for known organizations
+        if (normalizedQuery === 'pause' && orgName.includes('pawss')) {
+          console.log('Found PAWSS for pause query');
+          return true;
+        }
+        
         // Check for text matches (including fuzzy)
         const textMatch = orgName.includes(normalizedQuery) || 
                          normalizedQuery.includes(orgName) ||
                          searchableText.includes(normalizedQuery) ||
-                         fuzzyMatch(orgName, normalizedQuery);
+                         fuzzyMatch(orgName, normalizedQuery) ||
+                         fuzzyMatch(searchableText, normalizedQuery);
         
         // Check for category matches
         const categoryMatch = matchedCategories.includes(org.category);
@@ -91,21 +108,22 @@ function SearchContent() {
         return textMatch || categoryMatch;
       });
 
-      // If we only have category matches and not many direct text matches, 
-      // just show all organizations in those categories
+      // Determine if this is primarily a category keyword search
+      const isCategorySearch = matchedCategories.length > 0;
+      
       let allResults = [...directMatches];
       
-      if (matchedCategories.length > 0 && directMatches.length < 20) {
-        // Get all organizations in matched categories
+      if (isCategorySearch) {
+        // For category keyword searches, show ALL organizations in those categories
         const categoryOrgs = organizations.filter(org => 
           matchedCategories.includes(org.category) && 
           !directMatches.some(match => match.id === org.id)
         );
         
-        // Add all category matches if we have keyword matches
+        // Add all organizations from matched categories
         allResults = [...directMatches, ...categoryOrgs];
       } else if (directMatches.length > 0) {
-        // Original logic for when we have text matches
+        // For text-based searches, show similar organizations
         const matchedCats = [...new Set(directMatches.map(org => org.category))];
         
         // Find similar organizations in the same categories
@@ -117,7 +135,7 @@ function SearchContent() {
           return matchedCats.includes(org.category);
         });
         
-        // Add up to 10 similar organizations
+        // Add up to 10 similar organizations for text searches
         allResults = [...directMatches, ...similarOrgs.slice(0, 10)];
       }
 
