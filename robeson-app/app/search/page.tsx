@@ -158,6 +158,9 @@ function SearchContent() {
         const allMatchIds = new Set([...directMatches.map(o => o.id), ...categoryMatches.map(o => o.id)]);
         allResults = organizations.filter(org => allMatchIds.has(org.id));
         
+        // Ensure direct matches are tracked for sorting
+        setDirectMatchIds(new Set(directMatches.map(org => org.id)));
+        
         console.log(`Search for "${normalizedQuery}" found ${directMatches.length} direct matches and ${categoryMatches.length} category matches`);
       } else if (directMatches.length > 0) {
         // For searches with actual text matches, show similar organizations
@@ -181,56 +184,78 @@ function SearchContent() {
         const aIsDirectMatch = directMatches.some(match => match.id === a.id);
         const bIsDirectMatch = directMatches.some(match => match.id === b.id);
         
-        // Direct matches first
-        if (aIsDirectMatch && !bIsDirectMatch) return -1;
-        if (!aIsDirectMatch && bIsDirectMatch) return 1;
-        
-        // For medical searches, prioritize actual medical providers
-        if (normalizedQuery === 'doctor' || normalizedQuery === 'medical' || normalizedQuery === 'physician') {
+        // For medical searches, always prioritize actual medical providers
+        if (normalizedQuery === 'doctor' || normalizedQuery === 'medical' || normalizedQuery === 'physician' || normalizedQuery === 'healthcare') {
           const aName = a.organizationName.toLowerCase();
           const bName = b.organizationName.toLowerCase();
           const aServices = (a.servicesOffered || '').toLowerCase();
           const bServices = (b.servicesOffered || '').toLowerCase();
+          const aCategory = a.category.toLowerCase();
+          const bCategory = b.category.toLowerCase();
           
           // Calculate medical relevance scores
-          const getMedicalScore = (name: string, services: string) => {
+          const getMedicalScore = (name: string, services: string, category: string, isDirectMatch: boolean) => {
             let score = 0;
-            // High priority medical terms
-            if (name.includes('hospital')) score += 10;
-            if (name.includes('clinic')) score += 10;
-            if (name.includes('health') && name.includes('practice')) score += 10;
-            if (name.includes('medical')) score += 8;
-            if (services.includes('primary care')) score += 8;
-            if (services.includes('urgent care')) score += 8;
-            if (services.includes('emergency care')) score += 7;
-            if (services.includes('medical services')) score += 6;
-            // Lower priority for general health services
-            if (name.includes('pharmacy')) score += 3;
-            if (name.includes('behavioral')) score += 2;
-            if (name.includes('mental')) score += 2;
-            if (name.includes('support group')) score -= 5;
+            
+            // Direct text matches get a small boost, but not overwhelming
+            if (isDirectMatch) score += 2;
+            
+            // Highest priority - actual medical facilities
+            if (name.includes('hospital')) score += 20;
+            if (name.includes('health') && name.includes('practice')) score += 20;
+            if (name.includes('clinic') && !name.includes('behavioral')) score += 18;
+            if (name.includes('medical') && name.includes('center')) score += 18;
+            if (category === 'healthcare services') score += 15;
+            
+            // High priority medical services
+            if (services.includes('primary care')) score += 15;
+            if (services.includes('urgent care')) score += 15;
+            if (services.includes('emergency care')) score += 14;
+            if (services.includes('medical services')) score += 12;
+            if (services.includes('acute care')) score += 12;
+            
+            // Medium priority - related medical
+            if (name.includes('pharmacy')) score += 5;
+            if (name.includes('behavioral') && name.includes('healthcare')) score += 4;
+            if (name.includes('mental') && services.includes('medical')) score += 4;
+            
+            // Heavily deprioritize non-medical services
+            if (name.includes('support group') || name.includes('support groups')) score -= 20;
+            if (services.includes('support group') || services.includes('support for')) score -= 15;
+            if (name.includes('caregiver') && name.includes('support')) score -= 20;
+            if (name.includes('job seeker')) score -= 30;
+            if (name.includes('sorority') || name.includes('fraternity')) score -= 30;
+            if (name.includes('foundation') && !services.includes('medical')) score -= 25;
+            if (name.includes('college') && !name.includes('medical')) score -= 25;
+            if (name.includes('chapter') || name.includes('alumnae')) score -= 30;
+            if (category === 'community services' && !services.includes('medical')) score -= 10;
+            if (category === 'education' && !services.includes('medical')) score -= 20;
+            
             return score;
           };
           
-          const aScore = getMedicalScore(aName, aServices);
-          const bScore = getMedicalScore(bName, bServices);
+          const aScore = getMedicalScore(aName, aServices, aCategory, aIsDirectMatch);
+          const bScore = getMedicalScore(bName, bServices, bCategory, bIsDirectMatch);
           
+          // Always sort by medical score for medical searches
           if (aScore !== bScore) return bScore - aScore;
+        } else {
+          // For non-medical searches, direct matches first
+          if (aIsDirectMatch && !bIsDirectMatch) return -1;
+          if (!aIsDirectMatch && bIsDirectMatch) return 1;
         }
         
-        // Within direct matches, name matches first
-        if (aIsDirectMatch && bIsDirectMatch) {
-          const aNameMatch = a.organizationName.toLowerCase().includes(normalizedQuery);
-          const bNameMatch = b.organizationName.toLowerCase().includes(normalizedQuery);
-          if (aNameMatch && !bNameMatch) return -1;
-          if (!aNameMatch && bNameMatch) return 1;
-        }
+        // Within same priority, name matches first
+        const aNameMatch = a.organizationName.toLowerCase().includes(normalizedQuery);
+        const bNameMatch = b.organizationName.toLowerCase().includes(normalizedQuery);
+        if (aNameMatch && !bNameMatch) return -1;
+        if (!aNameMatch && bNameMatch) return 1;
         
         return 0;
       });
 
       setSearchResults(allResults);
-      setDirectMatchIds(new Set(directMatches.map(org => org.id)));
+      // directMatchIds already set above when we have category matches
     }
   }, [searchParams, organizations]);
 
