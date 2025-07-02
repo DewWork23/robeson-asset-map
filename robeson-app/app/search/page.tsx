@@ -109,14 +109,37 @@ function SearchContent() {
 
       let allResults = [...directMatches];
       
-      // If we have no direct text matches but have category keyword matches,
-      // show organizations from those categories
-      if (directMatches.length === 0 && matchedCategories.length > 0) {
-        // For pure category keyword searches with no text matches
-        allResults = organizations.filter(org => 
-          matchedCategories.includes(org.category)
-        );
-        console.log(`Category search for "${normalizedQuery}" found ${allResults.length} organizations in categories:`, matchedCategories);
+      // If we have category keyword matches, always include them
+      // This ensures searches like "doctor" show healthcare organizations
+      if (matchedCategories.length > 0) {
+        // Include organizations from matched categories
+        const categoryMatches = organizations.filter(org => {
+          // Check if organization is in a matched category
+          if (matchedCategories.includes(org.category)) return true;
+          
+          // Also check for healthcare organizations that might be miscategorized
+          // (e.g., hospitals categorized as "Crisis Services")
+          if (normalizedQuery === 'doctor' || normalizedQuery === 'medical' || normalizedQuery === 'healthcare') {
+            const servicesText = (org.servicesOffered || '').toLowerCase();
+            const descText = (org.description || '').toLowerCase();
+            const isHealthcare = servicesText.includes('medical') || 
+                               servicesText.includes('health') || 
+                               servicesText.includes('hospital') ||
+                               servicesText.includes('clinic') ||
+                               servicesText.includes('care') ||
+                               descText.includes('healthcare') ||
+                               descText.includes('medical');
+            return isHealthcare;
+          }
+          
+          return false;
+        });
+        
+        // Combine direct matches with category matches, removing duplicates
+        const allMatchIds = new Set([...directMatches.map(o => o.id), ...categoryMatches.map(o => o.id)]);
+        allResults = organizations.filter(org => allMatchIds.has(org.id));
+        
+        console.log(`Search for "${normalizedQuery}" found ${directMatches.length} direct matches and ${categoryMatches.length} category matches`);
       } else if (directMatches.length > 0) {
         // For searches with actual text matches, show similar organizations
         const matchedCats = [...new Set(directMatches.map(org => org.category))];
@@ -202,9 +225,15 @@ function SearchContent() {
             {searchResults.length > 0 
               ? (
                 <>
-                  Found {directMatchIds.size} direct match{directMatchIds.size !== 1 ? 'es' : ''} for "{searchQuery}"
-                  {searchResults.length > directMatchIds.size && (
-                    <span className="text-sm"> (showing {searchResults.length - directMatchIds.size} similar resources too)</span>
+                  {directMatchIds.size > 0 ? (
+                    <>
+                      Found {directMatchIds.size} direct match{directMatchIds.size !== 1 ? 'es' : ''} for "{searchQuery}"
+                      {searchResults.length > directMatchIds.size && (
+                        <span className="text-sm"> (showing {searchResults.length - directMatchIds.size} related resources too)</span>
+                      )}
+                    </>
+                  ) : (
+                    <>Found {searchResults.length} resource{searchResults.length !== 1 ? 's' : ''} related to "{searchQuery}"</>
                   )}
                 </>
               )
@@ -228,7 +257,7 @@ function SearchContent() {
                         <div className="w-full border-t border-gray-300"></div>
                       </div>
                       <div className="relative flex justify-center text-sm">
-                        <span className="px-3 bg-gray-50 text-gray-500 font-medium">Similar resources in the same category</span>
+                        <span className="px-3 bg-gray-50 text-gray-500 font-medium">Related resources</span>
                       </div>
                     </div>
                   )}
