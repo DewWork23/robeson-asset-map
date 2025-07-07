@@ -63,31 +63,55 @@ export function getCoordinatesFromAddress(address: string, isCrisisService: bool
   }
   
   let baseCoords: { lat: number; lon: number } | null = null;
+  let matchedLocation: string | null = null;
   
-  // Check for specific locations
-  // Look for city/town names but avoid matching them in street names
-  for (const [key, coords] of Object.entries(locationCoordinates)) {
-    if (key === 'default') continue;
+  // First, try to extract city from standard address format (e.g., "123 Main St, Lumberton, NC 28358")
+  const addressParts = address.split(',');
+  if (addressParts.length >= 2) {
+    // Get the city part (usually the second-to-last part)
+    const cityPart = addressParts[addressParts.length - 2]?.trim().toLowerCase();
     
-    // For cities outside Robeson County, only match if they appear as the city name
-    // This prevents matching "Fayetteville Road" as Fayetteville city
-    if (key === 'fayetteville' || key === 'raeford' || key === 'laurinburg') {
-      // Look for pattern where the city name appears before NC/North Carolina
-      // but NOT as part of a street name (e.g., "Fayetteville Road")
-      // Pattern matches: "City NC" but not "City Road/Street/Ave/etc"
-      const cityPattern = new RegExp(`\\b${key}\\s+(nc|north carolina)\\b`, 'i');
-      const streetPattern = new RegExp(`\\b${key}\\s+(road|rd|street|st|avenue|ave|boulevard|blvd|drive|dr|lane|ln|way|court|ct|place|pl)\\b`, 'i');
+    // Check if this city is in our coordinates
+    for (const [key, coords] of Object.entries(locationCoordinates)) {
+      if (key === 'default') continue;
       
-      // Match if it's followed by NC/North Carolina and NOT followed by a street suffix
-      if (cityPattern.test(address) && !streetPattern.test(address)) {
+      if (cityPart && cityPart.includes(key)) {
         baseCoords = { ...coords };
+        matchedLocation = key;
         break;
       }
-    } else {
-      // For Robeson County locations, use normal matching
-      if (addressLower.includes(key)) {
-        baseCoords = { ...coords };
-        break;
+    }
+  }
+  
+  // If no match from city extraction, fall back to searching the full address
+  if (!baseCoords) {
+    for (const [key, coords] of Object.entries(locationCoordinates)) {
+      if (key === 'default') continue;
+      
+      // For cities outside Robeson County, only match if they appear as the city name
+      if (key === 'fayetteville' || key === 'raeford' || key === 'laurinburg') {
+        // Look for pattern where the city name appears before NC/North Carolina
+        // but NOT as part of a street name (e.g., "Fayetteville Road")
+        const cityPattern = new RegExp(`\\b${key}\\s*(,\\s*)?(nc|north carolina)\\b`, 'i');
+        const streetPattern = new RegExp(`\\b${key}\\s+(road|rd|street|st|avenue|ave|boulevard|blvd|drive|dr|lane|ln|way|court|ct|place|pl)\\b`, 'i');
+        
+        // Match if it's followed by NC/North Carolina and NOT followed by a street suffix
+        if (cityPattern.test(address) && !streetPattern.test(address)) {
+          baseCoords = { ...coords };
+          matchedLocation = key;
+          break;
+        }
+      } else {
+        // For Robeson County locations, check if the city name appears after a comma
+        // This helps avoid matching street names like "Pembroke Road"
+        const cityAfterCommaPattern = new RegExp(`,\\s*${key}\\b`, 'i');
+        const endOfAddressPattern = new RegExp(`\\b${key}\\s*(,\\s*)?(nc|north carolina)?\\s*\\d*$`, 'i');
+        
+        if (cityAfterCommaPattern.test(address) || endOfAddressPattern.test(address)) {
+          baseCoords = { ...coords };
+          matchedLocation = key;
+          break;
+        }
       }
     }
   }
@@ -95,34 +119,69 @@ export function getCoordinatesFromAddress(address: string, isCrisisService: bool
   // Special case for UNCP
   if (!baseCoords && (addressLower.includes('university of north carolina') || addressLower.includes('uncp'))) {
     baseCoords = { ...locationCoordinates.uncp };
+    matchedLocation = 'uncp';
   }
   
   // Default to county center if no match
   if (!baseCoords) {
     baseCoords = { ...locationCoordinates.default };
+    console.log(`No city match found for address: "${address}", defaulting to county center`);
+  } else {
+    console.log(`Matched "${address}" to ${matchedLocation}`);
   }
   
-  // Add a much smaller offset to prevent exact overlapping
-  // This should only slightly separate pins, letting the clustering handle the rest
-  const offsetKey = `${baseCoords.lat},${baseCoords.lon}`;
-  const offsetCount = addressOffsets.get(offsetKey) || 0;
-  addressOffsets.set(offsetKey, offsetCount + 1);
+  // Create a stable offset based on the full address to prevent shuffling
+  // Use the full address as the key, not just the coordinates
+  const offsetKey = address.toLowerCase().trim();
+  let offsetIndex = addressOffsets.get(offsetKey);
   
-  if (offsetCount > 0) {
+  if (offsetIndex === undefined) {
+    // Get all addresses at this location
+    const locationKey = `${baseCoords.lat},${baseCoords.lon}`;
+    const addressesAtLocation = Array.from(addressOffsets.entries())
+      .filter(([addr, _]) => {
+        const coords = { lat: baseCoords.lat, lon: baseCoords.lon };
+        // Check if this address maps to the same base coordinates
+        return addr !== offsetKey && getBaseCoordinatesForAddress(addr) === locationKey;
+      }).length;
+    
+    offsetIndex = addressesAtLocation;
+    addressOffsets.set(offsetKey, offsetIndex);
+  }
+  
+  if (offsetIndex > 0) {
     // Use different offset scale for crisis services vs regular pins
-    // Crisis services need more separation since they're not clustered
-    const scaleFactor = isCrisisService ? 0.0004 : 0.0001; // 40m for crisis, 10m for others
+    const scaleFactor = isCrisisService ? 0.0003 : 0.00008; // Smaller offsets
     
-    // Simple grid pattern for predictable placement
-    const row = Math.floor(Math.sqrt(offsetCount));
-    const col = offsetCount - (row * row);
+    // Create a spiral pattern for more natural distribution
+    const angle = offsetIndex * 2.39996; // Golden angle in radians
+    const radius = Math.sqrt(offsetIndex) * scaleFactor;
     
-    // Apply offset based on type
-    baseCoords.lat += row * scaleFactor;
-    baseCoords.lon += col * scaleFactor;
+    baseCoords.lat += radius * Math.cos(angle);
+    baseCoords.lon += radius * Math.sin(angle) * 1.3; // Adjust for longitude scaling at this latitude
   }
   
   return baseCoords;
+}
+
+// Helper function to get base coordinates without offset
+function getBaseCoordinatesForAddress(address: string): string {
+  const addressLower = address.toLowerCase();
+  
+  // Same logic as above but just return the location key
+  const addressParts = address.split(',');
+  if (addressParts.length >= 2) {
+    const cityPart = addressParts[addressParts.length - 2]?.trim().toLowerCase();
+    for (const [key, coords] of Object.entries(locationCoordinates)) {
+      if (key === 'default') continue;
+      if (cityPart && cityPart.includes(key)) {
+        return `${coords.lat},${coords.lon}`;
+      }
+    }
+  }
+  
+  // Return default if no match
+  return `${locationCoordinates.default.lat},${locationCoordinates.default.lon}`;
 }
 
 // Format distance for display

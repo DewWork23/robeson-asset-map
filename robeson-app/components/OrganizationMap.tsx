@@ -374,8 +374,6 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         return;
       }
       
-      // Debug log for address geocoding
-      console.log(`Placing ${org.organizationName} at coordinates:`, coords, `from address: ${org.address}`);
       
       // Filter out organizations too far from Robeson County
       const robesonCenter = { lat: 34.6400, lon: -79.1100 };
