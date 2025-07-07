@@ -122,8 +122,15 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     map.on('click', (e: any) => {
       // Disable sticky mode and unspiderfy when clicking empty map
       stickyModeRef.current = false;
-      if (spiderfiedClusterRef.current && !preventZoomRef.current) {
-        organizationLayerRef.current.unspiderfy();
+      
+      if (spiderfiedClusterRef.current) {
+        // Restore original unspiderfy method if it was overridden
+        if (spiderfiedClusterRef.current._originalUnspiderfy) {
+          spiderfiedClusterRef.current.unspiderfy = spiderfiedClusterRef.current._originalUnspiderfy;
+        }
+        
+        // Now unspiderfy normally
+        spiderfiedClusterRef.current.unspiderfy();
         spiderfiedClusterRef.current = null;
       }
     });
@@ -208,6 +215,21 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       
       // Enable sticky mode for this cluster
       stickyModeRef.current = true;
+      spiderfiedClusterRef.current = cluster;
+      
+      // Override the cluster's unspiderfy method while in sticky mode
+      const originalUnspiderfy = cluster.unspiderfy;
+      cluster.unspiderfy = function() {
+        console.log('Unspiderfy attempt - sticky mode:', stickyModeRef.current);
+        if (!stickyModeRef.current) {
+          originalUnspiderfy.call(this);
+        } else {
+          console.log('Prevented unspiderfy due to sticky mode');
+        }
+      };
+      
+      // Store the original method for later restoration
+      cluster._originalUnspiderfy = originalUnspiderfy;
       
       // Zoom to show the cluster better if needed
       const childMarkers = cluster.getAllChildMarkers();
@@ -232,17 +254,11 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       });
       
     organizationLayer.on('unspiderfied', (e: any) => {
-      // If in sticky mode, immediately re-spiderfy
-      if (stickyModeRef.current && e.cluster) {
-        setTimeout(() => {
-          e.cluster.spiderfy();
-        }, 50);
-      } else {
-        spiderfiedClusterRef.current = null;
-        setTimeout(() => {
-          preventZoomRef.current = false;
-        }, 300);
-      }
+      // This should only fire when sticky mode is off
+      spiderfiedClusterRef.current = null;
+      setTimeout(() => {
+        preventZoomRef.current = false;
+      }, 300);
     });
     
     majorTowns.forEach(town => {
