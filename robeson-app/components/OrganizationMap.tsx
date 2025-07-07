@@ -272,6 +272,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       // When cluster is spiderfied, ensure markers are clickable
       preventZoomRef.current = true;
       spiderfiedClustersRef.current.add(e.cluster);
+      
+      // Add additional protection: override cluster's event handlers that might cause collapse
+      const cluster = e.cluster;
+      if (cluster._icon) {
+        // Remove any click handlers that might cause unspiderfy
+        L.DomEvent.off(cluster._icon);
+      }
     });
       
     organizationLayer.on('unspiderfied', (e: any) => {
@@ -486,6 +493,14 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       // Store organization reference on marker for later use
       (marker as any).organization = org;
       
+      // Add mousedown handler to prevent any premature cluster collapse
+      marker.on('mousedown', (e: any) => {
+        L.DomEvent.stopPropagation(e);
+        if (spiderfiedClustersRef.current.size > 0) {
+          stickyModeRef.current = true;
+        }
+      });
+      
       const encodedAddress = encodeURIComponent(org.address);
       const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
       
@@ -559,9 +574,20 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         L.DomEvent.stopPropagation(e);
         L.DomEvent.preventDefault(e);
         
-        // Keep sticky mode active when clicking markers
+        // Ensure sticky mode remains active when clicking any marker within a spiderfied cluster
         if (spiderfiedClustersRef.current.size > 0) {
           stickyModeRef.current = true;
+          
+          // Re-block unspiderfy on all expanded clusters to ensure they stay open
+          spiderfiedClustersRef.current.forEach(cluster => {
+            if (!cluster._blockedUnspiderfy && cluster.unspiderfy) {
+              const originalUnspiderfy = cluster.unspiderfy.bind(cluster);
+              cluster.unspiderfy = function() {
+                console.log('Blocked unspiderfy attempt on cluster during marker click');
+              };
+              cluster._blockedUnspiderfy = originalUnspiderfy;
+            }
+          });
         }
         
         // Debug logging to track organization object
