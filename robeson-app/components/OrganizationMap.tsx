@@ -24,7 +24,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   const organizationLayerRef = useRef<any>(null);
   const lastSelectedOrgRef = useRef<string | null>(null);
   const preventZoomRef = useRef(false);
-  const spiderfiedClusterRef = useRef<any>(null);
+  const spiderfiedClustersRef = useRef<Set<any>>(new Set());
   const stickyModeRef = useRef(false);
   const [isZoomedIn, setIsZoomedIn] = useState(false);
   const [onResetView, setOnResetView] = useState<(() => void) | null>(null);
@@ -120,19 +120,26 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     
     // Add map click handler to close spiderfied clusters when clicking elsewhere
     map.on('click', (e: any) => {
-      // Disable sticky mode and unspiderfy when clicking empty map
+      // Disable sticky mode
       stickyModeRef.current = false;
       
-      if (spiderfiedClusterRef.current) {
-        // Restore original unspiderfy method if it was overridden
-        if (spiderfiedClusterRef.current._originalUnspiderfy) {
-          spiderfiedClusterRef.current.unspiderfy = spiderfiedClusterRef.current._originalUnspiderfy;
+      // Restore original unspiderfy method for ALL clusters
+      organizationLayerRef.current.eachLayer((layer: any) => {
+        if (layer instanceof (L as any).MarkerCluster && layer._originalUnspiderfy) {
+          layer.unspiderfy = layer._originalUnspiderfy;
+          delete layer._originalUnspiderfy;
         }
-        
-        // Now unspiderfy normally
-        spiderfiedClusterRef.current.unspiderfy();
-        spiderfiedClusterRef.current = null;
-      }
+      });
+      
+      // Unspiderfy all expanded clusters
+      spiderfiedClustersRef.current.forEach(cluster => {
+        if (cluster._spiderfied) {
+          cluster.unspiderfy();
+        }
+      });
+      
+      // Clear the set
+      spiderfiedClustersRef.current.clear();
     });
 
     // Add county boundary
@@ -207,29 +214,37 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       e.propagatedFrom.setOpacity(1);
     });
     
+    // Override unspiderfy for ALL clusters in the layer
+    const overrideAllClustersUnspiderfy = () => {
+      organizationLayer.eachLayer((layer: any) => {
+        if (layer instanceof (L as any).MarkerCluster && !layer._originalUnspiderfy) {
+          const originalUnspiderfy = layer.unspiderfy;
+          layer._originalUnspiderfy = originalUnspiderfy;
+          layer.unspiderfy = function() {
+            console.log('Unspiderfy attempt on cluster - sticky mode:', stickyModeRef.current);
+            if (!stickyModeRef.current) {
+              originalUnspiderfy.call(this);
+              spiderfiedClustersRef.current.delete(this);
+            } else {
+              console.log('Prevented unspiderfy due to sticky mode');
+            }
+          };
+        }
+      });
+    };
+    
     // Handle cluster clicks manually
     organizationLayer.on('clusterclick', (e: any) => {
       L.DomEvent.stopPropagation(e);
       
       const cluster = e.layer;
       
-      // Enable sticky mode for this cluster
+      // Enable sticky mode
       stickyModeRef.current = true;
-      spiderfiedClusterRef.current = cluster;
+      spiderfiedClustersRef.current.add(cluster);
       
-      // Override the cluster's unspiderfy method while in sticky mode
-      const originalUnspiderfy = cluster.unspiderfy;
-      cluster.unspiderfy = function() {
-        console.log('Unspiderfy attempt - sticky mode:', stickyModeRef.current);
-        if (!stickyModeRef.current) {
-          originalUnspiderfy.call(this);
-        } else {
-          console.log('Prevented unspiderfy due to sticky mode');
-        }
-      };
-      
-      // Store the original method for later restoration
-      cluster._originalUnspiderfy = originalUnspiderfy;
+      // Override unspiderfy for ALL clusters when any cluster is clicked
+      overrideAllClustersUnspiderfy();
       
       // Zoom to show the cluster better if needed
       const childMarkers = cluster.getAllChildMarkers();
@@ -243,19 +258,23 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         map.fitBounds(bounds, { padding: [100, 100], maxZoom: 16 });
         setTimeout(() => {
           cluster.spiderfy();
+          // Override again after zoom in case new clusters appear
+          setTimeout(overrideAllClustersUnspiderfy, 100);
         }, 300);
       }
     });
       
-      organizationLayer.on('spiderfied', (e: any) => {
-        // When cluster is spiderfied, ensure markers are clickable
-        preventZoomRef.current = true;
-        spiderfiedClusterRef.current = e.cluster;
-      });
+    organizationLayer.on('spiderfied', (e: any) => {
+      // When cluster is spiderfied, ensure markers are clickable
+      preventZoomRef.current = true;
+      spiderfiedClustersRef.current.add(e.cluster);
+      // Override unspiderfy for any new clusters that appear
+      setTimeout(overrideAllClustersUnspiderfy, 100);
+    });
       
     organizationLayer.on('unspiderfied', (e: any) => {
       // This should only fire when sticky mode is off
-      spiderfiedClusterRef.current = null;
+      spiderfiedClustersRef.current.delete(e.cluster);
       setTimeout(() => {
         preventZoomRef.current = false;
       }, 300);
@@ -539,8 +558,10 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         L.DomEvent.preventDefault(e);
         
         // Keep sticky mode active when clicking markers
-        if (spiderfiedClusterRef.current) {
+        if (spiderfiedClustersRef.current.size > 0) {
           stickyModeRef.current = true;
+          // Re-override unspiderfy in case new clusters appeared
+          overrideAllClustersUnspiderfy();
         }
         
         // Debug logging to track organization object
@@ -550,7 +571,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           category: org.category,
           crisisService: org.crisisService,
           hasClickHandler: !!onOrganizationClick,
-          stickyMode: stickyModeRef.current
+          stickyMode: stickyModeRef.current,
+          expandedClusters: spiderfiedClustersRef.current.size
         });
         
         if (onOrganizationClick) {
