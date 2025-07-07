@@ -339,6 +339,10 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     const addressCounts = new Map<string, number>();
     const crisisServiceOrgs: Organization[] = [];
     
+    // Track exact GPS coordinates to handle stacked pins
+    const coordinateCounts = new Map<string, number>();
+    const coordinateOffsets = new Map<string, number>();
+    
     organizations.forEach(org => {
       const count = addressCounts.get(org.address) || 0;
       addressCounts.set(org.address, count + 1);
@@ -373,9 +377,27 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       let coords: { lat: number; lon: number } | null = null;
       if (org.latitude !== undefined && org.longitude !== undefined && !isNaN(org.latitude) && !isNaN(org.longitude)) {
         coords = { lat: org.latitude, lon: org.longitude };
-        console.log(`Using real coordinates for ${org.organizationName}: ${org.latitude}, ${org.longitude}`);
+        
+        // Handle multiple organizations at exact same GPS coordinates
+        const coordKey = `${org.latitude.toFixed(6)},${org.longitude.toFixed(6)}`;
+        const coordCount = coordinateCounts.get(coordKey) || 0;
+        coordinateCounts.set(coordKey, coordCount + 1);
+        
+        if (coordCount > 0) {
+          // Apply offset for stacked pins at same GPS location
+          const offsetIndex = coordinateOffsets.get(`${coordKey}:${org.id}`) || coordCount;
+          coordinateOffsets.set(`${coordKey}:${org.id}`, offsetIndex);
+          
+          // Create a small circular offset pattern
+          const angle = (offsetIndex - 1) * (2 * Math.PI / 8); // Max 8 pins in circle
+          const offsetDistance = 0.0002 * Math.ceil(offsetIndex / 8); // Increase radius for outer rings
+          
+          coords.lat += offsetDistance * Math.cos(angle);
+          coords.lon += offsetDistance * Math.sin(angle) * 1.2; // Adjust for longitude scaling
+          
+          console.log(`Applied offset to ${org.organizationName} at same GPS location (${offsetIndex} of ${coordCount + 1})`);
+        }
       } else {
-        console.log(`No GPS coordinates for ${org.organizationName}, falling back to address geocoding`);
         coords = getCoordinatesFromAddress(org.address, isCrisisService);
         if (!coords) {
           console.warn(`No coordinates found for organization: ${org.organizationName} at ${org.address}`);

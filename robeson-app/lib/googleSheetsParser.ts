@@ -112,15 +112,10 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     
     // Skip header row and map data
     const organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => {
-      // Debug first few rows to see the data structure - expanded to show actual values
-      if (index < 3) {
-        console.log(`Row ${index + 1} data:`);
-        console.log('  Name:', row[0]);
-        console.log('  Address:', row[3]);
-        console.log('  Latitude (raw at index 4):', row[4]);
-        console.log('  Longitude (raw at index 5):', row[5]);
-        console.log('  Row length:', row.length);
-      }
+      // Debug can be re-enabled if needed
+      // if (index < 3) {
+      //   console.log(`Row ${index + 1}: ${row[0]} at ${row[3]} - Lat: ${row[4]}, Lon: ${row[5]}`);
+      // }
       
       const org = {
         id: (index + 1).toString(),
@@ -142,13 +137,6 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
         specialNotes: row[15] || ''      // Column P (index 15)
       };
       
-      // Debug coordinate parsing for first few
-      if (index < 3 && (org.latitude || org.longitude)) {
-        console.log(`Parsed coordinates for ${org.organizationName}:`, {
-          latitude: org.latitude,
-          longitude: org.longitude
-        });
-      }
       
       return org;
     });
