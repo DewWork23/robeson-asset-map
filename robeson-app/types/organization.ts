@@ -14,6 +14,8 @@ export interface Organization {
   crisisService: boolean;
   languages: string;
   specialNotes: string;
+  latitude?: number; // Latitude from Google Sheets
+  longitude?: number; // Longitude from Google Sheets
   distance?: number; // Distance in miles from user location
 }
 

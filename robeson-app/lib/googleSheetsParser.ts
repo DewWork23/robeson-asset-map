@@ -6,10 +6,10 @@ import { CONSOLIDATED_CATEGORIES, CATEGORY_MIGRATION_MAP } from '@/utils/categor
 // These values are injected at build time via GitHub Actions
 const SHEET_ID = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || '';
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
-const RANGE = 'A:N'; // Use default sheet, no specific sheet name
+const RANGE = 'A:P'; // Extended to include Latitude (O) and Longitude (P) columns
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v17'; // Force new cache after cleanup
+const CACHE_KEY = 'robeson_resources_cache_v18'; // Force new cache for lat/lon columns
 const CACHE_DURATION = 1000 * 60 * 5; // 5 minutes for testing
 
 interface CachedData {
@@ -121,7 +121,9 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
       description: row[10] || '',
       crisisService: row[11]?.toLowerCase() === 'yes',
       languages: row[12] || '',
-      specialNotes: row[13] || ''
+      specialNotes: row[13] || '',
+      latitude: row[14] ? parseFloat(row[14]) : undefined,
+      longitude: row[15] ? parseFloat(row[15]) : undefined
     }));
     
     

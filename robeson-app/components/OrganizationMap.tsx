@@ -368,10 +368,18 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Add new markers
     organizations.forEach(org => {
       const isCrisisService = org.crisisService || org.category === 'Crisis Services';
-      const coords = getCoordinatesFromAddress(org.address, isCrisisService);
-      if (!coords) {
-        console.warn(`No coordinates found for organization: ${org.organizationName} at ${org.address}`);
-        return;
+      
+      // Use real coordinates if available, otherwise fall back to geocoding
+      let coords: { lat: number; lon: number } | null = null;
+      if (org.latitude && org.longitude) {
+        coords = { lat: org.latitude, lon: org.longitude };
+        console.log(`Using real coordinates for ${org.organizationName}: ${org.latitude}, ${org.longitude}`);
+      } else {
+        coords = getCoordinatesFromAddress(org.address, isCrisisService);
+        if (!coords) {
+          console.warn(`No coordinates found for organization: ${org.organizationName} at ${org.address}`);
+          return;
+        }
       }
       
       
@@ -546,7 +554,14 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         let hasValidCoords = false;
         
         organizations.forEach(org => {
-          const coords = getCoordinatesFromAddress(org.address);
+          // Use real coordinates if available, otherwise fall back to geocoding
+          let coords: { lat: number; lon: number } | null = null;
+          if (org.latitude && org.longitude) {
+            coords = { lat: org.latitude, lon: org.longitude };
+          } else {
+            coords = getCoordinatesFromAddress(org.address);
+          }
+          
           if (coords) {
             const robesonCenter = [34.6400, -79.1100] as [number, number];
             const distance = Math.sqrt(
@@ -596,7 +611,14 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       let debugLocations: string[] = [];
       
       organizations.forEach(org => {
-        const coords = getCoordinatesFromAddress(org.address);
+        // Use real coordinates if available, otherwise fall back to geocoding
+        let coords: { lat: number; lon: number } | null = null;
+        if (org.latitude && org.longitude) {
+          coords = { lat: org.latitude, lon: org.longitude };
+        } else {
+          coords = getCoordinatesFromAddress(org.address);
+        }
+        
         if (coords) {
           // Check if location is within reasonable distance of county center
           const distance = Math.sqrt(
@@ -736,7 +758,14 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       if (selectedMarker) {
         // Don't pan if we're in the middle of cluster interaction
         if (!preventZoomRef.current) {
-          const coords = getCoordinatesFromAddress(selectedOrganization.address);
+          // Use real coordinates if available, otherwise fall back to geocoding
+          let coords: { lat: number; lon: number } | null = null;
+          if (selectedOrganization.latitude && selectedOrganization.longitude) {
+            coords = { lat: selectedOrganization.latitude, lon: selectedOrganization.longitude };
+          } else {
+            coords = getCoordinatesFromAddress(selectedOrganization.address);
+          }
+          
           if (coords) {
             // Calculate offset to ensure popup is visible
             const isMobile = window.innerWidth < 768;
