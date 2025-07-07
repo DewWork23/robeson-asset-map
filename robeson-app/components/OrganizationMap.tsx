@@ -350,9 +350,17 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     const countyBorder = countyBorderRef.current;
 
     // Check if this is just an organization selection change (not category change)
-    const isJustOrgSelection = selectedOrganization?.id !== lastSelectedOrgRef.current && 
+    const prevOrgId = lastSelectedOrgRef.current;
+    const isJustOrgSelection = selectedOrganization?.id !== prevOrgId && 
                                selectedOrganization?.id !== null;
     lastSelectedOrgRef.current = selectedOrganization?.id || null;
+    
+    console.log('Organization selection check:', {
+      prevOrgId,
+      newOrgId: selectedOrganization?.id,
+      isJustOrgSelection,
+      preventZoomRef: preventZoomRef.current
+    });
 
     console.log('Updating markers, selectedCategory:', selectedCategory, 'organizations:', organizations.length);
     
@@ -577,53 +585,37 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           });
         }
         
-        // Add both mousedown and click handlers for better reliability
-        let clickHandled = false;
-        
-        marker.on('mousedown', (e: any) => {
-          L.DomEvent.stopPropagation(e);
-          clickHandled = false;
-        });
-        
-        marker.on('mouseup', (e: any) => {
-          // Handle click on mouseup for immediate response
-          if (!clickHandled) {
-            clickHandled = true;
-            L.DomEvent.stopPropagation(e);
-            
-            console.log('Map marker clicked (mouseup):', {
-              id: organization.id,
-              name: organization.organizationName
-            });
-            
-            if (onOrganizationClick) {
-              preventZoomRef.current = true;
-              onOrganizationClick(organization);
-              setTimeout(() => {
-                preventZoomRef.current = false;
-              }, 150);
-            }
-          }
-        });
-        
-        // Keep click handler as fallback
-        marker.on('click', (e: any) => {
-          L.DomEvent.stopPropagation(e);
+        // Add click handler with immediate response
+        const handleMarkerClick = () => {
+          console.log('Map marker clicked:', {
+            id: organization.id,
+            name: organization.organizationName,
+            hasClickHandler: !!onOrganizationClick
+          });
           
-          if (!clickHandled && onOrganizationClick) {
-            console.log('Map marker clicked (click fallback):', organization.organizationName);
-            preventZoomRef.current = true;
+          // Set flag to prevent view changes
+          preventZoomRef.current = true;
+          
+          // Call the handler immediately
+          if (onOrganizationClick) {
             onOrganizationClick(organization);
-            setTimeout(() => {
-              preventZoomRef.current = false;
-            }, 150);
           }
-          clickHandled = false;
+          
+          // Reset flag after a delay
+          setTimeout(() => {
+            preventZoomRef.current = false;
+          }, 500);
           
           // On mobile, ensure popup opens
           if (isMobile) {
             marker.openPopup();
           }
+        };
+        
+        // Attach to both click and tap events for better mobile support
+        marker.on('click', (e: any) => {
+          L.DomEvent.stopPropagation(e);
+          handleMarkerClick();
         });
       })(org);  // Pass org as parameter to the IIFE
     });
@@ -681,10 +673,10 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     setOnResetView(() => resetViewFunction);
 
     // Handle zoom based on selected category
-    const shouldSkipZoom = (!isMobile && isJustOrgSelection) || preventZoomRef.current;
+    const shouldSkipZoom = isJustOrgSelection || preventZoomRef.current;
     
     if (selectedCategory && organizations.length > 0 && !shouldSkipZoom) {
-      console.log(`Zooming to category: ${selectedCategory}, organizations: ${organizations.length}`);
+      console.log(`Zooming to category: ${selectedCategory}, organizations: ${organizations.length}, shouldSkipZoom: ${shouldSkipZoom}`);
       
       // Always start by centering on Robeson County
       const robesonCenter = [34.6400, -79.1100] as [number, number];

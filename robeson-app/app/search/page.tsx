@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Organization, CATEGORY_COLORS, CATEGORY_ICONS } from '@/types/organization';
 import { useOrganizations } from '@/contexts/OrganizationsContext';
 import { categoryToSlug } from '@/utils/categoryUtils';
+import { withBasePath } from '@/lib/basePath';
 import FeedbackBanner from '@/components/FeedbackBanner';
 
 function SearchContent() {
@@ -463,7 +464,7 @@ function SearchContent() {
 
                     <div className="flex gap-3">
                   <Link
-                    href={`/category/${categoryToSlug(org.category)}?org=${org.id}`}
+                    href={withBasePath(`/category/${categoryToSlug(org.category)}?org=${org.id}`)}
                     className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center"
                   >
                     View on Map
