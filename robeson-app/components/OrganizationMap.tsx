@@ -583,13 +583,10 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           });
         }
         
+        // Use mouseup instead of click for more reliable interaction
         marker.on('click', (e: any) => {
-          // Prevent event bubbling that might trigger map click
+          // Stop propagation to prevent map clicks
           L.DomEvent.stopPropagation(e);
-          L.DomEvent.preventDefault(e);
-          
-          // Set flag to prevent zoom/pan when selecting an organization
-          preventZoomRef.current = true;
           
           // Debug logging to track organization object
           console.log('Map marker clicked:', {
@@ -600,20 +597,21 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
             hasClickHandler: !!onOrganizationClick
           });
           
+          // Call the click handler immediately without delay
           if (onOrganizationClick) {
+            // Set flag but don't delay the handler
+            preventZoomRef.current = true;
             onOrganizationClick(organization);
+            
+            // Reset the flag after handler completes
+            setTimeout(() => {
+              preventZoomRef.current = false;
+            }, 200);
           }
-          
-          // Reset the flag after a short delay
-          setTimeout(() => {
-            preventZoomRef.current = false;
-          }, 500);
           
           // On mobile, ensure popup opens properly
           if (isMobile) {
-            setTimeout(() => {
-              marker.openPopup();
-            }, 100);
+            marker.openPopup();
           }
         });
       })(org);  // Pass org as parameter to the IIFE
