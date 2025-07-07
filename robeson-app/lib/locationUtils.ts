@@ -22,8 +22,12 @@ export const locationCoordinates: Record<string, { lat: number; lon: number }> =
   'pembroke': { lat: 34.6807, lon: -79.1953 },
   'uncp': { lat: 34.6874, lon: -79.2025 },
   
-  // Lumberton (county seat)
+  // Lumberton (county seat) - using different areas for better distribution
   'lumberton': { lat: 34.6182, lon: -79.0086 },
+  'north lumberton': { lat: 34.6400, lon: -79.0086 },
+  'south lumberton': { lat: 34.5964, lon: -79.0086 },
+  'east lumberton': { lat: 34.6182, lon: -78.9868 },
+  'west lumberton': { lat: 34.6182, lon: -79.0304 },
   
   // Other towns
   'fairmont': { lat: 34.4960, lon: -79.1142 },
@@ -43,6 +47,40 @@ export const locationCoordinates: Record<string, { lat: number; lon: number }> =
   
   // Default center of Robeson County
   'default': { lat: 34.6400, lon: -79.1100 }
+};
+
+// Common street patterns and their approximate offsets from city center
+const streetPatterns: Record<string, { latOffset: number; lonOffset: number }> = {
+  // Major roads/highways
+  'highway': { latOffset: 0.02, lonOffset: 0 },
+  'hwy': { latOffset: 0.02, lonOffset: 0 },
+  'route': { latOffset: 0.02, lonOffset: 0 },
+  'interstate': { latOffset: 0.03, lonOffset: 0 },
+  
+  // Directional indicators
+  'north': { latOffset: 0.015, lonOffset: 0 },
+  'south': { latOffset: -0.015, lonOffset: 0 },
+  'east': { latOffset: 0, lonOffset: 0.015 },
+  'west': { latOffset: 0, lonOffset: -0.015 },
+  'ne': { latOffset: 0.011, lonOffset: 0.011 },
+  'nw': { latOffset: 0.011, lonOffset: -0.011 },
+  'se': { latOffset: -0.011, lonOffset: 0.011 },
+  'sw': { latOffset: -0.011, lonOffset: -0.011 },
+  
+  // Common street types (slight variations)
+  'main': { latOffset: 0, lonOffset: 0 },
+  'elm': { latOffset: 0.005, lonOffset: 0.003 },
+  'oak': { latOffset: -0.003, lonOffset: 0.005 },
+  'pine': { latOffset: 0.004, lonOffset: -0.004 },
+  'martin luther king': { latOffset: 0.008, lonOffset: 0 },
+  'mlk': { latOffset: 0.008, lonOffset: 0 },
+  
+  // Numbered streets
+  '1st': { latOffset: -0.008, lonOffset: -0.008 },
+  '2nd': { latOffset: -0.006, lonOffset: -0.006 },
+  '3rd': { latOffset: -0.004, lonOffset: -0.004 },
+  '4th': { latOffset: -0.002, lonOffset: -0.002 },
+  '5th': { latOffset: 0, lonOffset: 0 },
 };
 
 // Track addresses to add offsets for duplicate locations
@@ -130,6 +168,40 @@ export function getCoordinatesFromAddress(address: string, isCrisisService: bool
     console.log(`Matched "${address}" to ${matchedLocation}`);
   }
   
+  // Apply street-level adjustments based on address patterns
+  const streetLower = addressLower;
+  
+  // Check for numbered addresses to create slight variations
+  const streetNumberMatch = address.match(/^(\d+)\s+/);
+  if (streetNumberMatch) {
+    const streetNumber = parseInt(streetNumberMatch[1]);
+    // Create a small offset based on street number
+    const numberOffset = (streetNumber % 100) * 0.00001;
+    baseCoords.lat += numberOffset;
+    baseCoords.lon += (streetNumber % 50) * 0.00001;
+  }
+  
+  // Apply offsets based on street patterns
+  for (const [pattern, offset] of Object.entries(streetPatterns)) {
+    if (streetLower.includes(pattern)) {
+      baseCoords.lat += offset.latOffset;
+      baseCoords.lon += offset.lonOffset;
+      console.log(`Applied street pattern offset for "${pattern}" in "${address}"`);
+      break; // Only apply first matching pattern
+    }
+  }
+  
+  // Special handling for specific Lumberton areas
+  if (matchedLocation === 'lumberton' && !addressLower.includes('pembroke')) {
+    if (streetLower.includes('fayetteville road') || streetLower.includes('fayetteville rd')) {
+      baseCoords.lat += 0.025; // North side
+    } else if (streetLower.includes('elizabethtown')) {
+      baseCoords.lat -= 0.020; // South side
+    } else if (streetLower.includes('5th')) {
+      baseCoords.lon -= 0.015; // West side
+    }
+  }
+  
   // For organizations at the same address, we need to offset them
   // Use a combination of base location and a counter for stable offsets
   const locationKey = `${matchedLocation || 'default'}_${Math.round(baseCoords.lat * 10000)}_${Math.round(baseCoords.lon * 10000)}`;
@@ -162,8 +234,8 @@ export function getCoordinatesFromAddress(address: string, isCrisisService: bool
   
   // Apply offset if this isn't the first organization at this location
   if (offsetIndex > 0) {
-    // Increase offset scale to make pins more visible when zoomed in
-    const scaleFactor = isCrisisService ? 0.001 : 0.0005; // Larger offsets for visibility
+    // Smaller offsets now that we have street-level distribution
+    const scaleFactor = isCrisisService ? 0.0003 : 0.0002; // Reduced offsets
     
     // Create a circular pattern for better distribution
     const angleStep = (2 * Math.PI) / Math.max(8, addressesAtLocation); // Divide circle by number of items
