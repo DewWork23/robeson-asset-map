@@ -152,21 +152,26 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Create layer groups
     const townLayer = L.layerGroup().addTo(map);
     
+    // Determine if we should disable clustering (for Crisis Services)
+    const shouldDisableClustering = selectedCategory === 'Crisis Services';
+    
     // Create marker cluster group with custom options
-    const organizationLayer = (L as any).markerClusterGroup({
-      showCoverageOnHover: false,
-      maxClusterRadius: 80, // Increased to better capture organizations at same address
-      spiderfyOnMaxZoom: true,
-      disableClusteringAtZoom: 18, // Allow clustering at higher zoom levels
-      animate: true,
-      animateAddingMarkers: true,
-      removeOutsideVisibleBounds: true,
-      spiderfyDistanceMultiplier: 2.0, // Increase distance between spiderfied markers
-      spiderLegPolylineOptions: { weight: 1.5, color: '#222', opacity: 0.5 },
-      zoomToBoundsOnClick: false, // Don't zoom when clicking cluster
-      spiderfyOnEveryZoom: true, // Keep spiderfy active across zoom levels
-      // Custom cluster icon creation
-      iconCreateFunction: function(cluster: any) {
+    const organizationLayer = shouldDisableClustering 
+      ? L.layerGroup().addTo(map) // Use regular layer group for Crisis Services
+      : (L as any).markerClusterGroup({
+          showCoverageOnHover: false,
+          maxClusterRadius: 80, // Increased to better capture organizations at same address
+          spiderfyOnMaxZoom: true,
+          disableClusteringAtZoom: 16, // Show individual markers at zoom 16+
+          animate: true,
+          animateAddingMarkers: true,
+          removeOutsideVisibleBounds: true,
+          spiderfyDistanceMultiplier: 2.5, // Increase distance between spiderfied markers
+          spiderLegPolylineOptions: { weight: 1.5, color: '#222', opacity: 0.5 },
+          zoomToBoundsOnClick: false, // Don't zoom when clicking cluster
+          singleMarkerMode: true, // Always show single markers (no clustering for single items)
+          // Custom cluster icon creation
+          iconCreateFunction: function(cluster: any) {
         const count = cluster.getChildCount();
         let size = 'small';
         let className = 'marker-cluster-small';
@@ -185,56 +190,60 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           iconSize: new (L as any).Point(40, 40)
         });
       }
-    }).addTo(map);
+        }).addTo(map);
+    
     organizationLayerRef.current = organizationLayer;
     
-    // Add cluster event handlers
-    organizationLayer.on('clustermouseover', (e: any) => {
-      e.propagatedFrom.setOpacity(0.8);
-    });
-    
-    organizationLayer.on('clustermouseout', (e: any) => {
-      e.propagatedFrom.setOpacity(1);
-    });
-    
-    // Handle cluster clicks manually
-    organizationLayer.on('clusterclick', (e: any) => {
-      L.DomEvent.stopPropagation(e);
+    // Only add cluster event handlers if clustering is enabled
+    if (!shouldDisableClustering) {
+      // Add cluster event handlers
+      organizationLayer.on('clustermouseover', (e: any) => {
+        e.propagatedFrom.setOpacity(0.8);
+      });
       
-      const cluster = e.layer;
-      const bottomCluster = cluster;
+      organizationLayer.on('clustermouseout', (e: any) => {
+        e.propagatedFrom.setOpacity(1);
+      });
       
-      // Zoom to show the cluster better if needed
-      const childMarkers = cluster.getAllChildMarkers();
-      const bounds = L.latLngBounds(childMarkers.map((m: any) => m.getLatLng()));
-      
-      // If already at high zoom, just spiderfy
-      if (map.getZoom() >= 15) {
-        cluster.spiderfy();
-      } else {
-        // Zoom in and then spiderfy
-        map.fitBounds(bounds, { padding: [100, 100], maxZoom: 16 });
-        setTimeout(() => {
+      // Handle cluster clicks manually
+      organizationLayer.on('clusterclick', (e: any) => {
+        L.DomEvent.stopPropagation(e);
+        
+        const cluster = e.layer;
+        const bottomCluster = cluster;
+        
+        // Zoom to show the cluster better if needed
+        const childMarkers = cluster.getAllChildMarkers();
+        const bounds = L.latLngBounds(childMarkers.map((m: any) => m.getLatLng()));
+        
+        // If already at high zoom, just spiderfy
+        if (map.getZoom() >= 15) {
           cluster.spiderfy();
-        }, 300);
-      }
-    });
-    
-    organizationLayer.on('spiderfied', (e: any) => {
-      // When cluster is spiderfied, ensure markers are clickable
-      preventZoomRef.current = true;
-      spiderfiedClusterRef.current = e.cluster;
-    });
-    
-    organizationLayer.on('unspiderfied', (e: any) => {
-      // Only allow unspiderfy if we're not selecting a marker
-      if (!preventZoomRef.current) {
-        spiderfiedClusterRef.current = null;
-        setTimeout(() => {
-          preventZoomRef.current = false;
-        }, 300);
-      }
-    });
+        } else {
+          // Zoom in and then spiderfy
+          map.fitBounds(bounds, { padding: [100, 100], maxZoom: 16 });
+          setTimeout(() => {
+            cluster.spiderfy();
+          }, 300);
+        }
+      });
+      
+      organizationLayer.on('spiderfied', (e: any) => {
+        // When cluster is spiderfied, ensure markers are clickable
+        preventZoomRef.current = true;
+        spiderfiedClusterRef.current = e.cluster;
+      });
+      
+      organizationLayer.on('unspiderfied', (e: any) => {
+        // Only allow unspiderfy if we're not selecting a marker
+        if (!preventZoomRef.current) {
+          spiderfiedClusterRef.current = null;
+          setTimeout(() => {
+            preventZoomRef.current = false;
+          }, 300);
+        }
+      });
+    }
     
     majorTowns.forEach(town => {
       const circle = L.circleMarker([town.coords.lat, town.coords.lon], {
@@ -347,9 +356,15 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
 
     // Track addresses to identify duplicates
     const addressCounts = new Map<string, number>();
+    const crisisServiceOrgs: Organization[] = [];
+    
     organizations.forEach(org => {
       const count = addressCounts.get(org.address) || 0;
       addressCounts.set(org.address, count + 1);
+      
+      if (org.crisisService || org.category === 'Crisis Services') {
+        crisisServiceOrgs.push(org);
+      }
     });
     
     // Log addresses with multiple organizations
@@ -359,9 +374,20 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       }
     });
     
+    // Debug Crisis Services specifically
+    if (selectedCategory === 'Crisis Services' || crisisServiceOrgs.length > 0) {
+      console.log('Crisis Services Debug:', {
+        totalCrisisOrgs: crisisServiceOrgs.length,
+        selectedCategory,
+        uniqueAddresses: new Set(crisisServiceOrgs.map(o => o.address)).size,
+        clusterRadius: 80
+      });
+    }
+    
     // Add new markers
     organizations.forEach(org => {
-      const coords = getCoordinatesFromAddress(org.address);
+      const isCrisisService = org.crisisService || org.category === 'Crisis Services';
+      const coords = getCoordinatesFromAddress(org.address, isCrisisService);
       if (!coords) return;
       
       // Filter out organizations too far from Robeson County

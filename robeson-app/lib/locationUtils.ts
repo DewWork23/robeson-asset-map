@@ -54,7 +54,7 @@ export function resetLocationOffsets() {
 }
 
 // Get coordinates from address string
-export function getCoordinatesFromAddress(address: string): { lat: number; lon: number } | null {
+export function getCoordinatesFromAddress(address: string, isCrisisService: boolean = false): { lat: number; lon: number } | null {
   const addressLower = address.toLowerCase();
   
   // Skip if no address
@@ -109,15 +109,15 @@ export function getCoordinatesFromAddress(address: string): { lat: number; lon: 
   addressOffsets.set(offsetKey, offsetCount + 1);
   
   if (offsetCount > 0) {
-    // Use a much smaller offset that keeps pins very close together
-    // This prevents false pins while still allowing individual selection
-    const scaleFactor = 0.0001; // Much smaller offset - about 10 meters
+    // Use different offset scale for crisis services vs regular pins
+    // Crisis services need more separation since they're not clustered
+    const scaleFactor = isCrisisService ? 0.0004 : 0.0001; // 40m for crisis, 10m for others
     
     // Simple grid pattern for predictable placement
     const row = Math.floor(Math.sqrt(offsetCount));
     const col = offsetCount - (row * row);
     
-    // Apply minimal offset
+    // Apply offset based on type
     baseCoords.lat += row * scaleFactor;
     baseCoords.lon += col * scaleFactor;
   }
