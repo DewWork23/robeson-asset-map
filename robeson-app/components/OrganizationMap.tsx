@@ -26,6 +26,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   const preventZoomRef = useRef(false);
   const spiderfiedClustersRef = useRef<Set<any>>(new Set());
   const stickyModeRef = useRef(false);
+  const overrideAllClustersUnspiderfyRef = useRef<(() => void) | null>(null);
   const [isZoomedIn, setIsZoomedIn] = useState(false);
   const [onResetView, setOnResetView] = useState<(() => void) | null>(null);
 
@@ -232,6 +233,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         }
       });
     };
+    
+    // Store the function in ref for use in marker click handlers
+    overrideAllClustersUnspiderfyRef.current = overrideAllClustersUnspiderfy;
     
     // Handle cluster clicks manually
     organizationLayer.on('clusterclick', (e: any) => {
@@ -561,7 +565,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         if (spiderfiedClustersRef.current.size > 0) {
           stickyModeRef.current = true;
           // Re-override unspiderfy in case new clusters appeared
-          overrideAllClustersUnspiderfy();
+          if (overrideAllClustersUnspiderfyRef.current) {
+            overrideAllClustersUnspiderfyRef.current();
+          }
         }
         
         // Debug logging to track organization object
