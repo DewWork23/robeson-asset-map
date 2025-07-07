@@ -369,7 +369,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     organizations.forEach(org => {
       const isCrisisService = org.crisisService || org.category === 'Crisis Services';
       const coords = getCoordinatesFromAddress(org.address, isCrisisService);
-      if (!coords) return;
+      if (!coords) {
+        console.warn(`No coordinates found for organization: ${org.organizationName} at ${org.address}`);
+        return;
+      }
+      
+      // Debug log for address geocoding
+      console.log(`Placing ${org.organizationName} at coordinates:`, coords, `from address: ${org.address}`);
       
       // Filter out organizations too far from Robeson County
       const robesonCenter = { lat: 34.6400, lon: -79.1100 };
@@ -427,107 +433,109 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       organizationLayer.addLayer(marker);
       markersRef.current.push(marker);
       
-      // Store organization reference on marker for later use
-      (marker as any).organization = org;
+      // Store organization reference on marker for later use - create a closure to capture the correct org
+      (function(organization) {
+        (marker as any).organization = organization;
       
-      // Add mousedown handler to prevent event bubbling
-      marker.on('mousedown', (e: any) => {
-        L.DomEvent.stopPropagation(e);
-      });
-      
-      const encodedAddress = encodeURIComponent(org.address);
-      const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
-      
-      // Create compact popup for mobile
-      const popupContent = isMobile ? `
-        <div style="max-width: 200px;">
-          <h3 style="font-weight: bold; margin: 0 0 4px 0; font-size: 14px; line-height: 1.2;">${org.organizationName}</h3>
-          <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">${org.category}</p>
-          <div style="margin-top: 8px; display: flex; gap: 4px;">
-            ${org.phone ? `<a href="tel:${org.phone.replace(/\D/g, '')}" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #16a34a; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500;">Call</a>` : ''}
-            <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500;">Directions</a>
-            <button onclick="window.showOrgDetails && window.showOrgDetails('${org.id}')" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #6b7280; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500; border: none; cursor: pointer;">Details</button>
-          </div>
-        </div>
-      ` : `
-        <div style="max-width: 300px;">
-          <h3 style="font-weight: bold; margin: 0 0 4px 0; font-size: 16px;">${org.organizationName}</h3>
-          <p style="margin: 0 0 4px 0; font-size: 14px; color: #666;">${org.category}</p>
-          <p style="margin: 0 0 8px 0; font-size: 13px;">${org.address}</p>
-          ${org.phone ? `<p style="margin: 0 0 4px 0; font-size: 14px;"><a href="tel:${org.phone.replace(/\D/g, '')}" style="color: #2563eb; text-decoration: none; font-weight: 500;">📞 ${org.phone}</a></p>` : ''}
-          ${org.hours ? `<p style="margin: 0 0 4px 0; font-size: 13px; color: #666;"><strong>Hours:</strong> ${org.hours}</p>` : ''}
-          ${org.servicesOffered ? `<p style="margin: 0 0 8px 0; font-size: 13px; color: #666;"><strong>Services:</strong> ${org.servicesOffered.substring(0, 100)}${org.servicesOffered.length > 100 ? '...' : ''}</p>` : ''}
-          <div style="margin-top: 12px; display: flex; gap: 8px;">
-            ${org.phone ? `<a href="tel:${org.phone.replace(/\D/g, '')}" style="flex: 1; display: inline-block; padding: 8px 12px; background-color: #16a34a; color: white; text-align: center; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">Call</a>` : ''}
-            <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; display: inline-block; padding: 8px 12px; background-color: #2563eb; color: white; text-align: center; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">📍 Directions</a>
-          </div>
-        </div>
-      `;
-      
-      marker.bindPopup(popupContent, {
-        autoPan: true,
-        autoPanPaddingTopLeft: [50, 100],
-        autoPanPaddingBottomRight: [50, 50],
-        keepInView: true,
-        maxWidth: isMobile ? 250 : 350
-      });
-      
-      // Add tooltip that shows on hover (desktop only)
-      if (!isMobile) {
-        const tooltipContent = `
-          <div style="
-            padding: 8px 12px;
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            white-space: nowrap;
-            max-width: 250px;
-          ">
-            <div style="font-weight: 600; margin-bottom: 2px;">
-              ${org.organizationName}
+        // Add mousedown handler to prevent event bubbling
+        marker.on('mousedown', (e: any) => {
+          L.DomEvent.stopPropagation(e);
+        });
+        
+        const encodedAddress = encodeURIComponent(organization.address);
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+        
+        // Create compact popup for mobile
+        const popupContent = isMobile ? `
+          <div style="max-width: 200px;">
+            <h3 style="font-weight: bold; margin: 0 0 4px 0; font-size: 14px; line-height: 1.2;">${organization.organizationName}</h3>
+            <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">${organization.category}</p>
+            <div style="margin-top: 8px; display: flex; gap: 4px;">
+              ${organization.phone ? `<a href="tel:${organization.phone.replace(/\D/g, '')}" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #16a34a; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500;">Call</a>` : ''}
+              <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500;">Directions</a>
+              <button onclick="window.showOrgDetails && window.showOrgDetails('${organization.id}')" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 8px; background-color: #6b7280; color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 500; border: none; cursor: pointer;">Details</button>
             </div>
-            <div style="font-size: 12px; color: #e2e8f0;">
-              ${org.category}
-              ${org.crisisService ? '<span style="color: #ef4444; margin-left: 8px;">🚨 Crisis Service</span>' : ''}
+          </div>
+        ` : `
+          <div style="max-width: 300px;">
+            <h3 style="font-weight: bold; margin: 0 0 4px 0; font-size: 16px;">${organization.organizationName}</h3>
+            <p style="margin: 0 0 4px 0; font-size: 14px; color: #666;">${organization.category}</p>
+            <p style="margin: 0 0 8px 0; font-size: 13px;">${organization.address}</p>
+            ${organization.phone ? `<p style="margin: 0 0 4px 0; font-size: 14px;"><a href="tel:${organization.phone.replace(/\D/g, '')}" style="color: #2563eb; text-decoration: none; font-weight: 500;">📞 ${organization.phone}</a></p>` : ''}
+            ${organization.hours ? `<p style="margin: 0 0 4px 0; font-size: 13px; color: #666;"><strong>Hours:</strong> ${organization.hours}</p>` : ''}
+            ${organization.servicesOffered ? `<p style="margin: 0 0 8px 0; font-size: 13px; color: #666;"><strong>Services:</strong> ${organization.servicesOffered.substring(0, 100)}${organization.servicesOffered.length > 100 ? '...' : ''}</p>` : ''}
+            <div style="margin-top: 12px; display: flex; gap: 8px;">
+              ${organization.phone ? `<a href="tel:${organization.phone.replace(/\D/g, '')}" style="flex: 1; display: inline-block; padding: 8px 12px; background-color: #16a34a; color: white; text-align: center; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">Call</a>` : ''}
+              <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; display: inline-block; padding: 8px 12px; background-color: #2563eb; color: white; text-align: center; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">📍 Directions</a>
             </div>
           </div>
         `;
         
-        marker.bindTooltip(tooltipContent, {
-          direction: 'top',
-          offset: [0, -20],
-          opacity: 1,
-          className: 'custom-tooltip'
-        });
-      }
-      
-      marker.on('click', (e: any) => {
-        // Prevent event bubbling that might trigger map click
-        L.DomEvent.stopPropagation(e);
-        L.DomEvent.preventDefault(e);
-        
-        // Debug logging to track organization object
-        console.log('Map marker clicked:', {
-          id: org.id,
-          name: org.organizationName,
-          category: org.category,
-          crisisService: org.crisisService,
-          hasClickHandler: !!onOrganizationClick
+        marker.bindPopup(popupContent, {
+          autoPan: true,
+          autoPanPaddingTopLeft: [50, 100],
+          autoPanPaddingBottomRight: [50, 50],
+          keepInView: true,
+          maxWidth: isMobile ? 250 : 350
         });
         
-        if (onOrganizationClick) {
-          onOrganizationClick(org);
+        // Add tooltip that shows on hover (desktop only)
+        if (!isMobile) {
+          const tooltipContent = `
+            <div style="
+              padding: 8px 12px;
+              background: rgba(0, 0, 0, 0.9);
+              color: white;
+              border-radius: 6px;
+              font-size: 14px;
+              font-weight: 500;
+              white-space: nowrap;
+              max-width: 250px;
+            ">
+              <div style="font-weight: 600; margin-bottom: 2px;">
+                ${organization.organizationName}
+              </div>
+              <div style="font-size: 12px; color: #e2e8f0;">
+                ${organization.category}
+                ${organization.crisisService ? '<span style="color: #ef4444; margin-left: 8px;">🚨 Crisis Service</span>' : ''}
+              </div>
+            </div>
+          `;
+          
+          marker.bindTooltip(tooltipContent, {
+            direction: 'top',
+            offset: [0, -20],
+            opacity: 1,
+            className: 'custom-tooltip'
+          });
         }
         
-        // On mobile, ensure popup opens properly
-        if (isMobile) {
-          setTimeout(() => {
-            marker.openPopup();
-          }, 100);
-        }
-      });
+        marker.on('click', (e: any) => {
+          // Prevent event bubbling that might trigger map click
+          L.DomEvent.stopPropagation(e);
+          L.DomEvent.preventDefault(e);
+          
+          // Debug logging to track organization object
+          console.log('Map marker clicked:', {
+            id: organization.id,
+            name: organization.organizationName,
+            category: organization.category,
+            crisisService: organization.crisisService,
+            hasClickHandler: !!onOrganizationClick
+          });
+          
+          if (onOrganizationClick) {
+            onOrganizationClick(organization);
+          }
+          
+          // On mobile, ensure popup opens properly
+          if (isMobile) {
+            setTimeout(() => {
+              marker.openPopup();
+            }, 100);
+          }
+        });
+      })(org);  // Pass org as parameter to the IIFE
     });
 
     // Create reset view function
