@@ -26,7 +26,6 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   const preventZoomRef = useRef(false);
   const spiderfiedClustersRef = useRef<Set<any>>(new Set());
   const stickyModeRef = useRef(false);
-  const overrideAllClustersUnspiderfyRef = useRef<(() => void) | null>(null);
   const [isZoomedIn, setIsZoomedIn] = useState(false);
   const [onResetView, setOnResetView] = useState<(() => void) | null>(null);
 
@@ -119,21 +118,25 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
     
-    // Add map click handler to close spiderfied clusters when clicking elsewhere
-    map.on('click', (e: any) => {
+    // Create exit sticky mode function
+    const exitStickyMode = () => {
       // Disable sticky mode
       stickyModeRef.current = false;
       
-      // Restore original unspiderfy method for ALL clusters
-      organizationLayerRef.current.eachLayer((layer: any) => {
-        if (layer instanceof (L as any).MarkerCluster && layer._originalUnspiderfy) {
-          layer.unspiderfy = layer._originalUnspiderfy;
-          delete layer._originalUnspiderfy;
-        }
-      });
-      
-      // Unspiderfy all expanded clusters
+      // Restore blocked unspiderfy methods
       spiderfiedClustersRef.current.forEach(cluster => {
+        if (cluster._blockedUnspiderfy) {
+          cluster.unspiderfy = cluster._blockedUnspiderfy;
+          delete cluster._blockedUnspiderfy;
+        }
+        
+        // Also restore parent group if it was blocked
+        if (cluster._group && cluster._group._blockedUnspiderfy) {
+          cluster._group.unspiderfy = cluster._group._blockedUnspiderfy;
+          delete cluster._group._blockedUnspiderfy;
+        }
+        
+        // Now unspiderfy
         if (cluster._spiderfied) {
           cluster.unspiderfy();
         }
@@ -141,7 +144,19 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       
       // Clear the set
       spiderfiedClustersRef.current.clear();
-    });
+    };
+    
+    // Define map click handler
+    const mapClickHandler = (e: any) => {
+      if (!stickyModeRef.current) {
+        // Normal click behavior
+        return;
+      }
+      exitStickyMode();
+    };
+    
+    // Add map click handler to close spiderfied clusters when clicking elsewhere
+    map.on('click', mapClickHandler);
 
     // Add county boundary
     const countyBorder = L.polygon(robesonCountyBoundary, {
@@ -177,11 +192,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       disableClusteringAtZoom: 16, // Show individual markers at zoom 16+
       animate: true,
       animateAddingMarkers: true,
-      removeOutsideVisibleBounds: true,
+      removeOutsideVisibleBounds: false, // Keep all markers loaded
       spiderfyDistanceMultiplier: 2.5, // Increase distance between spiderfied markers
       spiderLegPolylineOptions: { weight: 1.5, color: '#222', opacity: 0.5 },
       zoomToBoundsOnClick: false, // Don't zoom when clicking cluster
       singleMarkerMode: true, // Always show single markers (no clustering for single items)
+      spiderfyOnMaxZoom: true,
+      spiderfyOnEveryZoom: false, // Don't automatically spiderfy on zoom
       // Custom cluster icon creation
       iconCreateFunction: function(cluster: any) {
         const count = cluster.getChildCount();
@@ -215,56 +232,40 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       e.propagatedFrom.setOpacity(1);
     });
     
-    // Override unspiderfy for ALL clusters in the layer
-    const overrideAllClustersUnspiderfy = () => {
-      organizationLayer.eachLayer((layer: any) => {
-        if (layer instanceof (L as any).MarkerCluster && !layer._originalUnspiderfy) {
-          const originalUnspiderfy = layer.unspiderfy;
-          layer._originalUnspiderfy = originalUnspiderfy;
-          layer.unspiderfy = function() {
-            console.log('Unspiderfy attempt on cluster - sticky mode:', stickyModeRef.current);
-            if (!stickyModeRef.current) {
-              originalUnspiderfy.call(this);
-              spiderfiedClustersRef.current.delete(this);
-            } else {
-              console.log('Prevented unspiderfy due to sticky mode');
-            }
-          };
-        }
-      });
-    };
-    
-    // Store the function in ref for use in marker click handlers
-    overrideAllClustersUnspiderfyRef.current = overrideAllClustersUnspiderfy;
     
     // Handle cluster clicks manually
     organizationLayer.on('clusterclick', (e: any) => {
       L.DomEvent.stopPropagation(e);
+      L.DomEvent.preventDefault(e);
       
       const cluster = e.layer;
       
-      // Enable sticky mode
-      stickyModeRef.current = true;
+      // For debugging
+      console.log('Cluster clicked, child count:', cluster.getAllChildMarkers().length);
+      
+      // Simple approach: just spiderfy and prevent any unspiderfy
+      cluster.spiderfy();
+      
+      // Override the unspiderfy method immediately after spiderfy
+      const originalUnspiderfy = cluster.unspiderfy.bind(cluster);
+      cluster.unspiderfy = function() {
+        console.log('Blocked unspiderfy attempt on cluster');
+        // Do nothing - prevent unspiderfy
+      };
+      
+      // Store original for restoration
+      cluster._blockedUnspiderfy = originalUnspiderfy;
       spiderfiedClustersRef.current.add(cluster);
+      stickyModeRef.current = true;
       
-      // Override unspiderfy for ALL clusters when any cluster is clicked
-      overrideAllClustersUnspiderfy();
-      
-      // Zoom to show the cluster better if needed
-      const childMarkers = cluster.getAllChildMarkers();
-      const bounds = L.latLngBounds(childMarkers.map((m: any) => m.getLatLng()));
-      
-      // If already at high zoom, just spiderfy
-      if (map.getZoom() >= 15) {
-        cluster.spiderfy();
-      } else {
-        // Zoom in and then spiderfy
-        map.fitBounds(bounds, { padding: [100, 100], maxZoom: 16 });
-        setTimeout(() => {
-          cluster.spiderfy();
-          // Override again after zoom in case new clusters appear
-          setTimeout(overrideAllClustersUnspiderfy, 100);
-        }, 300);
+      // Also prevent unspiderfy on the parent cluster group
+      const parentGroup = cluster._group;
+      if (parentGroup && parentGroup.unspiderfy) {
+        const parentOriginal = parentGroup.unspiderfy.bind(parentGroup);
+        parentGroup.unspiderfy = function() {
+          console.log('Blocked unspiderfy on parent group');
+        };
+        parentGroup._blockedUnspiderfy = parentOriginal;
       }
     });
       
@@ -564,10 +565,6 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         // Keep sticky mode active when clicking markers
         if (spiderfiedClustersRef.current.size > 0) {
           stickyModeRef.current = true;
-          // Re-override unspiderfy in case new clusters appeared
-          if (overrideAllClustersUnspiderfyRef.current) {
-            overrideAllClustersUnspiderfyRef.current();
-          }
         }
         
         // Debug logging to track organization object
