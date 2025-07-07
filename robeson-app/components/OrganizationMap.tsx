@@ -351,8 +351,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
 
     // Check if this is just an organization selection change (not category change)
     const isJustOrgSelection = selectedOrganization?.id !== lastSelectedOrgRef.current && 
-                               selectedOrganization?.id && 
-                               !preventZoomRef.current;
+                               selectedOrganization?.id !== null;
     lastSelectedOrgRef.current = selectedOrganization?.id || null;
 
     console.log('Updating markers, selectedCategory:', selectedCategory, 'organizations:', organizations.length);
@@ -509,11 +508,6 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       // Store organization reference on marker for later use - create a closure to capture the correct org
       (function(organization) {
         (marker as any).organization = organization;
-      
-        // Add mousedown handler to prevent event bubbling
-        marker.on('mousedown', (e: any) => {
-          L.DomEvent.stopPropagation(e);
-        });
         
         const encodedAddress = encodeURIComponent(organization.address);
         const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
@@ -583,33 +577,50 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           });
         }
         
-        // Use mouseup instead of click for more reliable interaction
+        // Add both mousedown and click handlers for better reliability
+        let clickHandled = false;
+        
+        marker.on('mousedown', (e: any) => {
+          L.DomEvent.stopPropagation(e);
+          clickHandled = false;
+        });
+        
+        marker.on('mouseup', (e: any) => {
+          // Handle click on mouseup for immediate response
+          if (!clickHandled) {
+            clickHandled = true;
+            L.DomEvent.stopPropagation(e);
+            
+            console.log('Map marker clicked (mouseup):', {
+              id: organization.id,
+              name: organization.organizationName
+            });
+            
+            if (onOrganizationClick) {
+              preventZoomRef.current = true;
+              onOrganizationClick(organization);
+              setTimeout(() => {
+                preventZoomRef.current = false;
+              }, 150);
+            }
+          }
+        });
+        
+        // Keep click handler as fallback
         marker.on('click', (e: any) => {
-          // Stop propagation to prevent map clicks
           L.DomEvent.stopPropagation(e);
           
-          // Debug logging to track organization object
-          console.log('Map marker clicked:', {
-            id: organization.id,
-            name: organization.organizationName,
-            category: organization.category,
-            crisisService: organization.crisisService,
-            hasClickHandler: !!onOrganizationClick
-          });
-          
-          // Call the click handler immediately without delay
-          if (onOrganizationClick) {
-            // Set flag but don't delay the handler
+          if (!clickHandled && onOrganizationClick) {
+            console.log('Map marker clicked (click fallback):', organization.organizationName);
             preventZoomRef.current = true;
             onOrganizationClick(organization);
-            
-            // Reset the flag after handler completes
             setTimeout(() => {
               preventZoomRef.current = false;
-            }, 200);
+            }, 150);
           }
+          clickHandled = false;
           
-          // On mobile, ensure popup opens properly
+          // On mobile, ensure popup opens
           if (isMobile) {
             marker.openPopup();
           }
@@ -761,9 +772,12 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Restore view if we should preserve it
     if (shouldPreserveView && currentCenter && currentZoom) {
       setTimeout(() => {
-        map.setView(currentCenter, currentZoom, {
-          animate: false
-        });
+        if (mapRef.current) {
+          console.log('Preserving view at:', currentCenter, currentZoom);
+          mapRef.current.setView(currentCenter, currentZoom, {
+            animate: false
+          });
+        }
       }, 0);
     }
   }, [mapReady, L, organizations, selectedCategory, onOrganizationClick]);
