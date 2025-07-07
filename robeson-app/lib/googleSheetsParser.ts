@@ -106,26 +106,54 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     
     
     // Skip header row and map data
-    const organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => ({
-      id: (index + 1).toString(),
-      organizationName: row[0] || '',
-      category: row[1] || '',
-      serviceType: row[2] || '',
-      address: row[3] || '',
-      phone: row[4] || '',
-      email: row[5] || '',
-      website: row[6] || '',
-      hours: row[7] || '',
-      servicesOffered: row[8] || '',
-      costPayment: row[9] || '',
-      description: row[10] || '',
-      crisisService: row[11]?.toLowerCase() === 'yes',
-      languages: row[12] || '',
-      specialNotes: row[13] || '',
-      latitude: row[14] ? parseFloat(row[14]) : undefined,
-      longitude: row[15] ? parseFloat(row[15]) : undefined
-    }));
+    const organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => {
+      // Debug first few rows to see the data structure
+      if (index < 3) {
+        console.log(`Row ${index + 1} data:`, {
+          name: row[0],
+          address: row[3],
+          latitudeRaw: row[14],
+          longitudeRaw: row[15],
+          rowLength: row.length
+        });
+      }
+      
+      const org = {
+        id: (index + 1).toString(),
+        organizationName: row[0] || '',
+        category: row[1] || '',
+        serviceType: row[2] || '',
+        address: row[3] || '',
+        phone: row[4] || '',
+        email: row[5] || '',
+        website: row[6] || '',
+        hours: row[7] || '',
+        servicesOffered: row[8] || '',
+        costPayment: row[9] || '',
+        description: row[10] || '',
+        crisisService: row[11]?.toLowerCase() === 'yes',
+        languages: row[12] || '',
+        specialNotes: row[13] || '',
+        latitude: row[14] ? parseFloat(row[14]) : undefined,
+        longitude: row[15] ? parseFloat(row[15]) : undefined
+      };
+      
+      // Debug coordinate parsing for first few
+      if (index < 3 && (org.latitude || org.longitude)) {
+        console.log(`Parsed coordinates for ${org.organizationName}:`, {
+          latitude: org.latitude,
+          longitude: org.longitude
+        });
+      }
+      
+      return org;
+    });
     
+    
+    // Debug: Count organizations with and without coordinates
+    const withCoords = organizations.filter(org => org.latitude && org.longitude).length;
+    const withoutCoords = organizations.filter(org => !org.latitude || !org.longitude).length;
+    console.log(`Organizations with coordinates: ${withCoords}, without: ${withoutCoords}`);
     
     // Cache the data
     setCachedData(organizations);

@@ -371,10 +371,11 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       
       // Use real coordinates if available, otherwise fall back to geocoding
       let coords: { lat: number; lon: number } | null = null;
-      if (org.latitude && org.longitude) {
+      if (org.latitude !== undefined && org.longitude !== undefined && !isNaN(org.latitude) && !isNaN(org.longitude)) {
         coords = { lat: org.latitude, lon: org.longitude };
         console.log(`Using real coordinates for ${org.organizationName}: ${org.latitude}, ${org.longitude}`);
       } else {
+        console.log(`No GPS coordinates for ${org.organizationName}, falling back to address geocoding`);
         coords = getCoordinatesFromAddress(org.address, isCrisisService);
         if (!coords) {
           console.warn(`No coordinates found for organization: ${org.organizationName} at ${org.address}`);
@@ -556,7 +557,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         organizations.forEach(org => {
           // Use real coordinates if available, otherwise fall back to geocoding
           let coords: { lat: number; lon: number } | null = null;
-          if (org.latitude && org.longitude) {
+          if (org.latitude !== undefined && org.longitude !== undefined && !isNaN(org.latitude) && !isNaN(org.longitude)) {
             coords = { lat: org.latitude, lon: org.longitude };
           } else {
             coords = getCoordinatesFromAddress(org.address);
@@ -760,7 +761,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         if (!preventZoomRef.current) {
           // Use real coordinates if available, otherwise fall back to geocoding
           let coords: { lat: number; lon: number } | null = null;
-          if (selectedOrganization.latitude && selectedOrganization.longitude) {
+          if (selectedOrganization.latitude !== undefined && selectedOrganization.longitude !== undefined && 
+              !isNaN(selectedOrganization.latitude) && !isNaN(selectedOrganization.longitude)) {
             coords = { lat: selectedOrganization.latitude, lon: selectedOrganization.longitude };
           } else {
             coords = getCoordinatesFromAddress(selectedOrganization.address);
