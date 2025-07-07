@@ -166,7 +166,18 @@ export default function MapPage() {
           selectedOrganization={selectedOrganization}
           selectedCategory={selectedCategory}
           onOrganizationClick={(org) => {
+            console.log('Sidebar received organization click:', {
+              id: org.id,
+              name: org.organizationName,
+              category: org.category,
+              crisisService: org.crisisService,
+              currentSelected: selectedOrganization?.id
+            });
             setSelectedOrganization(org);
+            // Force sidebar to stay open on desktop when selecting
+            if (window.innerWidth >= 1024) {
+              setSidebarOpen(true);
+            }
           }}
           onCategoryChange={(category) => {
             setSelectedCategory(category);
@@ -178,10 +189,19 @@ export default function MapPage() {
         {/* Map container */}
         <div className="flex-1 relative">
           <OrganizationMap 
-            organizations={selectedCategory 
-              ? filterOrganizations(organizations, selectedCategory)
-              : organizations
-            }
+            organizations={(() => {
+              const filtered = selectedCategory 
+                ? filterOrganizations(organizations, selectedCategory)
+                : organizations;
+              
+              // Debug log to check crisis service organizations
+              const crisisOrgs = filtered.filter(org => org.crisisService);
+              if (crisisOrgs.length > 0) {
+                console.log(`Filtered organizations include ${crisisOrgs.length} crisis service orgs in category: ${selectedCategory || 'All'}`);
+              }
+              
+              return filtered;
+            })()}
             allOrganizations={organizations}
             selectedCategory={selectedCategory}
             selectedOrganization={selectedOrganization}
@@ -189,7 +209,18 @@ export default function MapPage() {
               setSelectedCategory(cat);
             }}
             onOrganizationClick={(org) => {
+              console.log('Map page received organization click:', {
+                id: org.id,
+                name: org.organizationName,
+                category: org.category,
+                crisisService: org.crisisService,
+                selectedCategory: selectedCategory
+              });
               setSelectedOrganization(org);
+              // Ensure sidebar opens on mobile when selecting from map
+              if (window.innerWidth < 768) {
+                setSidebarOpen(true);
+              }
             }}
           />
           

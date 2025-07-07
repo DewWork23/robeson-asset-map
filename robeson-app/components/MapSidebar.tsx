@@ -448,7 +448,15 @@ export default function MapSidebar({
               {sortedOrganizations.map((org) => (
                 <div
                   key={org.id}
-                  onClick={() => onOrganizationClick?.(org)}
+                  onClick={() => {
+                    console.log('Sidebar card clicked:', {
+                      id: org.id,
+                      name: org.organizationName,
+                      category: org.category,
+                      crisisService: org.crisisService
+                    });
+                    onOrganizationClick?.(org);
+                  }}
                   className={`cursor-pointer transition-all ${
                     selectedOrganization?.id === org.id 
                       ? 'ring-2 ring-blue-500 rounded-lg' 

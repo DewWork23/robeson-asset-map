@@ -420,6 +420,15 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         // Reset preventZoom when clicking a marker to ensure proper behavior
         preventZoomRef.current = false;
         
+        // Debug logging to track organization object
+        console.log('Map marker clicked:', {
+          id: org.id,
+          name: org.organizationName,
+          category: org.category,
+          crisisService: org.crisisService,
+          hasClickHandler: !!onOrganizationClick
+        });
+        
         if (onOrganizationClick) {
           onOrganizationClick(org);
         }
