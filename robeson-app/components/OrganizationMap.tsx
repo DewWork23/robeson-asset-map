@@ -413,6 +413,37 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         maxWidth: isMobile ? 250 : 350
       });
       
+      // Add tooltip that shows on hover (desktop only)
+      if (!isMobile) {
+        const tooltipContent = `
+          <div style="
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            max-width: 250px;
+          ">
+            <div style="font-weight: 600; margin-bottom: 2px;">
+              ${org.organizationName}
+            </div>
+            <div style="font-size: 12px; color: #e2e8f0;">
+              ${org.category}
+              ${org.crisisService ? '<span style="color: #ef4444; margin-left: 8px;">🚨 Crisis Service</span>' : ''}
+            </div>
+          </div>
+        `;
+        
+        marker.bindTooltip(tooltipContent, {
+          direction: 'top',
+          offset: [0, -20],
+          opacity: 1,
+          className: 'custom-tooltip'
+        });
+      }
+      
       marker.on('click', (e: any) => {
         // Prevent event bubbling that might trigger map click
         L.DomEvent.stopPropagation(e);

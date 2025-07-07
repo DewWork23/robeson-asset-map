@@ -270,3 +270,59 @@ button, a {
     font-weight: 900;
   }
 }
+
+/* Custom tooltip styles */
+.leaflet-tooltip.custom-tooltip {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.leaflet-tooltip.custom-tooltip::before {
+  display: none;
+}
+
+/* Ensure tooltips have high z-index */
+.leaflet-tooltip {
+  z-index: 9999 !important;
+}
+
+/* Prevent tooltip text wrapping for better appearance */
+.leaflet-tooltip div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Add animation to tooltips */
+@keyframes tooltip-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.leaflet-tooltip.custom-tooltip {
+  animation: tooltip-fade-in 0.2s ease-out;
+}
+
+/* Pulse animation for selected markers */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(30, 64, 175, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(30, 64, 175, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(30, 64, 175, 0);
+  }
+}
