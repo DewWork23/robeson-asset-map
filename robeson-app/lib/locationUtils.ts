@@ -102,36 +102,24 @@ export function getCoordinatesFromAddress(address: string): { lat: number; lon: 
     baseCoords = { ...locationCoordinates.default };
   }
   
-  // Add a smart offset to prevent exact overlapping
-  // This creates a circular pattern with proper spacing
+  // Add a much smaller offset to prevent exact overlapping
+  // This should only slightly separate pins, letting the clustering handle the rest
   const offsetKey = `${baseCoords.lat},${baseCoords.lon}`;
   const offsetCount = addressOffsets.get(offsetKey) || 0;
   addressOffsets.set(offsetKey, offsetCount + 1);
   
   if (offsetCount > 0) {
-    // Create a sunflower pattern for optimal spacing
-    const goldenAngle = 137.5077640500378; // Golden angle in degrees
-    const scaleFactor = 0.008; // Significantly increased for better visibility
+    // Use a much smaller offset that keeps pins very close together
+    // This prevents false pins while still allowing individual selection
+    const scaleFactor = 0.0001; // Much smaller offset - about 10 meters
     
-    // Calculate position using sunflower seed arrangement
-    const angle = (offsetCount * goldenAngle * Math.PI) / 180;
-    const radius = scaleFactor * Math.sqrt(offsetCount);
+    // Simple grid pattern for predictable placement
+    const row = Math.floor(Math.sqrt(offsetCount));
+    const col = offsetCount - (row * row);
     
-    // Add slight randomization to prevent perfect patterns
-    const randomOffset = 0.0001;
-    const randomAngle = (Math.random() - 0.5) * randomOffset;
-    const randomRadius = (Math.random() - 0.5) * randomOffset;
-    
-    // Apply offset with randomization
-    baseCoords.lat += (radius + randomRadius) * Math.cos(angle + randomAngle);
-    baseCoords.lon += (radius + randomRadius) * Math.sin(angle + randomAngle);
-    
-    // For very crowded areas (>20 pins), increase spacing even more
-    if (offsetCount > 20) {
-      const extraSpacing = 0.002 * Math.floor(offsetCount / 20);
-      baseCoords.lat += extraSpacing * Math.cos(angle);
-      baseCoords.lon += extraSpacing * Math.sin(angle);
-    }
+    // Apply minimal offset
+    baseCoords.lat += row * scaleFactor;
+    baseCoords.lon += col * scaleFactor;
   }
   
   return baseCoords;

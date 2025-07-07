@@ -145,13 +145,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Create marker cluster group with custom options
     const organizationLayer = (L as any).markerClusterGroup({
       showCoverageOnHover: false,
-      maxClusterRadius: 50, // Smaller radius for more granular clustering
+      maxClusterRadius: 80, // Increased to better capture organizations at same address
       spiderfyOnMaxZoom: true,
-      disableClusteringAtZoom: 16, // Show individual markers when zoomed in enough
+      disableClusteringAtZoom: 18, // Allow clustering at higher zoom levels
       animate: true,
       animateAddingMarkers: true,
       removeOutsideVisibleBounds: true,
-      spiderfyDistanceMultiplier: 1.5, // Increase distance between spiderfied markers
+      spiderfyDistanceMultiplier: 2.0, // Increase distance between spiderfied markers
       spiderLegPolylineOptions: { weight: 1.5, color: '#222', opacity: 0.5 },
       // Custom cluster icon creation
       iconCreateFunction: function(cluster: any) {
@@ -312,6 +312,20 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       };
     }
 
+    // Track addresses to identify duplicates
+    const addressCounts = new Map<string, number>();
+    organizations.forEach(org => {
+      const count = addressCounts.get(org.address) || 0;
+      addressCounts.set(org.address, count + 1);
+    });
+    
+    // Log addresses with multiple organizations
+    addressCounts.forEach((count, address) => {
+      if (count > 1) {
+        console.log(`${count} organizations at address: ${address}`);
+      }
+    });
+    
     // Add new markers
     organizations.forEach(org => {
       const coords = getCoordinatesFromAddress(org.address);
