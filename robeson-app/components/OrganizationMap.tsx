@@ -197,7 +197,6 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       spiderLegPolylineOptions: { weight: 1.5, color: '#222', opacity: 0.5 },
       zoomToBoundsOnClick: false, // Don't zoom when clicking cluster
       singleMarkerMode: true, // Always show single markers (no clustering for single items)
-      spiderfyOnMaxZoom: true,
       spiderfyOnEveryZoom: false, // Don't automatically spiderfy on zoom
       // Custom cluster icon creation
       iconCreateFunction: function(cluster: any) {
@@ -273,8 +272,6 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       // When cluster is spiderfied, ensure markers are clickable
       preventZoomRef.current = true;
       spiderfiedClustersRef.current.add(e.cluster);
-      // Override unspiderfy for any new clusters that appear
-      setTimeout(overrideAllClustersUnspiderfy, 100);
     });
       
     organizationLayer.on('unspiderfied', (e: any) => {
