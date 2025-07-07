@@ -9,7 +9,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'A:P'; // Extended to include Latitude (O) and Longitude (P) columns
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v18'; // Force new cache for lat/lon columns
+const CACHE_KEY = 'robeson_resources_cache_v19'; // Force new cache - fixed lat/lon column positions
 const CACHE_DURATION = 1000 * 60 * 5; // 5 minutes for testing
 
 interface CachedData {
@@ -112,16 +112,14 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     
     // Skip header row and map data
     const organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => {
-      // Debug first few rows to see the data structure
+      // Debug first few rows to see the data structure - expanded to show actual values
       if (index < 3) {
-        console.log(`Row ${index + 1} data:`, {
-          name: row[0],
-          address: row[3],
-          latitudeRaw: row[14],
-          longitudeRaw: row[15],
-          rowLength: row.length,
-          fullRow: row  // Show the entire row to see structure
-        });
+        console.log(`Row ${index + 1} data:`);
+        console.log('  Name:', row[0]);
+        console.log('  Address:', row[3]);
+        console.log('  Latitude (raw at index 4):', row[4]);
+        console.log('  Longitude (raw at index 5):', row[5]);
+        console.log('  Row length:', row.length);
       }
       
       const org = {
@@ -130,18 +128,18 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
         category: row[1] || '',
         serviceType: row[2] || '',
         address: row[3] || '',
-        phone: row[4] || '',
-        email: row[5] || '',
-        website: row[6] || '',
-        hours: row[7] || '',
-        servicesOffered: row[8] || '',
-        costPayment: row[9] || '',
-        description: row[10] || '',
-        crisisService: row[11]?.toLowerCase() === 'yes',
-        languages: row[12] || '',
-        specialNotes: row[13] || '',
-        latitude: row[14] ? parseFloat(row[14]) : undefined,
-        longitude: row[15] ? parseFloat(row[15]) : undefined
+        latitude: row[4] ? parseFloat(row[4]) : undefined,  // Column E (index 4)
+        longitude: row[5] ? parseFloat(row[5]) : undefined, // Column F (index 5)
+        phone: row[6] || '',     // Column G (index 6)
+        email: row[7] || '',     // Column H (index 7)
+        website: row[8] || '',   // Column I (index 8)
+        hours: row[9] || '',     // Column J (index 9)
+        servicesOffered: row[10] || '',  // Column K (index 10)
+        costPayment: row[11] || '',      // Column L (index 11)
+        description: row[12] || '',      // Column M (index 12)
+        crisisService: row[13]?.toLowerCase() === 'yes', // Column N (index 13)
+        languages: row[14] || '',        // Column O (index 14)
+        specialNotes: row[15] || ''      // Column P (index 15)
       };
       
       // Debug coordinate parsing for first few
