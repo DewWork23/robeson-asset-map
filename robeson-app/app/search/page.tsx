@@ -84,8 +84,10 @@ function SearchContent() {
         // Only match specific known variations, not partial matches
         const soundsLike: Record<string, string[]> = {
           'pause': ['pawss', 'paws'],
-          'pawss': ['pause', 'paws'],
-          'paws': ['pause', 'pawss'],
+          'pawss': ['pause', 'paws', 'pauls', "paul's"],
+          'paws': ['pause', 'pawss', 'pauls', "paul's"],
+          'pauls': ['pawss', 'paws'],
+          "paul's": ['pawss', 'paws'],
         };
         
         // Check if the search term matches any known variations
@@ -100,6 +102,10 @@ function SearchContent() {
         // Special handling for known organizations
         if (normalizedQuery === 'pause' && orgName.includes('pawss')) {
           console.log('Found PAWSS for pause query');
+          return true;
+        }
+        if ((normalizedQuery === 'pauls' || normalizedQuery === "paul's") && orgName.includes('pawss')) {
+          console.log('Found PAWSS for pauls/paul\'s query');
           return true;
         }
         
