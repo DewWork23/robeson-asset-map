@@ -256,10 +256,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         duration: 0.5
       });
       
-      // Keep the flag set for a bit to prevent view resets
-      setTimeout(() => {
-        preventZoomRef.current = false;
-      }, 1000);
+      // Don't reset the flag here - let marker clicks handle it
+      // This prevents timing conflicts
       
       // Prevent default behavior
       return false;
@@ -367,7 +365,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Store current map state before updating
     const currentZoom = map.getZoom();
     const currentCenter = map.getCenter();
-    const shouldPreserveView = isJustOrgSelection || preventZoomRef.current;
+    const shouldPreserveView = isJustOrgSelection || preventZoomRef.current || expandedClustersRef.current.size > 0;
 
     // Clear existing markers from cluster group
     organizationLayer.clearLayers();
@@ -586,14 +584,22 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         }
         
         // Add click handler with immediate response
-        const handleMarkerClick = () => {
+        const handleMarkerClick = (e: any) => {
+          // Always stop propagation first
+          if (e) {
+            L.DomEvent.stopPropagation(e);
+            L.DomEvent.preventDefault(e);
+          }
+          
           console.log('Map marker clicked:', {
             id: organization.id,
             name: organization.organizationName,
-            hasClickHandler: !!onOrganizationClick
+            hasClickHandler: !!onOrganizationClick,
+            preventZoomRef: preventZoomRef.current,
+            expandedClusters: expandedClustersRef.current.size
           });
           
-          // Set flag to prevent view changes
+          // Always set flag to prevent view changes
           preventZoomRef.current = true;
           
           // Call the handler immediately
@@ -601,10 +607,16 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
             onOrganizationClick(organization);
           }
           
-          // Reset flag after a delay
+          // Keep the flag set longer if we're in an expanded cluster
+          const resetDelay = expandedClustersRef.current.size > 0 ? 1500 : 800;
+          
           setTimeout(() => {
             preventZoomRef.current = false;
-          }, 500);
+            // Clear expanded clusters after interaction
+            if (expandedClustersRef.current.size > 0) {
+              expandedClustersRef.current.clear();
+            }
+          }, resetDelay);
           
           // On mobile, ensure popup opens
           if (isMobile) {
@@ -612,10 +624,12 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           }
         };
         
-        // Attach to both click and tap events for better mobile support
-        marker.on('click', (e: any) => {
+        // Use direct event binding for better control
+        marker.on('click', handleMarkerClick);
+        
+        // Also handle mousedown to prevent any bubbling issues
+        marker.on('mousedown', (e: any) => {
           L.DomEvent.stopPropagation(e);
-          handleMarkerClick();
         });
       })(org);  // Pass org as parameter to the IIFE
     });
@@ -673,7 +687,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     setOnResetView(() => resetViewFunction);
 
     // Handle zoom based on selected category
-    const shouldSkipZoom = isJustOrgSelection || preventZoomRef.current;
+    const shouldSkipZoom = isJustOrgSelection || preventZoomRef.current || expandedClustersRef.current.size > 0;
     
     if (selectedCategory && organizations.length > 0 && !shouldSkipZoom) {
       console.log(`Zooming to category: ${selectedCategory}, organizations: ${organizations.length}, shouldSkipZoom: ${shouldSkipZoom}`);
