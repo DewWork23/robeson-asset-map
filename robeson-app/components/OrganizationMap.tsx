@@ -184,7 +184,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       animate: true,
       animateAddingMarkers: true,
       removeOutsideVisibleBounds: false, // Keep all markers loaded
-      zoomToBoundsOnClick: true, // Enable zoom on click
+      zoomToBoundsOnClick: false, // Disable default zoom - we handle it manually
       singleMarkerMode: true, // Always show single markers (no clustering for single items)
       // Custom cluster icon creation
       iconCreateFunction: function(cluster: any) {
@@ -222,10 +222,18 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     
     // Handle cluster clicks manually - zoom to show actual locations
     organizationLayer.on('clusterclick', (e: any) => {
+      // Prevent default cluster behavior
+      e.originalEvent.preventDefault();
+      e.originalEvent.stopPropagation();
+      
       const cluster = e.layer;
       const childMarkers = cluster.getAllChildMarkers();
       
       console.log('Cluster clicked, child count:', childMarkers.length);
+      
+      // Set flag to maintain view state when interacting with clusters
+      preventZoomRef.current = true;
+      expandedClustersRef.current.add(cluster);
       
       // Get bounds of all child markers
       const group = L.featureGroup(childMarkers);
@@ -248,8 +256,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         duration: 0.5
       });
       
-      // Don't prevent default - let the cluster library handle the zoom
-      return true;
+      // Keep the flag set for a bit to prevent view resets
+      setTimeout(() => {
+        preventZoomRef.current = false;
+      }, 1000);
+      
+      // Prevent default behavior
+      return false;
     });
       
     
@@ -575,6 +588,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           L.DomEvent.stopPropagation(e);
           L.DomEvent.preventDefault(e);
           
+          // Set flag to prevent zoom/pan when selecting an organization
+          preventZoomRef.current = true;
+          
           // Debug logging to track organization object
           console.log('Map marker clicked:', {
             id: organization.id,
@@ -587,6 +603,11 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           if (onOrganizationClick) {
             onOrganizationClick(organization);
           }
+          
+          // Reset the flag after a short delay
+          setTimeout(() => {
+            preventZoomRef.current = false;
+          }, 500);
           
           // On mobile, ensure popup opens properly
           if (isMobile) {
