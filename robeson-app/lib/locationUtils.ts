@@ -130,59 +130,55 @@ export function getCoordinatesFromAddress(address: string, isCrisisService: bool
     console.log(`Matched "${address}" to ${matchedLocation}`);
   }
   
-  // Create a stable offset based on the full address to prevent shuffling
-  // Use the full address as the key, not just the coordinates
-  const offsetKey = address.toLowerCase().trim();
-  let offsetIndex = addressOffsets.get(offsetKey);
+  // For organizations at the same address, we need to offset them
+  // Use a combination of base location and a counter for stable offsets
+  const locationKey = `${matchedLocation || 'default'}_${Math.round(baseCoords.lat * 10000)}_${Math.round(baseCoords.lon * 10000)}`;
   
-  if (offsetIndex === undefined) {
-    // Get all addresses at this location
-    const locationKey = `${baseCoords.lat},${baseCoords.lon}`;
-    const addressesAtLocation = Array.from(addressOffsets.entries())
-      .filter(([addr, _]) => {
-        const coords = { lat: baseCoords.lat, lon: baseCoords.lon };
-        // Check if this address maps to the same base coordinates
-        return addr !== offsetKey && getBaseCoordinatesForAddress(addr) === locationKey;
-      }).length;
-    
-    offsetIndex = addressesAtLocation;
-    addressOffsets.set(offsetKey, offsetIndex);
+  // Get or create an array of addresses at this location
+  if (!addressOffsets.has(locationKey)) {
+    addressOffsets.set(locationKey, 0);
   }
   
+  // Check if we've seen this exact address before
+  const fullAddressKey = `${locationKey}::${address.toLowerCase().trim()}`;
+  let offsetIndex = 0;
+  
+  // Get all entries that start with this location key
+  let addressesAtLocation = 0;
+  for (const [key, value] of addressOffsets.entries()) {
+    if (key.startsWith(locationKey + '::')) {
+      addressesAtLocation++;
+      if (key === fullAddressKey) {
+        offsetIndex = value as number;
+      }
+    }
+  }
+  
+  // If this is a new address at this location, assign it the next index
+  if (!addressOffsets.has(fullAddressKey)) {
+    offsetIndex = addressesAtLocation;
+    addressOffsets.set(fullAddressKey, offsetIndex);
+  }
+  
+  // Apply offset if this isn't the first organization at this location
   if (offsetIndex > 0) {
-    // Use different offset scale for crisis services vs regular pins
-    const scaleFactor = isCrisisService ? 0.0003 : 0.00008; // Smaller offsets
+    // Increase offset scale to make pins more visible when zoomed in
+    const scaleFactor = isCrisisService ? 0.001 : 0.0005; // Larger offsets for visibility
     
-    // Create a spiral pattern for more natural distribution
-    const angle = offsetIndex * 2.39996; // Golden angle in radians
-    const radius = Math.sqrt(offsetIndex) * scaleFactor;
+    // Create a circular pattern for better distribution
+    const angleStep = (2 * Math.PI) / Math.max(8, addressesAtLocation); // Divide circle by number of items
+    const angle = offsetIndex * angleStep;
     
-    baseCoords.lat += radius * Math.cos(angle);
-    baseCoords.lon += radius * Math.sin(angle) * 1.3; // Adjust for longitude scaling at this latitude
+    // Base radius that increases slightly with more items
+    const baseRadius = scaleFactor * (1 + Math.floor(offsetIndex / 8) * 0.5);
+    
+    baseCoords.lat += baseRadius * Math.cos(angle);
+    baseCoords.lon += baseRadius * Math.sin(angle) * 1.2; // Adjust for longitude scaling
   }
   
   return baseCoords;
 }
 
-// Helper function to get base coordinates without offset
-function getBaseCoordinatesForAddress(address: string): string {
-  const addressLower = address.toLowerCase();
-  
-  // Same logic as above but just return the location key
-  const addressParts = address.split(',');
-  if (addressParts.length >= 2) {
-    const cityPart = addressParts[addressParts.length - 2]?.trim().toLowerCase();
-    for (const [key, coords] of Object.entries(locationCoordinates)) {
-      if (key === 'default') continue;
-      if (cityPart && cityPart.includes(key)) {
-        return `${coords.lat},${coords.lon}`;
-      }
-    }
-  }
-  
-  // Return default if no match
-  return `${locationCoordinates.default.lat},${locationCoordinates.default.lon}`;
-}
 
 // Format distance for display
 export function formatDistance(miles: number): string {
