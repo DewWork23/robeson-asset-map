@@ -73,9 +73,36 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
 
   // Initialize map only once
   useEffect(() => {
-    if (!mapReady || !L || mapRef.current) return;
+    if (!mapReady || !L) return;
+    
+    // More robust check for existing map
+    if (mapRef.current) {
+      console.log('Map already exists in mapRef, skipping initialization');
+      return;
+    }
 
     console.log('Initializing map with center:', [34.6400, -79.1100]);
+    
+    // Check if the container already has a map and clean it up
+    const container = document.getElementById('map');
+    if (!container) {
+      console.log('Map container not found');
+      return;
+    }
+    
+    if ((container as any)._leaflet_id) {
+      console.log('Map container already has Leaflet instance, attempting cleanup...');
+      // Try to find and remove existing map instance
+      try {
+        const existingMap = (container as any)._leaflet_map;
+        if (existingMap) {
+          existingMap.remove();
+        }
+      } catch (e) {
+        console.error('Error cleaning up existing map:', e);
+      }
+      delete (container as any)._leaflet_id;
+    }
     
     // Create map with explicit options for better mobile experience
     // Start very zoomed out to ensure we see everything
@@ -291,7 +318,11 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Cleanup on unmount
     return () => {
       if (mapRef.current) {
-        mapRef.current.remove();
+        try {
+          mapRef.current.remove();
+        } catch (e) {
+          console.error('Error removing map:', e);
+        }
         mapRef.current = null;
       }
     };
