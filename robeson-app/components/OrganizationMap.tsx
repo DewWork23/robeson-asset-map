@@ -24,6 +24,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   const organizationLayerRef = useRef<any>(null);
   const lastSelectedOrgRef = useRef<string | null>(null);
   const preventZoomRef = useRef(false);
+  const spiderfiedClusterRef = useRef<any>(null);
   const [isZoomedIn, setIsZoomedIn] = useState(false);
   const [onResetView, setOnResetView] = useState<(() => void) | null>(null);
 
@@ -115,6 +116,15 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
+    
+    // Add map click handler to close spiderfied clusters when clicking elsewhere
+    map.on('click', (e: any) => {
+      // Only unspiderfy if clicking on empty map area
+      if (spiderfiedClusterRef.current && !preventZoomRef.current) {
+        organizationLayerRef.current.unspiderfy();
+        spiderfiedClusterRef.current = null;
+      }
+    });
 
     // Add county boundary
     const countyBorder = L.polygon(robesonCountyBoundary, {
@@ -153,6 +163,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       removeOutsideVisibleBounds: true,
       spiderfyDistanceMultiplier: 2.0, // Increase distance between spiderfied markers
       spiderLegPolylineOptions: { weight: 1.5, color: '#222', opacity: 0.5 },
+      zoomToBoundsOnClick: false, // Don't zoom when clicking cluster
+      spiderfyOnEveryZoom: true, // Keep spiderfy active across zoom levels
       // Custom cluster icon creation
       iconCreateFunction: function(cluster: any) {
         const count = cluster.getChildCount();
@@ -185,22 +197,43 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       e.propagatedFrom.setOpacity(1);
     });
     
-    // Prevent map reset when interacting with clusters
+    // Handle cluster clicks manually
     organizationLayer.on('clusterclick', (e: any) => {
       L.DomEvent.stopPropagation(e);
+      
+      const cluster = e.layer;
+      const bottomCluster = cluster;
+      
+      // Zoom to show the cluster better if needed
+      const childMarkers = cluster.getAllChildMarkers();
+      const bounds = L.latLngBounds(childMarkers.map((m: any) => m.getLatLng()));
+      
+      // If already at high zoom, just spiderfy
+      if (map.getZoom() >= 15) {
+        cluster.spiderfy();
+      } else {
+        // Zoom in and then spiderfy
+        map.fitBounds(bounds, { padding: [100, 100], maxZoom: 16 });
+        setTimeout(() => {
+          cluster.spiderfy();
+        }, 300);
+      }
     });
     
     organizationLayer.on('spiderfied', (e: any) => {
       // When cluster is spiderfied, ensure markers are clickable
       preventZoomRef.current = true;
+      spiderfiedClusterRef.current = e.cluster;
     });
     
     organizationLayer.on('unspiderfied', (e: any) => {
-      // Reset zoom prevention after unspiderfy with longer delay
-      // to avoid conflicts with marker clicks
-      setTimeout(() => {
-        preventZoomRef.current = false;
-      }, 300);
+      // Only allow unspiderfy if we're not selecting a marker
+      if (!preventZoomRef.current) {
+        spiderfiedClusterRef.current = null;
+        setTimeout(() => {
+          preventZoomRef.current = false;
+        }, 300);
+      }
     });
     
     majorTowns.forEach(town => {
@@ -461,9 +494,10 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       marker.on('click', (e: any) => {
         // Prevent event bubbling that might trigger map click
         L.DomEvent.stopPropagation(e);
+        L.DomEvent.preventDefault(e);
         
-        // Reset preventZoom when clicking a marker to ensure proper behavior
-        preventZoomRef.current = false;
+        // Keep preventZoom true to maintain spiderfy state
+        preventZoomRef.current = true;
         
         // Debug logging to track organization object
         console.log('Map marker clicked:', {
@@ -478,12 +512,26 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           onOrganizationClick(org);
         }
         
+        // Keep the spiderfied cluster open
+        if (spiderfiedClusterRef.current) {
+          setTimeout(() => {
+            if (spiderfiedClusterRef.current && !spiderfiedClusterRef.current._spiderfied) {
+              spiderfiedClusterRef.current.spiderfy();
+            }
+          }, 50);
+        }
+        
         // On mobile, ensure popup opens properly
         if (isMobile) {
           setTimeout(() => {
             marker.openPopup();
           }, 100);
         }
+        
+        // Reset prevent zoom after a delay
+        setTimeout(() => {
+          preventZoomRef.current = false;
+        }, 1000);
       });
     });
 
