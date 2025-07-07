@@ -104,6 +104,11 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     
     console.log(`Successfully fetched ${rows.length} rows from Google Sheets`);
     
+    // Debug: Show headers
+    if (rows.length > 0) {
+      console.log('Headers:', rows[0]);
+      console.log('Number of columns:', rows[0].length);
+    }
     
     // Skip header row and map data
     const organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => {
@@ -114,7 +119,8 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
           address: row[3],
           latitudeRaw: row[14],
           longitudeRaw: row[15],
-          rowLength: row.length
+          rowLength: row.length,
+          fullRow: row  // Show the entire row to see structure
         });
       }
       

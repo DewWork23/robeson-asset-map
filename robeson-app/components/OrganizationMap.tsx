@@ -614,7 +614,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       organizations.forEach(org => {
         // Use real coordinates if available, otherwise fall back to geocoding
         let coords: { lat: number; lon: number } | null = null;
-        if (org.latitude && org.longitude) {
+        if (org.latitude !== undefined && org.longitude !== undefined && !isNaN(org.latitude) && !isNaN(org.longitude)) {
           coords = { lat: org.latitude, lon: org.longitude };
         } else {
           coords = getCoordinatesFromAddress(org.address);
