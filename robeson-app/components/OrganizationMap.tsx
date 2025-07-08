@@ -231,9 +231,22 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       
       console.log('Cluster clicked, child count:', childMarkers.length);
       
+      // Check if this cluster was already expanded
+      const wasExpanded = expandedClustersRef.current.has(cluster);
+      
       // Set flag to maintain view state when interacting with clusters
       preventZoomRef.current = true;
       expandedClustersRef.current.add(cluster);
+      
+      // If cluster was already expanded, don't zoom again
+      if (wasExpanded) {
+        console.log('Cluster already expanded, preserving current view');
+        // Keep the flag set for a bit to prevent any view changes
+        setTimeout(() => {
+          preventZoomRef.current = false;
+        }, 500);
+        return false;
+      }
       
       // Get bounds of all child markers
       const group = L.featureGroup(childMarkers);
@@ -256,8 +269,10 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         duration: 0.5
       });
       
-      // Don't reset the flag here - let marker clicks handle it
-      // This prevents timing conflicts
+      // Reset the flag after animation completes
+      setTimeout(() => {
+        preventZoomRef.current = false;
+      }, 600);
       
       // Prevent default behavior
       return false;
@@ -507,7 +522,11 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         popupAnchor: [0, -38],
       });
 
-      const marker = L.marker([coords.lat, coords.lon], { icon });
+      const marker = L.marker([coords.lat, coords.lon], { 
+        icon,
+        bubblingMouseEvents: false,  // Prevent event bubbling to clusters
+        interactive: true  // Ensure marker is interactive
+      });
       organizationLayer.addLayer(marker);
       markersRef.current.push(marker);
       
@@ -585,12 +604,6 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         
         // Add click handler with immediate response
         const handleMarkerClick = (e: any) => {
-          // Always stop propagation first
-          if (e) {
-            L.DomEvent.stopPropagation(e);
-            L.DomEvent.preventDefault(e);
-          }
-          
           console.log('Map marker clicked:', {
             id: organization.id,
             name: organization.organizationName,
@@ -622,15 +635,15 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           if (isMobile) {
             marker.openPopup();
           }
+          
+          // Stop propagation after handling to prevent unintended zoom
+          if (e && e.originalEvent) {
+            L.DomEvent.stopPropagation(e.originalEvent);
+          }
         };
         
         // Use direct event binding for better control
         marker.on('click', handleMarkerClick);
-        
-        // Also handle mousedown to prevent any bubbling issues
-        marker.on('mousedown', (e: any) => {
-          L.DomEvent.stopPropagation(e);
-        });
       })(org);  // Pass org as parameter to the IIFE
     });
 
