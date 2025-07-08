@@ -17,6 +17,7 @@ function SearchContent() {
   const [directMatchIds, setDirectMatchIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [isVoiceSearch, setIsVoiceSearch] = useState(false);
+  const [showEmergencyWarning, setShowEmergencyWarning] = useState(false);
 
   useEffect(() => {
     const query = searchParams.get('q') || '';
@@ -28,6 +29,24 @@ function SearchContent() {
     if (query && organizations.length > 0) {
       // Search organizations by name, services, and description
       const normalizedQuery = query.toLowerCase().trim();
+      
+      // Check for emergency/danger keywords
+      const emergencyKeywords = [
+        'suicide', 'suicidal', 'kill myself', 'want to die', 'end my life', 
+        'end it all', 'dying', 'die', 'death', 'dead', 'hopeless', 
+        'worthless', 'give up', "don't want to live", 'dont want to live',
+        'no reason to live', 'feel like dying', 'i feel like dying',
+        'kill me', 'kill', 'murder', 'hurt myself', 'harm myself',
+        'self harm', 'self-harm', 'cut myself', 'cutting',
+        'overdose', 'od', 'pills to die', 'jump off',
+        'hang myself', 'hanging', 'shoot myself', 'gun'
+      ];
+      
+      const hasEmergencyKeyword = emergencyKeywords.some(keyword => 
+        normalizedQuery.includes(keyword)
+      );
+      
+      setShowEmergencyWarning(hasEmergencyKeyword);
       
       // Define category keywords mapping
       const categoryKeywords: Record<string, string[]> = {
@@ -337,6 +356,9 @@ function SearchContent() {
 
       setSearchResults(allResults);
       // directMatchIds already set above when we have category matches
+    } else {
+      // Reset emergency warning when search is empty
+      setShowEmergencyWarning(false);
     }
   }, [searchParams, organizations]);
 
@@ -372,6 +394,56 @@ function SearchContent() {
           </div>
         </div>
       </div>
+
+      {/* Emergency Warning Banner */}
+      {showEmergencyWarning && (
+        <div className="bg-red-600 text-white py-6 px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-4">
+              <div className="flex-shrink-0">
+                <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold mb-2">If you're in immediate danger, please call 911 now</h2>
+                <p className="text-lg mb-4">
+                  Help is available. You are not alone.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <a
+                    href="tel:911"
+                    className="inline-flex items-center gap-2 bg-white text-red-600 px-6 py-3 rounded-lg font-bold hover:bg-red-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    Call 911
+                  </a>
+                  <a
+                    href="tel:988"
+                    className="inline-flex items-center gap-2 bg-white text-red-600 px-6 py-3 rounded-lg font-bold hover:bg-red-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    Call 988 (Suicide & Crisis Lifeline)
+                  </a>
+                  <a
+                    href="sms:988"
+                    className="inline-flex items-center gap-2 bg-white text-red-600 px-6 py-3 rounded-lg font-bold hover:bg-red-50 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    Text 988
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main content */}
       <div className="max-w-4xl mx-auto px-4 py-8">
