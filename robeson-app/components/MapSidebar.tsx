@@ -466,6 +466,16 @@ export default function MapSidebar({
                   <CompactOrganizationCard
                     organization={org}
                     showDistance={sortBy === 'distance' && (!!userLocation || !!searchLocation)}
+                    onZoomClick={(org) => {
+                      // Dispatch zoom event
+                      window.dispatchEvent(new CustomEvent('zoomToOrganization', { 
+                        detail: { organizationId: org.id }
+                      }));
+                      // Also select the organization
+                      if (onOrganizationClick) {
+                        onOrganizationClick(org);
+                      }
+                    }}
                   />
                 </div>
               ))}
