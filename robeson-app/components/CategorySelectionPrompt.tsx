@@ -53,8 +53,22 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
       
       if (matchingOrgs.length > 0) {
         console.log(`Found ${matchingOrgs.length} organization(s) matching:`, normalizedTranscript);
-        // Redirect to search page to show the matching organizations
-        router.push(`/search?q=${encodeURIComponent(transcript)}&from=voice`);
+        
+        // If exactly one match, select its category and zoom to it
+        if (matchingOrgs.length === 1) {
+          const org = matchingOrgs[0];
+          onCategorySelect(org.category as Category);
+          
+          // Dispatch event to zoom to organization after map loads
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('zoomToOrganization', { 
+              detail: { organizationId: org.id }
+            }));
+          }, 500);
+        } else {
+          // Multiple matches - redirect to search page
+          router.push(`/search?q=${encodeURIComponent(transcript)}&from=voice`);
+        }
         return;
       }
     }

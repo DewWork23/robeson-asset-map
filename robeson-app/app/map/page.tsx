@@ -85,6 +85,26 @@ function MapPageContent() {
     }
   }, [searchParams, organizations, initialOrgHandled]);
 
+  // Handle zoom to organization event (from voice search or zoom button)
+  useEffect(() => {
+    const handleZoomToOrganization = (event: any) => {
+      const orgId = event.detail.organizationId;
+      const org = organizations.find(o => o.id === orgId);
+      
+      if (org) {
+        console.log('Map page: Setting selected organization for zoom:', org.organizationName);
+        setSelectedOrganization(org);
+        setSidebarOpen(true);
+      }
+    };
+
+    window.addEventListener('zoomToOrganization', handleZoomToOrganization);
+    
+    return () => {
+      window.removeEventListener('zoomToOrganization', handleZoomToOrganization);
+    };
+  }, [organizations]);
+
   // Get user location when component mounts
   useEffect(() => {
     if (navigator.geolocation) {
