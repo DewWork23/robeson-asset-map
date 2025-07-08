@@ -4,6 +4,7 @@ import { Category, CATEGORY_ICONS, CATEGORY_COLORS } from '@/types/organization'
 import Link from 'next/link';
 import SpeechButton from '@/components/SpeechButton';
 import { useRouter } from 'next/navigation';
+import { useOrganizations } from '@/contexts/OrganizationsContext';
 
 interface CategorySelectionPromptProps {
   onCategorySelect: (category: Category | 'all') => void;
@@ -29,9 +30,34 @@ const categories: Category[] = [
 
 export default function CategorySelectionPrompt({ onCategorySelect }: CategorySelectionPromptProps) {
   const router = useRouter();
+  const { organizations } = useOrganizations();
   
   const handleSpeechResult = (transcript: string) => {
     const normalizedTranscript = transcript.toLowerCase().trim();
+    
+    console.log('Map voice search transcript:', transcript);
+    console.log('Normalized transcript:', normalizedTranscript);
+    
+    // First, check if the transcript matches any organization names
+    if (organizations && organizations.length > 0) {
+      // Special handling for known variations
+      const searchQuery = normalizedTranscript === 'pause' || normalizedTranscript === 'pauls' || normalizedTranscript === "paul's" 
+        ? 'pawss' 
+        : normalizedTranscript;
+      
+      const matchingOrgs = organizations.filter(org => {
+        const orgName = org.organizationName.toLowerCase();
+        // Check for exact match or contains
+        return orgName.includes(searchQuery) || searchQuery.includes(orgName);
+      });
+      
+      if (matchingOrgs.length > 0) {
+        console.log(`Found ${matchingOrgs.length} organization(s) matching:`, normalizedTranscript);
+        // Redirect to search page to show the matching organizations
+        router.push(`/search?q=${encodeURIComponent(transcript)}&from=voice`);
+        return;
+      }
+    }
     
     // Check for "near me" keywords
     const nearMeKeywords = ['near me', 'nearby', 'closest', 'close to me', 'around me', 'near'];
@@ -137,7 +163,7 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
             <div className="mb-8">
               <SpeechButton 
                 onSpeechResult={handleSpeechResult}
-                prompt="Examples: 'food', 'doctor', 'housing', 'mental health', 'I'm depressed', 'I need help', 'pharmacy', 'church', 'near me'"
+                prompt="Try saying: organization names (like 'PAWSS'), categories ('food', 'doctor'), emotions ('I'm depressed'), or 'near me'"
               />
               
               {/* Keyword Examples */}
@@ -146,18 +172,18 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
                   🎙️ Voice Search Examples:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <span className="text-base font-medium text-blue-800">• "PAWSS"</span>
                   <span className="text-base font-medium text-blue-800">• "I need food"</span>
                   <span className="text-base font-medium text-blue-800">• "Find a doctor"</span>
                   <span className="text-base font-medium text-blue-800">• "I'm depressed"</span>
                   <span className="text-base font-medium text-blue-800">• "Housing help"</span>
                   <span className="text-base font-medium text-blue-800">• "Mental health"</span>
-                  <span className="text-base font-medium text-blue-800">• "I'm anxious"</span>
+                  <span className="text-base font-medium text-blue-800">• "Hospital"</span>
                   <span className="text-base font-medium text-blue-800">• "Pharmacy near me"</span>
-                  <span className="text-base font-medium text-blue-800">• "Find a church"</span>
                   <span className="text-base font-medium text-blue-800">• "Crisis help"</span>
                 </div>
                 <p className="text-sm text-blue-700 mt-3 italic">
-                  Tip: You can also say things like "I'm feeling stressed" or "I need someone to talk to"
+                  Tip: Say organization names directly or describe how you're feeling
                 </p>
               </div>
               
