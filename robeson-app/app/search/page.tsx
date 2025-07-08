@@ -536,7 +536,7 @@ function SearchContent() {
 
                     <div className="flex gap-3">
                   <Link
-                    href={withBasePath('/map')}
+                    href={withBasePath(`/map?org=${encodeURIComponent(org.id)}`)}
                     className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center"
                   >
                     View on Map

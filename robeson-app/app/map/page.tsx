@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Organization, CATEGORY_ICONS, Category } from '@/types/organization';
 import { filterOrganizations } from '@/lib/googleSheetsParser';
@@ -14,8 +14,9 @@ import { categoryToSlug } from '@/utils/categoryUtils';
 import { calculateDistance, getCoordinatesFromAddress } from '@/lib/locationUtils';
 import { useOrganizations } from '@/contexts/OrganizationsContext';
 
-export default function MapPage() {
+function MapPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { organizations, loading } = useOrganizations();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showPrompt, setShowPrompt] = useState(true);
@@ -24,6 +25,7 @@ export default function MapPage() {
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [initialOrgHandled, setInitialOrgHandled] = useState(false);
 
   // Set sidebar open on desktop by default and check if mobile
   useEffect(() => {
@@ -59,6 +61,24 @@ export default function MapPage() {
       window.removeEventListener('showOrgDetails', handleShowDetails);
     };
   }, [organizations]);
+
+  // Handle organization parameter from URL
+  useEffect(() => {
+    if (!initialOrgHandled && organizations.length > 0) {
+      const orgId = searchParams.get('org');
+      if (orgId) {
+        const org = organizations.find(o => o.id === orgId);
+        if (org) {
+          console.log('Found organization from URL:', org.organizationName);
+          setSelectedOrganization(org);
+          setSelectedCategory(org.category);
+          setShowPrompt(false);
+          setSidebarOpen(true);
+          setInitialOrgHandled(true);
+        }
+      }
+    }
+  }, [searchParams, organizations, initialOrgHandled]);
 
   // Get user location when component mounts
   useEffect(() => {
@@ -249,5 +269,20 @@ export default function MapPage() {
       {/* Mobile Map Guide for first-time users */}
       <MobileMapGuide />
     </div>
+  );
+}
+
+export default function MapPage() {
+  return (
+    <Suspense fallback={
+      <div className="fixed inset-0 bg-gray-50 flex items-center justify-center">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-48 mb-4"></div>
+          <div className="h-64 w-64 bg-gray-200 rounded-lg"></div>
+        </div>
+      </div>
+    }>
+      <MapPageContent />
+    </Suspense>
   );
 }
