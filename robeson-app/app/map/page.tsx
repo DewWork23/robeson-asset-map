@@ -75,6 +75,11 @@ function MapPageContent() {
           setShowPrompt(false);
           setSidebarOpen(true);
           setInitialOrgHandled(true);
+          
+          // Dispatch event to zoom to organization after map loads
+          window.dispatchEvent(new CustomEvent('zoomToOrganization', { 
+            detail: { organizationId: org.id }
+          }));
         }
       }
     }

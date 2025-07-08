@@ -896,6 +896,53 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     }
   }, [mapReady, L, selectedOrganization]);
 
+  // Handle zoom to organization event (from URL parameter)
+  useEffect(() => {
+    if (!mapReady || !L || !mapRef.current) return;
+
+    const handleZoomToOrganization = (event: any) => {
+      const orgId = event.detail.organizationId;
+      const org = organizations.find(o => o.id === orgId);
+      
+      if (org) {
+        const map = mapRef.current;
+        
+        // Get organization coordinates
+        let coords: { lat: number; lon: number } | null = null;
+        if (org.latitude !== undefined && org.longitude !== undefined && 
+            !isNaN(org.latitude) && !isNaN(org.longitude)) {
+          coords = { lat: org.latitude, lon: org.longitude };
+        } else {
+          coords = getCoordinatesFromAddress(org.address);
+        }
+        
+        if (coords) {
+          // Zoom in close to the organization
+          map.setView([coords.lat, coords.lon], 16, {
+            animate: true,
+            duration: 1.0
+          });
+          
+          // Find and open the popup after zoom completes
+          setTimeout(() => {
+            const marker = markersRef.current.find(m => 
+              (m as any).organization?.id === orgId
+            );
+            if (marker) {
+              marker.openPopup();
+            }
+          }, 1100);
+        }
+      }
+    };
+
+    window.addEventListener('zoomToOrganization', handleZoomToOrganization);
+    
+    return () => {
+      window.removeEventListener('zoomToOrganization', handleZoomToOrganization);
+    };
+  }, [mapReady, L, organizations]);
+
   if (!mapReady) {
     return <div className="h-full flex items-center justify-center">Loading map...</div>;
   }
