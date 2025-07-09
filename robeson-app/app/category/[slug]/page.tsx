@@ -173,7 +173,7 @@ function CategoryPageContent() {
 
         {/* Content */}
         {viewMode === 'list' ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-4">
             {filteredOrgs.map((org) => (
               <OrganizationCard key={org.id} organization={org} />
             ))}
