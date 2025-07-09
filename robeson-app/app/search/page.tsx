@@ -162,38 +162,10 @@ function SearchContent() {
           const isSpecificCondition = mentalHealthConditions.some(condition => normalizedQuery.includes(condition));
           
           if (isSpecificCondition && matchedCategories.includes('Mental Health & Substance Use')) {
-            // For specific mental health conditions, only include organizations that mention mental health or the specific condition
-            const orgText = `${org.organizationName} ${org.servicesOffered || ''} ${org.description || ''}`.toLowerCase();
-            const hasRelevantMentalHealthService = 
-              orgText.includes('mental health') ||
-              orgText.includes('behavioral health') ||
-              orgText.includes('counseling') ||
-              orgText.includes('therapy') ||
-              orgText.includes('psychiatric') ||
-              orgText.includes('psychology') ||
-              orgText.includes(normalizedQuery) ||
-              // Check for specific condition mentions
-              (normalizedQuery.includes('anxiety') && (orgText.includes('anxiety') || orgText.includes('stress'))) ||
-              (normalizedQuery.includes('depression') && (orgText.includes('depression') || orgText.includes('depressed'))) ||
-              (normalizedQuery.includes('bipolar') && orgText.includes('bipolar')) ||
-              (normalizedQuery.includes('ptsd') && (orgText.includes('ptsd') || orgText.includes('trauma'))) ||
-              (normalizedQuery.includes('adhd') && orgText.includes('adhd'));
-              
-            // Exclude substance-only organizations unless the query is about substance use
-            const isSubstanceOnly = 
-              !orgText.includes('mental') && 
-              !orgText.includes('behavioral') &&
-              !orgText.includes('counseling') &&
-              !orgText.includes('therapy') &&
-              (orgText.includes('alcoholics anonymous') || 
-               orgText.includes('narcotics anonymous') ||
-               orgText.includes('aa meeting') ||
-               orgText.includes('na meeting') ||
-               (orgText.includes('substance') && !orgText.includes('mental')));
-            
-            if (!hasRelevantMentalHealthService || isSubstanceOnly) {
-              return false;
-            }
+            // For mental health condition searches, include ALL mental health & substance use organizations
+            // This ensures people searching for "anxiety" or "depression" see all available resources
+            // including integrated care facilities that handle both mental health and substance use
+            return org.category === 'Mental Health & Substance Use';
           }
           
           // Check if organization is in a matched category
@@ -257,20 +229,10 @@ function SearchContent() {
           // Don't include if already in direct matches
           if (directMatches.some(match => match.id === org.id)) return false;
           
-          // For mental health condition searches, only show relevant mental health providers
+          // For mental health condition searches, show all mental health & substance use providers
           if (isSpecificCondition && matchedCats.includes('Mental Health & Substance Use')) {
-            const orgText = `${org.organizationName} ${org.servicesOffered || ''} ${org.description || ''}`.toLowerCase();
-            
-            // Must have mental health services
-            const hasMentalHealthService = 
-              orgText.includes('mental health') ||
-              orgText.includes('behavioral health') ||
-              orgText.includes('counseling') ||
-              orgText.includes('therapy') ||
-              orgText.includes('psychiatric') ||
-              orgText.includes('psychology');
-              
-            return hasMentalHealthService && matchedCats.includes(org.category);
+            // Include all organizations in the Mental Health & Substance Use category
+            return org.category === 'Mental Health & Substance Use';
           }
           
           // For other searches, include if in same category
@@ -345,7 +307,11 @@ function SearchContent() {
                    normalizedQuery.includes('anxious') || normalizedQuery.includes('mental') ||
                    normalizedQuery.includes('suicide') || normalizedQuery.includes('stressed') ||
                    normalizedQuery.includes('dying') || normalizedQuery.includes('die') ||
-                   normalizedQuery.includes('hopeless') || normalizedQuery.includes('worthless')) {
+                   normalizedQuery.includes('hopeless') || normalizedQuery.includes('worthless') ||
+                   normalizedQuery.includes('anxiety') || normalizedQuery.includes('depression') ||
+                   normalizedQuery.includes('bipolar') || normalizedQuery.includes('ptsd') ||
+                   normalizedQuery.includes('ocd') || normalizedQuery.includes('adhd') ||
+                   normalizedQuery.includes('panic') || normalizedQuery.includes('trauma')) {
           // For mental health searches, prioritize mental health services
           const getMentalHealthScore = (org: Organization) => {
             let score = 0;
@@ -374,10 +340,23 @@ function SearchContent() {
             if (services.includes('depression') || services.includes('anxiety')) score += 40;
             if (name.includes('carter clinic')) score += 40; // Known mental health provider
             
+            // Bonus points for organizations that specifically mention the searched condition
+            const orgText = `${name} ${services}`.toLowerCase();
+            if (normalizedQuery.includes('anxiety') && orgText.includes('anxiety')) score += 30;
+            if (normalizedQuery.includes('depression') && orgText.includes('depression')) score += 30;
+            if (normalizedQuery.includes('bipolar') && orgText.includes('bipolar')) score += 30;
+            if (normalizedQuery.includes('ptsd') && orgText.includes('ptsd')) score += 30;
+            if (normalizedQuery.includes('adhd') && orgText.includes('adhd')) score += 30;
+            if (normalizedQuery.includes('ocd') && orgText.includes('ocd')) score += 30;
+            
             // Medium priority - integrated care with mental health
             if (name.includes('integrated care') && services.includes('mental')) score += 30;
             if (services.includes('therapy') || services.includes('counseling')) score += 25;
             if (services.includes('behavioral health')) score += 25;
+            
+            // Bonus for integrated mental health and substance use services
+            if (orgText.includes('mental health') && orgText.includes('substance')) score += 20;
+            if (orgText.includes('co-occurring') || orgText.includes('dual diagnosis')) score += 25;
             
             // Lower priority - general crisis services
             if (category === 'crisis services' && !services.includes('mental')) score += 10;
@@ -386,9 +365,8 @@ function SearchContent() {
             if (name.includes('domestic violence') && !normalizedQuery.includes('domestic')) score -= 50;
             if (name.includes('sexual assault') && !normalizedQuery.includes('sexual')) score -= 50;
             if (name.includes('district attorney') || name.includes('court')) score -= 40;
-            if (name.includes('substance') && !normalizedQuery.includes('substance') && !normalizedQuery.includes('drug')) score -= 20;
+            // Don't deprioritize substance use services for mental health searches - they often co-occur
             if (name.includes('disaster') || name.includes('hurricane')) score -= 30;
-            if (name.includes('harm reduction') && !services.includes('mental')) score -= 25;
             
             return score;
           };
