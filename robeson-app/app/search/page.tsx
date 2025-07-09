@@ -570,6 +570,14 @@ function SearchContent() {
               We couldn't find any organizations matching "{searchQuery}". Try searching for a different term or browse by category.
             </p>
             <div className="space-y-3">
+              {isVoiceSearch && (
+                <button
+                  onClick={() => router.push('/')}
+                  className="block w-full bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                >
+                  🎤 Try Voice Search Again
+                </button>
+              )}
               <Link
                 href="/categories"
                 className="block w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
@@ -589,10 +597,16 @@ function SearchContent() {
         {/* Voice search tip */}
         {isVoiceSearch && searchResults.length === 0 && (
           <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
+            <p className="text-sm text-blue-800 mb-4">
               <strong>Tip:</strong> Try saying the organization name more clearly, or search by the type of service you need 
               (like "food", "healthcare", or "housing").
             </p>
+            <button
+              onClick={() => router.push('/')}
+              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            >
+              Try Voice Search Again
+            </button>
           </div>
         )}
         

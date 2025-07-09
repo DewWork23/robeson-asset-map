@@ -147,6 +147,10 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
         return;
       }
     }
+    
+    // If no matches found, redirect to search page with the transcript
+    console.log(`No category match found for "${normalizedTranscript}", redirecting to search`);
+    router.push(`/search?q=${encodeURIComponent(transcript)}&from=voice`);
   };
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
