@@ -555,7 +555,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
             <p style="margin: 0 0 8px 0; font-size: 13px;">${organization.address}</p>
             ${organization.phone ? `<p style="margin: 0 0 4px 0; font-size: 14px;"><a href="tel:${organization.phone.replace(/\D/g, '')}" style="color: #2563eb; text-decoration: none; font-weight: 500;">📞 ${organization.phone}</a></p>` : ''}
             ${organization.hours ? `<p style="margin: 0 0 4px 0; font-size: 13px; color: #666;"><strong>Hours:</strong> ${organization.hours}</p>` : ''}
-            ${organization.servicesOffered ? `<p style="margin: 0 0 8px 0; font-size: 13px; color: #666;"><strong>Services:</strong> ${organization.servicesOffered.substring(0, 100)}${organization.servicesOffered.length > 100 ? '...' : ''}</p>` : ''}
+            ${organization.servicesOffered ? `<p style="margin: 0 0 8px 0; font-size: 13px; color: #666;"><strong>Services:</strong> ${organization.servicesOffered}</p>` : ''}
             <div style="margin-top: 12px; display: flex; gap: 8px;">
               ${organization.phone ? `<a href="tel:${organization.phone.replace(/\D/g, '')}" style="flex: 1; display: inline-block; padding: 8px 12px; background-color: #16a34a; color: white; text-align: center; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">Call</a>` : ''}
               <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; display: inline-block; padding: 8px 12px; background-color: #2563eb; color: white; text-align: center; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">📍 Directions</a>

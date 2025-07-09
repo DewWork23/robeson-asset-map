@@ -57,7 +57,7 @@ function SearchContent() {
         'Healthcare/Treatment': ['health', 'doctor', 'medical', 'treatment', 'therapy', 'clinic', 'care'],
         'Healthcare/Public Health': ['health', 'doctor', 'medical', 'public health', 'wellness', 'prevention'],
         'Mental Health': ['mental', 'counseling', 'therapy', 'psychology', 'psychiatry', 'behavioral'],
-        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'depressed', 'anxiety', 'anxious', 'sad', 'worried', 'stress', 'stressed', 'drugs', 'alcohol', 'recovery', "i'm depressed", "im depressed", "i am depressed", "feeling depressed", "i'm sad", "im sad", "i'm anxious", "im anxious", "i'm stressed", "im stressed", "feel depressed", "feeling sad", "feeling anxious", "feeling stressed", "need help", "suicide", "suicidal", "kill myself", "want to die", "i'm feeling anxious", "i am anxious", "panic", "panic attack", "scared", "i'm scared", "fearful", "overwhelmed", "i'm overwhelmed", "feel like dying", "i feel like dying", "hopeless", "i feel hopeless", "worthless", "i feel worthless", "no reason to live", "end my life", "end it all", "give up", "don't want to live", "dont want to live"],
+        'Mental Health & Substance Use': ['mental', 'counseling', 'therapy', 'addiction', 'substance', 'depression', 'depressed', 'anxiety', 'anxious', 'sad', 'worried', 'stress', 'stressed', 'drugs', 'alcohol', 'recovery', "i'm depressed", "im depressed", "i am depressed", "feeling depressed", "i'm sad", "im sad", "i'm anxious", "im anxious", "i'm stressed", "im stressed", "feel depressed", "feeling sad", "feeling anxious", "feeling stressed", "need help", "suicide", "suicidal", "kill myself", "want to die", "i'm feeling anxious", "i am anxious", "panic", "panic attack", "scared", "i'm scared", "fearful", "overwhelmed", "i'm overwhelmed", "feel like dying", "i feel like dying", "hopeless", "i feel hopeless", "worthless", "i feel worthless", "no reason to live", "end my life", "end it all", "give up", "don't want to live", "dont want to live", 'bipolar', 'ptsd', 'ocd', 'adhd', 'schizophrenia', 'psychosis', 'trauma', 'grief', 'bereavement', 'mood disorder', 'personality disorder'],
         'Government Services': ['government', 'benefits', 'assistance', 'social services', 'welfare', 'medicaid', 'medicare', 'snap'],
         'Tribal Services': ['tribal', 'lumbee', 'native', 'indian', 'indigenous'],
         'Community Services': ['community', 'support', 'volunteer', 'help', 'services', 'pawss', 'paws'],
@@ -157,6 +157,45 @@ function SearchContent() {
       if (matchedCategories.length > 0) {
         // Include organizations from matched categories
         const categoryMatches = organizations.filter(org => {
+          // For mental health specific conditions, be more selective
+          const mentalHealthConditions = ['bipolar', 'anxiety', 'depression', 'ptsd', 'ocd', 'adhd', 'schizophrenia', 'psychosis', 'trauma', 'grief', 'panic', 'mood disorder', 'personality disorder'];
+          const isSpecificCondition = mentalHealthConditions.some(condition => normalizedQuery.includes(condition));
+          
+          if (isSpecificCondition && matchedCategories.includes('Mental Health & Substance Use')) {
+            // For specific mental health conditions, only include organizations that mention mental health or the specific condition
+            const orgText = `${org.organizationName} ${org.servicesOffered || ''} ${org.description || ''}`.toLowerCase();
+            const hasRelevantMentalHealthService = 
+              orgText.includes('mental health') ||
+              orgText.includes('behavioral health') ||
+              orgText.includes('counseling') ||
+              orgText.includes('therapy') ||
+              orgText.includes('psychiatric') ||
+              orgText.includes('psychology') ||
+              orgText.includes(normalizedQuery) ||
+              // Check for specific condition mentions
+              (normalizedQuery.includes('anxiety') && (orgText.includes('anxiety') || orgText.includes('stress'))) ||
+              (normalizedQuery.includes('depression') && (orgText.includes('depression') || orgText.includes('depressed'))) ||
+              (normalizedQuery.includes('bipolar') && orgText.includes('bipolar')) ||
+              (normalizedQuery.includes('ptsd') && (orgText.includes('ptsd') || orgText.includes('trauma'))) ||
+              (normalizedQuery.includes('adhd') && orgText.includes('adhd'));
+              
+            // Exclude substance-only organizations unless the query is about substance use
+            const isSubstanceOnly = 
+              !orgText.includes('mental') && 
+              !orgText.includes('behavioral') &&
+              !orgText.includes('counseling') &&
+              !orgText.includes('therapy') &&
+              (orgText.includes('alcoholics anonymous') || 
+               orgText.includes('narcotics anonymous') ||
+               orgText.includes('aa meeting') ||
+               orgText.includes('na meeting') ||
+               (orgText.includes('substance') && !orgText.includes('mental')));
+            
+            if (!hasRelevantMentalHealthService || isSubstanceOnly) {
+              return false;
+            }
+          }
+          
           // Check if organization is in a matched category
           if (matchedCategories.includes(org.category)) return true;
           
@@ -209,12 +248,32 @@ function SearchContent() {
         // For searches with actual text matches, show similar organizations
         const matchedCats = [...new Set(directMatches.map(org => org.category))];
         
+        // Check if this is a specific mental health condition search
+        const mentalHealthConditions = ['bipolar', 'anxiety', 'depression', 'ptsd', 'ocd', 'adhd', 'schizophrenia', 'psychosis', 'trauma', 'grief', 'panic', 'mood disorder', 'personality disorder'];
+        const isSpecificCondition = mentalHealthConditions.some(condition => normalizedQuery.includes(condition));
+        
         // Find similar organizations in the same categories
         const similarOrgs = organizations.filter(org => {
           // Don't include if already in direct matches
           if (directMatches.some(match => match.id === org.id)) return false;
           
-          // Include if in same category
+          // For mental health condition searches, only show relevant mental health providers
+          if (isSpecificCondition && matchedCats.includes('Mental Health & Substance Use')) {
+            const orgText = `${org.organizationName} ${org.servicesOffered || ''} ${org.description || ''}`.toLowerCase();
+            
+            // Must have mental health services
+            const hasMentalHealthService = 
+              orgText.includes('mental health') ||
+              orgText.includes('behavioral health') ||
+              orgText.includes('counseling') ||
+              orgText.includes('therapy') ||
+              orgText.includes('psychiatric') ||
+              orgText.includes('psychology');
+              
+            return hasMentalHealthService && matchedCats.includes(org.category);
+          }
+          
+          // For other searches, include if in same category
           return matchedCats.includes(org.category);
         });
         
@@ -527,8 +586,7 @@ function SearchContent() {
                   )}
                   {org.servicesOffered && (
                     <p className="mt-2">
-                      <strong>Services:</strong> {org.servicesOffered.substring(0, 150)}
-                      {org.servicesOffered.length > 150 && '...'}
+                      <strong>Services:</strong> {org.servicesOffered}
                     </p>
                   )}
                     </div>
