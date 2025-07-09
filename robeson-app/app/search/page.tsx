@@ -156,6 +156,14 @@ function SearchContent() {
       const mentalHealthConditions = ['bipolar', 'anxiety', 'depression', 'ptsd', 'ocd', 'adhd', 'schizophrenia', 'psychosis', 'trauma', 'grief', 'panic', 'mood disorder', 'personality disorder'];
       const isSpecificCondition = mentalHealthConditions.some(condition => normalizedQuery.includes(condition));
       
+      // Debug logging for mental health condition searches
+      if (isSpecificCondition) {
+        console.log(`Mental health condition search detected for: "${normalizedQuery}"`);
+        console.log('Matched categories:', matchedCategories);
+        console.log('Direct matches found:', directMatches.length);
+        console.log('Is specific condition:', isSpecificCondition);
+      }
+      
       // If we have category keyword matches, always include them
       // This ensures searches like "doctor" show healthcare organizations
       if (matchedCategories.length > 0 && !isSpecificCondition) {
@@ -232,16 +240,72 @@ function SearchContent() {
           // For mental health condition searches, show all mental health & substance use providers
           if (isSpecificCondition) {
             // Include all organizations in the Mental Health & Substance Use category
-            return org.category === 'Mental Health & Substance Use';
+            if (org.category === 'Mental Health & Substance Use') return true;
+            
+            // Also include organizations from other categories that offer mental health services
+            const servicesText = (org.servicesOffered || '').toLowerCase();
+            const descText = (org.description || '').toLowerCase();
+            const orgName = org.organizationName.toLowerCase();
+            
+            // Check if the organization offers mental health services
+            const hasMentalHealthServices = 
+              servicesText.includes('mental health') ||
+              servicesText.includes('counseling') ||
+              servicesText.includes('therapy') ||
+              servicesText.includes('psychiatric') ||
+              servicesText.includes('depression') ||
+              servicesText.includes('anxiety') ||
+              servicesText.includes('bipolar') ||
+              servicesText.includes('ptsd') ||
+              servicesText.includes('mood disorder') ||
+              servicesText.includes('behavioral health') ||
+              servicesText.includes('substance abuse') ||
+              servicesText.includes('addiction') ||
+              descText.includes('mental health') ||
+              descText.includes('behavioral health') ||
+              descText.includes('counseling') ||
+              descText.includes('therapy') ||
+              orgName.includes('counseling') ||
+              orgName.includes('therapy') ||
+              orgName.includes('mental health') ||
+              orgName.includes('behavioral');
+            
+            // Include if it's from Crisis Services or Community Services and offers mental health services
+            if ((org.category === 'Crisis Services' || org.category === 'Community Services' || org.category === 'Healthcare Services') && hasMentalHealthServices) {
+              return true;
+            }
+            
+            return false;
           }
           
           // For other searches, include if in same category
           return matchedCats.includes(org.category);
         });
         
+        // Debug logging for mental health searches
+        if (isSpecificCondition) {
+          const mentalHealthOrgs = organizations.filter(org => org.category === 'Mental Health & Substance Use');
+          console.log('Total Mental Health & Substance Use orgs in database:', mentalHealthOrgs.length);
+          console.log('Similar orgs found (including cross-category mental health services):', similarOrgs.length);
+          console.log('Sample of similar orgs:', similarOrgs.slice(0, 5).map(o => ({ 
+            name: o.organizationName, 
+            category: o.category,
+            services: (o.servicesOffered || '').substring(0, 50) + '...'
+          })));
+        }
+        
         // Add similar organizations - more for mental health searches
         const similarLimit = isSpecificCondition ? 20 : 10;
         allResults = [...directMatches, ...similarOrgs.slice(0, similarLimit)];
+        
+        // More debug logging
+        if (isSpecificCondition) {
+          console.log('Final allResults length:', allResults.length);
+          console.log('Direct match IDs:', directMatches.map(o => o.id));
+        }
+        
+        // Set direct match IDs for proper UI display
+        setDirectMatchIds(new Set(directMatches.map(org => org.id)));
       }
 
       // Sort results by relevance
