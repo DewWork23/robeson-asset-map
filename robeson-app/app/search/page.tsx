@@ -156,6 +156,10 @@ function SearchContent() {
       const mentalHealthConditions = ['bipolar', 'anxiety', 'depression', 'ptsd', 'ocd', 'adhd', 'schizophrenia', 'psychosis', 'trauma', 'grief', 'panic', 'mood disorder', 'personality disorder'];
       const isSpecificCondition = mentalHealthConditions.some(condition => normalizedQuery.includes(condition));
       
+      // Check if this is a substance use search
+      const substanceUseTerms = ['addiction', 'substance', 'alcohol', 'drug', 'drugs', 'alcoholic', 'alcoholism', 'narcotic', 'cocaine', 'meth', 'heroin', 'opioid', 'opiate', 'recovery', 'rehab', 'detox', 'sober', 'sobriety'];
+      const isSubstanceUseSearch = substanceUseTerms.some(term => normalizedQuery.includes(term));
+      
       // Debug logging for mental health condition searches
       if (isSpecificCondition) {
         console.log(`Mental health condition search detected for: "${normalizedQuery}"`);
@@ -228,7 +232,7 @@ function SearchContent() {
         setDirectMatchIds(new Set(directMatches.map(org => org.id)));
         
         console.log(`Search for "${normalizedQuery}" found ${directMatches.length} direct matches and ${categoryMatches.length} category matches`);
-      } else if (isSpecificCondition || directMatches.length > 0) {
+      } else if (isSpecificCondition || isSubstanceUseSearch || directMatches.length > 0) {
         // For searches with actual text matches, show similar organizations
         const matchedCats = [...new Set(directMatches.map(org => org.category))];
         
@@ -237,8 +241,8 @@ function SearchContent() {
           // Don't include if already in direct matches
           if (directMatches.some(match => match.id === org.id)) return false;
           
-          // For mental health condition searches, show all mental health & substance use providers
-          if (isSpecificCondition) {
+          // For mental health condition searches, show mental health providers (but not pure substance abuse)
+          if (isSpecificCondition && !isSubstanceUseSearch) {
             // Include all organizations in the Mental Health & Substance Use category
             if (org.category === 'Mental Health & Substance Use') return true;
             
@@ -259,8 +263,8 @@ function SearchContent() {
               servicesText.includes('ptsd') ||
               servicesText.includes('mood disorder') ||
               servicesText.includes('behavioral health') ||
-              servicesText.includes('substance abuse') ||
-              servicesText.includes('addiction') ||
+              servicesText.includes('psychological') ||
+              servicesText.includes('psychotherapy') ||
               descText.includes('mental health') ||
               descText.includes('behavioral health') ||
               descText.includes('counseling') ||
@@ -270,12 +274,56 @@ function SearchContent() {
               orgName.includes('mental health') ||
               orgName.includes('behavioral');
             
+            // Exclude organizations that are primarily substance abuse focused (unless the search is for substance use)
+            const isSubstanceAbuseFocused = 
+              orgName.includes('anonymous') ||
+              orgName.includes(' aa') ||
+              orgName.includes('narcotics') ||
+              orgName.includes('cocaine') ||
+              orgName.includes('crystal meth') ||
+              orgName.includes('smart recovery') ||
+              orgName.includes('refuge recovery') ||
+              orgName.includes('lifering') ||
+              orgName.includes('gamblers') ||
+              orgName.includes('gam-anon') ||
+              orgName.includes('overeaters') ||
+              orgName.includes('sex addicts') ||
+              orgName.includes('nicotine') ||
+              orgName.includes('workaholics') ||
+              orgName.includes('harm reduction coalition') ||
+              (servicesText.includes('12-step') && !servicesText.includes('mental health')) ||
+              (servicesText.includes('addiction recovery') && !servicesText.includes('mental health')) ||
+              (servicesText.includes('syringe exchange') && !servicesText.includes('mental health')) ||
+              (servicesText.includes('substance abuse') && !servicesText.includes('mental health') && !servicesText.includes('counseling') && !servicesText.includes('therapy'));
+            
             // Include if it's from Crisis Services or Community Services and offers mental health services
-            if ((org.category === 'Crisis Services' || org.category === 'Community Services' || org.category === 'Healthcare Services') && hasMentalHealthServices) {
+            // BUT exclude if it's primarily substance abuse focused
+            if ((org.category === 'Crisis Services' || org.category === 'Community Services' || org.category === 'Healthcare Services') && hasMentalHealthServices && !isSubstanceAbuseFocused) {
               return true;
             }
             
             return false;
+          }
+          
+          // For substance use searches, show substance abuse organizations
+          if (isSubstanceUseSearch) {
+            const servicesText = (org.servicesOffered || '').toLowerCase();
+            const orgName = org.organizationName.toLowerCase();
+            
+            const hasSubstanceServices = 
+              servicesText.includes('substance') ||
+              servicesText.includes('addiction') ||
+              servicesText.includes('recovery') ||
+              servicesText.includes('12-step') ||
+              servicesText.includes('alcohol') ||
+              servicesText.includes('drug') ||
+              servicesText.includes('detox') ||
+              servicesText.includes('rehab') ||
+              servicesText.includes('sober') ||
+              orgName.includes('anonymous') ||
+              orgName.includes('recovery');
+              
+            if (hasSubstanceServices) return true;
           }
           
           // For other searches, include if in same category
@@ -294,8 +342,8 @@ function SearchContent() {
           })));
         }
         
-        // Add similar organizations - more for mental health searches
-        const similarLimit = isSpecificCondition ? 20 : 10;
+        // Add similar organizations - more for mental health and substance use searches
+        const similarLimit = (isSpecificCondition || isSubstanceUseSearch) ? 20 : 10;
         allResults = [...directMatches, ...similarOrgs.slice(0, similarLimit)];
         
         // More debug logging
