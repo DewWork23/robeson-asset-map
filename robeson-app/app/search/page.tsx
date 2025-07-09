@@ -265,6 +265,8 @@ function SearchContent() {
               servicesText.includes('behavioral health') ||
               servicesText.includes('psychological') ||
               servicesText.includes('psychotherapy') ||
+              servicesText.includes('peer support') ||
+              servicesText.includes('support group') ||
               descText.includes('mental health') ||
               descText.includes('behavioral health') ||
               descText.includes('counseling') ||
@@ -272,7 +274,10 @@ function SearchContent() {
               orgName.includes('counseling') ||
               orgName.includes('therapy') ||
               orgName.includes('mental health') ||
-              orgName.includes('behavioral');
+              orgName.includes('behavioral') ||
+              orgName.includes('nami') || // National Alliance on Mental Illness
+              orgName.includes('depression') ||
+              orgName.includes('anxiety');
             
             // Exclude organizations that are primarily substance abuse focused (unless the search is for substance use)
             const isSubstanceAbuseFocused = 
@@ -291,14 +296,31 @@ function SearchContent() {
               orgName.includes('nicotine') ||
               orgName.includes('workaholics') ||
               orgName.includes('harm reduction coalition') ||
+              orgName.includes('treatment center') ||
+              orgName.includes('methadone') ||
+              orgName.includes('suboxone') ||
+              orgName.includes('buprenorphine') ||
+              orgName.includes('addiction medicine') ||
               (servicesText.includes('12-step') && !servicesText.includes('mental health')) ||
               (servicesText.includes('addiction recovery') && !servicesText.includes('mental health')) ||
               (servicesText.includes('syringe exchange') && !servicesText.includes('mental health')) ||
-              (servicesText.includes('substance abuse') && !servicesText.includes('mental health') && !servicesText.includes('counseling') && !servicesText.includes('therapy'));
+              (servicesText.includes('methadone') && !servicesText.includes('mental health')) ||
+              (servicesText.includes('suboxone') && !servicesText.includes('mental health')) ||
+              (servicesText.includes('substance abuse') && !servicesText.includes('mental health') && !servicesText.includes('counseling') && !servicesText.includes('therapy') && !servicesText.includes('depression') && !servicesText.includes('anxiety') && !servicesText.includes('bipolar'));
+            
+            // Exclude general healthcare that happens to mention mental health in passing
+            const isGeneralHealthcare = 
+              (orgName.includes('hospital') || orgName.includes('health center') || orgName.includes('medical center')) &&
+              !servicesText.includes('psychiatric') &&
+              !servicesText.includes('behavioral health') &&
+              !servicesText.includes('mental health treatment');
             
             // Include if it's from Crisis Services or Community Services and offers mental health services
-            // BUT exclude if it's primarily substance abuse focused
-            if ((org.category === 'Crisis Services' || org.category === 'Community Services' || org.category === 'Healthcare Services') && hasMentalHealthServices && !isSubstanceAbuseFocused) {
+            // BUT exclude if it's primarily substance abuse focused or general healthcare
+            if ((org.category === 'Crisis Services' || org.category === 'Community Services' || org.category === 'Healthcare Services') && 
+                hasMentalHealthServices && 
+                !isSubstanceAbuseFocused && 
+                !isGeneralHealthcare) {
               return true;
             }
             
@@ -343,7 +365,7 @@ function SearchContent() {
         }
         
         // Add similar organizations - more for mental health and substance use searches
-        const similarLimit = (isSpecificCondition || isSubstanceUseSearch) ? 20 : 10;
+        const similarLimit = (isSpecificCondition || isSubstanceUseSearch) ? 10 : 10;
         allResults = [...directMatches, ...similarOrgs.slice(0, similarLimit)];
         
         // More debug logging
