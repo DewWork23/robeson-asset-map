@@ -40,6 +40,7 @@ jobs:
         run: |
           cd robeson-app
           npm run build
+          cp ../CNAME out/
           
       - name: Setup Pages
         uses: actions/configure-pages@v4
