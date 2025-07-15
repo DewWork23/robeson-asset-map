@@ -196,7 +196,7 @@ export default function Dashboard() {
             </div>
 
             {/* Data Note */}
-            <div className="mt-8 text-base text-gray-600 bg-gray-100 rounded-lg p-4">
+            <div className="mt-8 text-base text-gray-600 bg-gray-100 rounded-lg p-4 text-center">
               <p className="font-semibold mb-1">Data Note:</p>
               <p>
                 The 2024 statistics are projected based on {partialYearDeaths} confirmed overdose deaths 
