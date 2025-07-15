@@ -16,7 +16,7 @@ export default function Dashboard() {
   const changeFromPriorYear = -64;
 
   // Get substance use and mental health organizations
-  const substanceUseOrgs = filterOrganizations(organizations, 'Mental Health and Substance Use');
+  const substanceUseOrgs = filterOrganizations(organizations, 'Mental Health & Substance Use');
   const crisisOrgs = organizations.filter(org => org.crisisService);
 
   // Calculate additional metrics
@@ -138,7 +138,7 @@ export default function Dashboard() {
                   Mental health and substance use treatment centers available
                 </p>
                 <Link 
-                  href="/category/mental-health-and-substance-use"
+                  href="/category/mental-health-substance-use"
                   className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Find Treatment →
