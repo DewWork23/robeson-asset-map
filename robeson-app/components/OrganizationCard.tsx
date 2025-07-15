@@ -82,6 +82,16 @@ export default function OrganizationCard({ organization, showDistance = true }: 
             Call Now
           </a>
         )}
+        {organization.website && (
+          <a
+            href={organization.website.startsWith('http') ? organization.website : `https://${organization.website}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors text-center"
+          >
+            Website
+          </a>
+        )}
       </div>
     </div>
   );
