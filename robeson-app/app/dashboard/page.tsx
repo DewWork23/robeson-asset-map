@@ -56,20 +56,20 @@ export default function Dashboard() {
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center">
                   <p className="text-4xl font-bold text-red-600">{overdoseDeathRate}</p>
-                  <p className="text-sm text-gray-600 mt-1">per 100,000 residents</p>
-                  <p className="text-xs text-gray-500 mt-1">Overdose Death Rate</p>
+                  <p className="text-base text-gray-600 mt-1">per 100,000 residents</p>
+                  <p className="text-sm text-gray-500 mt-1">Overdose Death Rate</p>
                 </div>
                 <div className="text-center">
                   <p className="text-4xl font-bold text-red-600">{projectedDeaths}</p>
-                  <p className="text-sm text-gray-600 mt-1">projected deaths in 2024</p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-base text-gray-600 mt-1">projected deaths in 2024</p>
+                  <p className="text-sm text-gray-500 mt-1">
                     Based on {partialYearDeaths} deaths in {monthsReported} months
                   </p>
                 </div>
                 <div className="text-center">
                   <p className="text-4xl font-bold text-green-600">{Math.abs(changeFromPriorYear)}%</p>
-                  <p className="text-sm text-gray-600 mt-1">decrease from prior year</p>
-                  <p className="text-xs text-gray-500 mt-1">Trending in the right direction</p>
+                  <p className="text-base text-gray-600 mt-1">decrease from prior year</p>
+                  <p className="text-sm text-gray-500 mt-1">Trending in the right direction</p>
                 </div>
               </div>
             </div>
@@ -80,8 +80,8 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium">Robeson County</span>
-                    <span className="text-sm font-bold text-red-600">{overdoseDeathRate} per 100k</span>
+                    <span className="text-base font-medium">Robeson County</span>
+                    <span className="text-base font-bold text-red-600">{overdoseDeathRate} per 100k</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-4">
                     <div 
@@ -92,8 +92,8 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium">North Carolina Average</span>
-                    <span className="text-sm font-medium">{stateAverage} per 100k</span>
+                    <span className="text-base font-medium">North Carolina Average</span>
+                    <span className="text-base font-medium">{stateAverage} per 100k</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-4">
                     <div 
@@ -104,8 +104,8 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium">National Average</span>
-                    <span className="text-sm font-medium">{nationalAverage} per 100k</span>
+                    <span className="text-base font-medium">National Average</span>
+                    <span className="text-base font-medium">{nationalAverage} per 100k</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-4">
                     <div 
@@ -115,7 +115,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 mt-4 p-4 bg-red-50 rounded-lg">
+              <p className="text-base text-gray-600 mt-4 p-4 bg-red-50 rounded-lg">
                 ⚠️ Robeson County's overdose death rate is among the <strong>highest</strong> in North Carolina, 
                 significantly exceeding both state and national averages.
               </p>
@@ -196,7 +196,7 @@ export default function Dashboard() {
             </div>
 
             {/* Data Note */}
-            <div className="mt-8 text-sm text-gray-600 bg-gray-100 rounded-lg p-4">
+            <div className="mt-8 text-base text-gray-600 bg-gray-100 rounded-lg p-4">
               <p className="font-semibold mb-1">Data Note:</p>
               <p>
                 The 2024 statistics are projected based on {partialYearDeaths} confirmed overdose deaths 

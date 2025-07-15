@@ -24,16 +24,11 @@ export default function Navigation() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          {/* Logo/Title */}
-          <Link href="/" className="font-bold text-xl text-gray-900">
-            Robeson Resources
-          </Link>
-
           {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-6">
+          <div className="hidden md:flex space-x-6 mx-auto">
             <Link
               href="/"
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-bold transition-colors ${
                 isActive('/') 
                   ? 'bg-blue-100 text-blue-700' 
                   : 'text-gray-700 hover:bg-gray-100'
@@ -43,7 +38,7 @@ export default function Navigation() {
             </Link>
             <Link
               href="/map"
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-bold transition-colors ${
                 isActive('/map') 
                   ? 'bg-blue-100 text-blue-700' 
                   : 'text-gray-700 hover:bg-gray-100'
@@ -53,7 +48,7 @@ export default function Navigation() {
             </Link>
             <Link
               href="/dashboard"
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-bold transition-colors ${
                 isActive('/dashboard') 
                   ? 'bg-red-100 text-red-700' 
                   : 'text-gray-700 hover:bg-gray-100'
@@ -66,7 +61,7 @@ export default function Navigation() {
           {/* Hamburger Menu Button */}
           <button
             onClick={toggleMenu}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mx-auto"
             aria-label="Toggle navigation menu"
           >
             <svg
@@ -100,7 +95,7 @@ export default function Navigation() {
             <Link
               href="/"
               onClick={closeMenu}
-              className={`block px-4 py-3 rounded-lg font-medium transition-colors ${
+              className={`block px-4 py-3 rounded-lg font-bold transition-colors ${
                 isActive('/') 
                   ? 'bg-blue-100 text-blue-700' 
                   : 'text-gray-700 hover:bg-gray-100'
@@ -113,7 +108,7 @@ export default function Navigation() {
             <Link
               href="/map"
               onClick={closeMenu}
-              className={`block px-4 py-3 rounded-lg font-medium transition-colors ${
+              className={`block px-4 py-3 rounded-lg font-bold transition-colors ${
                 isActive('/map') 
                   ? 'bg-blue-100 text-blue-700' 
                   : 'text-gray-700 hover:bg-gray-100'
@@ -126,7 +121,7 @@ export default function Navigation() {
             <Link
               href="/dashboard"
               onClick={closeMenu}
-              className={`block px-4 py-3 rounded-lg font-medium transition-colors ${
+              className={`block px-4 py-3 rounded-lg font-bold transition-colors ${
                 isActive('/dashboard') 
                   ? 'bg-red-100 text-red-700' 
                   : 'text-gray-700 hover:bg-gray-100'
@@ -141,7 +136,7 @@ export default function Navigation() {
             <div className="border-t border-gray-200 mt-2 pt-2">
               <a
                 href="tel:988"
-                className="block px-4 py-3 bg-red-50 text-red-700 rounded-lg font-medium hover:bg-red-100 transition-colors"
+                className="block px-4 py-3 bg-red-50 text-red-700 rounded-lg font-bold hover:bg-red-100 transition-colors"
               >
                 <span className="flex items-center gap-2">
                   <span>☎️</span> Crisis Hotline: 988
