@@ -28,18 +28,13 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-gradient-to-r from-red-900 to-red-700 text-white shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <Link href="/" className="text-white/80 hover:text-white text-sm mb-2 inline-block">
-            ← Back to Home
-          </Link>
-          <div className="text-center">
-            <h1 className="text-4xl font-bold mb-3">
-              Robeson County Opioid Crisis Dashboard
-            </h1>
-            <p className="text-xl text-white/90">
-              Understanding and Combating the Overdose Epidemic
-            </p>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 py-8 text-center">
+          <h1 className="text-4xl font-bold mb-3">
+            Robeson County Opioid Crisis Dashboard
+          </h1>
+          <p className="text-xl text-white/90">
+            Understanding and Combating the Overdose Epidemic
+          </p>
         </div>
       </header>
 
