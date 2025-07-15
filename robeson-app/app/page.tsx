@@ -30,6 +30,22 @@ export default function Home() {
     console.log('Voice search transcript:', transcript);
     console.log('Normalized transcript:', normalizedTranscript);
     
+    // Check for organization acronyms/aliases
+    const organizationAliases: { [key: string]: string } = {
+      'rhcc': 'Robeson Health Care Corporation',
+      'r h c c': 'Robeson Health Care Corporation',
+      'r.h.c.c': 'Robeson Health Care Corporation',
+      'r.h.c.c.': 'Robeson Health Care Corporation'
+    };
+    
+    // Check if transcript matches any alias
+    const aliasMatch = organizationAliases[normalizedTranscript];
+    if (aliasMatch) {
+      console.log(`Found alias match: ${normalizedTranscript} -> ${aliasMatch}`);
+      router.push(`/search?q=${encodeURIComponent(aliasMatch)}&from=voice`);
+      return;
+    }
+    
     // First, check if the transcript matches any organization names
     if (organizations && organizations.length > 0) {
       const matchingOrgs = organizations.filter(org => 
