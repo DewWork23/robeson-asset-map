@@ -95,7 +95,7 @@ export default function Home() {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-3">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-3 leading-tight pb-1">
               Robeson County Community Resources
             </h1>
             <p className="text-xl text-gray-700 mb-2">
