@@ -27,7 +27,20 @@ function SearchContent() {
 
     if (query && organizations.length > 0) {
       // Search organizations by name, services, and description
-      const normalizedQuery = query.toLowerCase().trim();
+      let normalizedQuery = query.toLowerCase().trim();
+      
+      // Check for organization acronyms/aliases
+      const organizationAliases: { [key: string]: string } = {
+        'rhcc': 'robeson health care corporation',
+        'r h c c': 'robeson health care corporation',
+        'r.h.c.c': 'robeson health care corporation',
+        'r.h.c.c.': 'robeson health care corporation'
+      };
+      
+      // Replace alias with full name if found
+      if (organizationAliases[normalizedQuery]) {
+        normalizedQuery = organizationAliases[normalizedQuery];
+      }
       
       // Check for emergency/danger keywords
       const emergencyKeywords = [
