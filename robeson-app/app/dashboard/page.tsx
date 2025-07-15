@@ -32,12 +32,14 @@ export default function Dashboard() {
           <Link href="/" className="text-white/80 hover:text-white text-sm mb-2 inline-block">
             ← Back to Home
           </Link>
-          <h1 className="text-4xl font-bold mb-3">
-            Robeson County Opioid Crisis Dashboard
-          </h1>
-          <p className="text-xl text-white/90">
-            Understanding and Combating the Overdose Epidemic
-          </p>
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-3">
+              Robeson County Opioid Crisis Dashboard
+            </h1>
+            <p className="text-xl text-white/90">
+              Understanding and Combating the Overdose Epidemic
+            </p>
+          </div>
         </div>
       </header>
 
