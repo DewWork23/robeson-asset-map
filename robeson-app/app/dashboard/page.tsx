@@ -57,7 +57,7 @@ export default function Dashboard() {
           <>
             {/* Key Statistics Banner */}
             <div className="bg-white rounded-lg shadow-lg p-6 mb-8 mt-8 border-l-4 border-red-600">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">2024 Overdose Death Statistics</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">2024 Overdose Death Statistics</h2>
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center">
                   <p className="text-4xl font-bold text-red-600">{overdoseDeathRate}</p>
@@ -81,7 +81,7 @@ export default function Dashboard() {
 
             {/* Comparison Section */}
             <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Regional Comparison</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">Regional Comparison</h2>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between mb-1">
@@ -129,41 +129,49 @@ export default function Dashboard() {
             {/* Available Resources */}
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2">
                   <span className="text-2xl">🏥</span>
                   Treatment Resources
                 </h2>
-                <p className="text-3xl font-bold text-blue-600 mb-2">
-                  {substanceUseOrgs.length}
-                </p>
-                <p className="text-gray-600 mb-4">
-                  Mental health and substance use treatment centers available
-                </p>
-                <Link 
-                  href="/category/mental-health-substance-use"
-                  className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Find Treatment →
-                </Link>
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-blue-600 mb-2">
+                    {substanceUseOrgs.length}
+                  </p>
+                  <p className="text-gray-600 mb-4">
+                    Mental health and substance use treatment centers available
+                  </p>
+                </div>
+                <div className="text-center">
+                  <Link 
+                    href="/category/mental-health-substance-use"
+                    className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Find Treatment →
+                  </Link>
+                </div>
               </div>
 
               <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2">
                   <span className="text-2xl">🆘</span>
                   Crisis Services
                 </h2>
-                <p className="text-3xl font-bold text-red-600 mb-2">
-                  {crisisOrgs.length}
-                </p>
-                <p className="text-gray-600 mb-4">
-                  24/7 crisis intervention services ready to help
-                </p>
-                <Link 
-                  href="/category/crisis-services"
-                  className="inline-block bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Get Help Now →
-                </Link>
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-red-600 mb-2">
+                    {crisisOrgs.length}
+                  </p>
+                  <p className="text-gray-600 mb-4">
+                    24/7 crisis intervention services ready to help
+                  </p>
+                </div>
+                <div className="text-center">
+                  <Link 
+                    href="/category/crisis-services"
+                    className="inline-block bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Get Help Now →
+                  </Link>
+                </div>
               </div>
             </div>
 
