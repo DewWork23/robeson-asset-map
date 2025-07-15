@@ -138,7 +138,7 @@ export default function Dashboard() {
                 </div>
                 <div className="text-center">
                   <Link 
-                    href="/category/mental-health-substance-use"
+                    href="/category/mental-health-and-substance-use"
                     className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     Find Treatment →
