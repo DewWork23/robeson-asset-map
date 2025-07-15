@@ -193,6 +193,12 @@ export default function Home() {
                     >
                       <span>🗺️</span> Map View
                     </Link>
+                    <Link
+                      href="/dashboard"
+                      className="px-3 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2"
+                    >
+                      <span>📊</span> <span className="hidden sm:inline">Crisis Dashboard</span>
+                    </Link>
                   </div>
                 </div>
               </div>
