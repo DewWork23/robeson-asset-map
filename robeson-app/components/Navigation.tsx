@@ -24,8 +24,8 @@ export default function Navigation() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          {/* Logo/Title */}
-          <Link href="/" className="font-bold text-xl text-gray-900">
+          {/* Logo/Title - Centered on mobile, left-aligned on desktop */}
+          <Link href="/" className="font-bold text-xl text-gray-900 flex-1 md:flex-none text-center md:text-left">
             Robeson Resources
           </Link>
 
