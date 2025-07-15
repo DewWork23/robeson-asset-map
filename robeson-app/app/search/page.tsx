@@ -740,6 +740,16 @@ function SearchContent() {
                       Call Now
                     </a>
                   )}
+                  {org.website && (
+                    <a
+                      href={org.website.startsWith('http') ? org.website : `https://${org.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors text-center"
+                    >
+                      Website
+                    </a>
+                  )}
                     </div>
                   </div>
                 </div>
