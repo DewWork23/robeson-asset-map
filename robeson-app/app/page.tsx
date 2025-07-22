@@ -215,6 +215,13 @@ export default function Home() {
                     >
                       <span>📊</span> <span className="hidden sm:inline">Crisis Dashboard</span>
                     </Link>
+                    <Link
+                      href="/providers"
+                      className="px-3 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2 relative"
+                    >
+                      <span>👨‍⚕️</span> <span className="hidden sm:inline">Find a Provider</span>
+                      <span className="absolute -top-1 -right-1 text-xs bg-yellow-400 text-black px-1.5 py-0.5 rounded-full font-bold">BETA</span>
+                    </Link>
                   </div>
                 </div>
               </div>
