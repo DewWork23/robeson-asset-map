@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
+import { loadEventsFromGoogleSheets, appendEventToGoogleSheets, EventData, getPendingEvents } from '@/lib/googleSheetsEvents';
 
 interface Event {
   id: string;
@@ -14,59 +15,6 @@ interface Event {
   organizer: string;
 }
 
-const mockEvents: Event[] = [
-  {
-    id: '1',
-    title: 'Community Food Drive',
-    date: new Date(2025, 6, 28),
-    time: '10:00 AM - 2:00 PM',
-    location: 'Robeson County Community Center',
-    description: 'Help us collect non-perishable food items for local families in need.',
-    category: 'Community Service',
-    organizer: 'Robeson County Food Bank'
-  },
-  {
-    id: '2',
-    title: 'Free Health Screening',
-    date: new Date(2025, 6, 30),
-    time: '9:00 AM - 4:00 PM',
-    location: 'Public Health Department',
-    description: 'Free blood pressure, diabetes, and vision screenings. No appointment needed.',
-    category: 'Health',
-    organizer: 'Robeson County Health Department'
-  },
-  {
-    id: '3',
-    title: 'Job Fair',
-    date: new Date(2025, 7, 5),
-    time: '11:00 AM - 3:00 PM',
-    location: 'Robeson Community College',
-    description: 'Connect with local employers. Bring your resume!',
-    category: 'Career',
-    organizer: 'Workforce Development Center'
-  },
-  {
-    id: '4',
-    title: 'Back to School Supply Giveaway',
-    date: new Date(2025, 7, 10),
-    time: '1:00 PM - 5:00 PM',
-    location: 'Lumberton High School',
-    description: 'Free school supplies for K-12 students. First come, first served.',
-    category: 'Education',
-    organizer: 'United Way of Robeson County'
-  },
-  {
-    id: '5',
-    title: 'Senior Citizens Bingo Night',
-    date: new Date(2025, 7, 15),
-    time: '6:00 PM - 8:00 PM',
-    location: 'Pembroke Senior Center',
-    description: 'Join us for bingo, refreshments, and prizes!',
-    category: 'Recreation',
-    organizer: 'Pembroke Senior Center'
-  }
-];
-
 export default function EventsPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -76,6 +24,9 @@ export default function EventsPage() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [newEvent, setNewEvent] = useState<Partial<Event>>({
     title: '',
     date: new Date(),
@@ -86,13 +37,31 @@ export default function EventsPage() {
     organizer: ''
   });
 
-  // Check if admin on component mount
+  // Check if admin on component mount and load events
   useEffect(() => {
     const adminStatus = sessionStorage.getItem('calendarAdmin');
     if (adminStatus === 'true') {
       setIsAdmin(true);
     }
+    loadEvents();
   }, []);
+
+  const loadEvents = async () => {
+    setLoading(true);
+    try {
+      const eventData = await loadEventsFromGoogleSheets();
+      const formattedEvents = eventData.map(e => ({
+        ...e,
+        id: e.id || '',
+        date: new Date(e.date)
+      }));
+      setEvents(formattedEvents);
+    } catch (error) {
+      console.error('Error loading events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = () => {
     // For GitHub Pages deployment, we use a hardcoded password
@@ -115,23 +84,47 @@ export default function EventsPage() {
     sessionStorage.removeItem('calendarAdmin');
   };
 
-  const handleSubmitEvent = () => {
-    // In a real app, this would save to a database
-    console.log('New event submitted:', newEvent);
-    // For now, just close the modal
-    setShowEventModal(false);
-    // Reset form
-    setNewEvent({
-      title: '',
-      date: new Date(),
-      time: '',
-      location: '',
-      description: '',
-      category: 'Community Service',
-      organizer: ''
-    });
-    // Show success message
-    alert('Event submitted successfully! In production, this would be saved to a database.');
+  const handleSubmitEvent = async () => {
+    setSubmitting(true);
+    try {
+      const eventData: EventData = {
+        title: newEvent.title || '',
+        date: newEvent.date?.toISOString() || new Date().toISOString(),
+        time: newEvent.time || '',
+        location: newEvent.location || '',
+        description: newEvent.description || '',
+        category: newEvent.category || 'Community Service',
+        organizer: newEvent.organizer || ''
+      };
+
+      const success = await appendEventToGoogleSheets(eventData);
+      
+      if (success) {
+        // Reload events to show the new one
+        await loadEvents();
+        
+        // Close modal and reset form
+        setShowEventModal(false);
+        setNewEvent({
+          title: '',
+          date: new Date(),
+          time: '',
+          location: '',
+          description: '',
+          category: 'Community Service',
+          organizer: ''
+        });
+        
+        alert('Event stored locally! To add it to the calendar permanently, copy the event details from the admin panel to your Google Sheet.');
+      } else {
+        alert('Failed to submit event. Please check that the Google Sheet has an "Events" tab with the correct headers.');
+      }
+    } catch (error) {
+      console.error('Error submitting event:', error);
+      alert('Error submitting event. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const categories = ['all', 'Community Service', 'Health', 'Career', 'Education', 'Recreation'];
@@ -157,7 +150,7 @@ export default function EventsPage() {
   };
 
   const getEventsForDate = (date: Date) => {
-    return mockEvents.filter(event => 
+    return events.filter(event => 
       event.date.getDate() === date.getDate() &&
       event.date.getMonth() === date.getMonth() &&
       event.date.getFullYear() === date.getFullYear() &&
@@ -166,8 +159,8 @@ export default function EventsPage() {
   };
 
   const filteredEvents = selectedCategory === 'all' 
-    ? mockEvents 
-    : mockEvents.filter(event => event.category === selectedCategory);
+    ? events 
+    : events.filter(event => event.category === selectedCategory);
 
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
                       'July', 'August', 'September', 'October', 'November', 'December'];
@@ -277,7 +270,9 @@ export default function EventsPage() {
             </h2>
             
             <div className="space-y-4 max-h-[500px] overflow-y-auto">
-              {(selectedDate ? getEventsForDate(selectedDate) : filteredEvents).map(event => (
+              {loading ? (
+                <p className="text-gray-500 text-center py-8">Loading events...</p>
+              ) : (selectedDate ? getEventsForDate(selectedDate) : filteredEvents).map(event => (
                 <div key={event.id} className="border-l-4 border-blue-500 pl-4 py-3">
                   <h3 className="font-semibold text-gray-800">{event.title}</h3>
                   <p className="text-sm text-gray-600">{event.time}</p>
@@ -302,6 +297,26 @@ export default function EventsPage() {
             </div>
           </div>
         </div>
+
+        {/* Admin Panel - Show pending events */}
+        {isAdmin && getPendingEvents().length > 0 && (
+          <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-3">Pending Events (Stored Locally)</h3>
+            <p className="text-sm text-gray-600 mb-4">These events are stored locally. To add them to the live calendar, manually copy them to your Google Sheet:</p>
+            <div className="bg-white rounded border border-gray-200 p-4 font-mono text-xs overflow-x-auto">
+              <pre>{JSON.stringify(getPendingEvents(), null, 2)}</pre>
+            </div>
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText(JSON.stringify(getPendingEvents(), null, 2));
+                alert('Event data copied to clipboard!');
+              }}
+              className="mt-3 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+            >
+              Copy to Clipboard
+            </button>
+          </div>
+        )}
 
         {/* Add Event CTA */}
         <div className="mt-8 bg-blue-50 rounded-lg p-6 text-center">
@@ -471,10 +486,10 @@ export default function EventsPage() {
                 </button>
                 <button
                   onClick={handleSubmitEvent}
-                  disabled={!newEvent.title || !newEvent.time || !newEvent.location || !newEvent.organizer || !newEvent.description}
+                  disabled={!newEvent.title || !newEvent.time || !newEvent.location || !newEvent.organizer || !newEvent.description || submitting}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                  Submit Event
+                  {submitting ? 'Submitting...' : 'Submit Event'}
                 </button>
               </div>
             </div>
