@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
-import { loadEventsFromGoogleSheets, appendEventToGoogleSheets, EventData, getPendingEvents } from '@/lib/googleSheetsEvents';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
 
 interface Event {
   id: string;
   title: string;
-  date: Date;
+  date: string;
   time: string;
   location: string;
   description: string;
@@ -15,27 +17,41 @@ interface Event {
   organizer: string;
 }
 
+interface CalendarEvent {
+  id: string;
+  title: string;
+  date: string;
+  extendedProps: {
+    time: string;
+    location: string;
+    description: string;
+    category: string;
+    organizer: string;
+  };
+}
+
 export default function EventsPage() {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showEventModal, setShowEventModal] = useState(false);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [newEvent, setNewEvent] = useState<Partial<Event>>({
     title: '',
-    date: new Date(),
+    date: new Date().toISOString().split('T')[0],
     time: '',
     location: '',
     description: '',
     category: 'Community Service',
     organizer: ''
   });
+
+  const categories = ['Community Service', 'Health', 'Career', 'Education', 'Recreation'];
 
   // Check if admin on component mount and load events
   useEffect(() => {
@@ -49,13 +65,24 @@ export default function EventsPage() {
   const loadEvents = async () => {
     setLoading(true);
     try {
-      const eventData = await loadEventsFromGoogleSheets();
-      const formattedEvents = eventData.map(e => ({
-        ...e,
-        id: e.id || '',
-        date: new Date(e.date)
+      const response = await fetch('/robeson-app/events.json');
+      const data = await response.json();
+      setEvents(data.events);
+      
+      // Convert to FullCalendar format
+      const fcEvents: CalendarEvent[] = data.events.map((event: Event) => ({
+        id: event.id,
+        title: event.title,
+        date: event.date,
+        extendedProps: {
+          time: event.time,
+          location: event.location,
+          description: event.description,
+          category: event.category,
+          organizer: event.organizer
+        }
       }));
-      setEvents(formattedEvents);
+      setCalendarEvents(fcEvents);
     } catch (error) {
       console.error('Error loading events:', error);
     } finally {
@@ -64,8 +91,7 @@ export default function EventsPage() {
   };
 
   const handleLogin = () => {
-    // For GitHub Pages deployment, we use a hardcoded password
-    // since environment variables aren't supported
+    // Hardcoded password for GitHub Pages
     const ADMIN_PASSWORD = 'SPARC';
     
     if (password === ADMIN_PASSWORD) {
@@ -84,86 +110,72 @@ export default function EventsPage() {
     sessionStorage.removeItem('calendarAdmin');
   };
 
-  const handleSubmitEvent = async () => {
-    setSubmitting(true);
-    try {
-      const eventData: EventData = {
-        title: newEvent.title || '',
-        date: newEvent.date?.toISOString() || new Date().toISOString(),
-        time: newEvent.time || '',
-        location: newEvent.location || '',
-        description: newEvent.description || '',
-        category: newEvent.category || 'Community Service',
-        organizer: newEvent.organizer || ''
-      };
-
-      const success = await appendEventToGoogleSheets(eventData);
-      
-      if (success) {
-        // Reload events to show the new one
-        await loadEvents();
-        
-        // Close modal and reset form
-        setShowEventModal(false);
-        setNewEvent({
-          title: '',
-          date: new Date(),
-          time: '',
-          location: '',
-          description: '',
-          category: 'Community Service',
-          organizer: ''
-        });
-        
-        alert('Event stored locally! To add it to the calendar permanently, copy the event details from the admin panel to your Google Sheet.');
-      } else {
-        alert('Failed to submit event. Please check that the Google Sheet has an "Events" tab with the correct headers.');
-      }
-    } catch (error) {
-      console.error('Error submitting event:', error);
-      alert('Error submitting event. Please try again.');
-    } finally {
-      setSubmitting(false);
+  const handleEventClick = (info: any) => {
+    const event = events.find(e => e.id === info.event.id);
+    if (event) {
+      setSelectedEvent(event);
+      setShowEventModal(true);
     }
   };
 
-  const categories = ['all', 'Community Service', 'Health', 'Career', 'Education', 'Recreation'];
+  const handleSubmitEvent = () => {
+    // Generate a unique ID
+    const id = Date.now().toString();
+    const eventToAdd = {
+      ...newEvent,
+      id
+    } as Event;
 
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  };
-
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentMonth(prev => {
-      const newDate = new Date(prev);
-      if (direction === 'prev') {
-        newDate.setMonth(prev.getMonth() - 1);
-      } else {
-        newDate.setMonth(prev.getMonth() + 1);
+    // Add to local state
+    const updatedEvents = [...events, eventToAdd];
+    setEvents(updatedEvents);
+    
+    // Convert to FullCalendar format
+    const fcEvent: CalendarEvent = {
+      id: eventToAdd.id,
+      title: eventToAdd.title,
+      date: eventToAdd.date,
+      extendedProps: {
+        time: eventToAdd.time,
+        location: eventToAdd.location,
+        description: eventToAdd.description,
+        category: eventToAdd.category,
+        organizer: eventToAdd.organizer
       }
-      return newDate;
+    };
+    setCalendarEvents([...calendarEvents, fcEvent]);
+
+    // Store in sessionStorage for admin to copy
+    const pendingEvents = JSON.parse(sessionStorage.getItem('pendingEvents') || '[]');
+    pendingEvents.push(eventToAdd);
+    sessionStorage.setItem('pendingEvents', JSON.stringify(pendingEvents));
+
+    // Reset form and close modal
+    setShowSubmitModal(false);
+    setNewEvent({
+      title: '',
+      date: new Date().toISOString().split('T')[0],
+      time: '',
+      location: '',
+      description: '',
+      category: 'Community Service',
+      organizer: ''
     });
+
+    alert('Event added locally! To make it permanent, copy the event data from the admin panel and add it to the events.json file in the GitHub repository.');
   };
 
-  const getEventsForDate = (date: Date) => {
-    return events.filter(event => 
-      event.date.getDate() === date.getDate() &&
-      event.date.getMonth() === date.getMonth() &&
-      event.date.getFullYear() === date.getFullYear() &&
-      (selectedCategory === 'all' || event.category === selectedCategory)
-    );
+  // Get category color
+  const getCategoryColor = (category: string) => {
+    const colors: { [key: string]: string } = {
+      'Community Service': '#3B82F6',
+      'Health': '#10B981',
+      'Career': '#F59E0B',
+      'Education': '#8B5CF6',
+      'Recreation': '#EC4899'
+    };
+    return colors[category] || '#6B7280';
   };
-
-  const filteredEvents = selectedCategory === 'all' 
-    ? events 
-    : events.filter(event => event.category === selectedCategory);
-
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                      'July', 'August', 'September', 'October', 'November', 'December'];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -173,190 +185,157 @@ export default function EventsPage() {
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Community Events</h1>
         <p className="text-gray-600 mb-6">Stay connected with what's happening in Robeson County</p>
 
-        {/* Category Filter */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Category:</label>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            {categories.map(category => (
-              <option key={category} value={category}>
-                {category === 'all' ? 'All Categories' : category}
-              </option>
-            ))}
-          </select>
+        {/* Category Legend */}
+        <div className="mb-6 flex flex-wrap gap-3">
+          {categories.map(category => (
+            <div key={category} className="flex items-center gap-2">
+              <div 
+                className="w-4 h-4 rounded"
+                style={{ backgroundColor: getCategoryColor(category) }}
+              />
+              <span className="text-sm text-gray-700">{category}</span>
+            </div>
+          ))}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Calendar View */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex justify-between items-center mb-4">
-              <button
-                onClick={() => navigateMonth('prev')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Previous month"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <h2 className="text-xl font-bold text-gray-800">
-                {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-              </h2>
-              <button
-                onClick={() => navigateMonth('next')}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Next month"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                <div key={day} className="text-center text-sm font-medium text-gray-600 py-2">
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-7 gap-1">
-              {Array.from({ length: getFirstDayOfMonth(currentMonth) }).map((_, index) => (
-                <div key={`empty-${index}`} className="aspect-square" />
-              ))}
-              
-              {Array.from({ length: getDaysInMonth(currentMonth) }).map((_, index) => {
-                const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), index + 1);
-                const events = getEventsForDate(date);
-                const isSelected = selectedDate?.getDate() === date.getDate() &&
-                                 selectedDate?.getMonth() === date.getMonth() &&
-                                 selectedDate?.getFullYear() === date.getFullYear();
-                
+        {/* FullCalendar */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          {loading ? (
+            <p className="text-center py-8">Loading events...</p>
+          ) : (
+            <FullCalendar
+              plugins={[dayGridPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              events={calendarEvents}
+              eventClick={handleEventClick}
+              eventColor="#3B82F6"
+              eventDisplay="block"
+              height="auto"
+              eventContent={(eventInfo) => {
+                const category = eventInfo.event.extendedProps.category;
                 return (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedDate(date)}
-                    className={`aspect-square p-1 rounded-lg border transition-colors relative ${
-                      isSelected 
-                        ? 'bg-blue-500 text-white border-blue-500' 
-                        : events.length > 0
-                          ? 'bg-blue-50 hover:bg-blue-100 border-blue-200'
-                          : 'hover:bg-gray-50 border-gray-200'
-                    }`}
+                  <div 
+                    className="p-1 text-xs truncate"
+                    style={{ 
+                      backgroundColor: getCategoryColor(category),
+                      color: 'white',
+                      borderRadius: '4px'
+                    }}
                   >
-                    <span className="text-sm">{index + 1}</span>
-                    {events.length > 0 && !isSelected && (
-                      <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
-                        <div className="w-1 h-1 bg-blue-500 rounded-full" />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Event List */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
-              {selectedDate 
-                ? `Events on ${selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`
-                : 'Upcoming Events'
-              }
-            </h2>
-            
-            <div className="space-y-4 max-h-[500px] overflow-y-auto">
-              {loading ? (
-                <p className="text-gray-500 text-center py-8">Loading events...</p>
-              ) : (selectedDate ? getEventsForDate(selectedDate) : filteredEvents).map(event => (
-                <div key={event.id} className="border-l-4 border-blue-500 pl-4 py-3">
-                  <h3 className="font-semibold text-gray-800">{event.title}</h3>
-                  <p className="text-sm text-gray-600">{event.time}</p>
-                  <p className="text-sm text-gray-600">{event.location}</p>
-                  <p className="text-sm text-gray-700 mt-1">{event.description}</p>
-                  <div className="flex items-center gap-4 mt-2">
-                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                      {event.category}
-                    </span>
-                    <span className="text-xs text-gray-500">By {event.organizer}</span>
+                    {eventInfo.event.title}
                   </div>
-                </div>
-              ))}
-              
-              {(selectedDate && getEventsForDate(selectedDate).length === 0) && (
-                <p className="text-gray-500 text-center py-8">No events scheduled for this date.</p>
-              )}
-              
-              {(!selectedDate && filteredEvents.length === 0) && (
-                <p className="text-gray-500 text-center py-8">No events found for the selected category.</p>
-              )}
-            </div>
-          </div>
+                );
+              }}
+            />
+          )}
         </div>
 
-        {/* Admin Panel - Show pending events */}
-        {isAdmin && getPendingEvents().length > 0 && (
-          <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-3">Pending Events (Stored Locally)</h3>
-            <p className="text-sm text-gray-600 mb-4">These events are stored locally. To add them to the live calendar, manually copy them to your Google Sheet:</p>
-            <div className="bg-white rounded border border-gray-200 p-4 font-mono text-xs overflow-x-auto">
-              <pre>{JSON.stringify(getPendingEvents(), null, 2)}</pre>
-            </div>
-            <button 
-              onClick={() => {
-                navigator.clipboard.writeText(JSON.stringify(getPendingEvents(), null, 2));
-                alert('Event data copied to clipboard!');
-              }}
-              className="mt-3 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-            >
-              Copy to Clipboard
-            </button>
-          </div>
-        )}
+        {/* Admin Panel */}
+        {isAdmin && (
+          <div className="mt-8">
+            {/* Pending Events */}
+            {sessionStorage.getItem('pendingEvents') && 
+             JSON.parse(sessionStorage.getItem('pendingEvents') || '[]').length > 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-4">
+                <h3 className="text-lg font-bold text-gray-800 mb-3">Pending Events</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  To make these events permanent:
+                  1. Copy the JSON below
+                  2. Go to your GitHub repository
+                  3. Edit public/events.json
+                  4. Add these events to the "events" array
+                </p>
+                <div className="bg-white rounded border border-gray-200 p-4 font-mono text-xs overflow-x-auto">
+                  <pre>{JSON.stringify(JSON.parse(sessionStorage.getItem('pendingEvents') || '[]'), null, 2)}</pre>
+                </div>
+                <div className="mt-3 flex gap-3">
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        JSON.stringify(JSON.parse(sessionStorage.getItem('pendingEvents') || '[]'), null, 2)
+                      );
+                      alert('Event data copied to clipboard!');
+                    }}
+                    className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                  >
+                    Copy to Clipboard
+                  </button>
+                  <button 
+                    onClick={() => {
+                      sessionStorage.removeItem('pendingEvents');
+                      window.location.reload();
+                    }}
+                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                  >
+                    Clear Pending
+                  </button>
+                </div>
+              </div>
+            )}
 
-        {/* Add Event CTA */}
-        <div className="mt-8 bg-blue-50 rounded-lg p-6 text-center">
-          {isAdmin ? (
-            <div>
+            {/* Admin Actions */}
+            <div className="bg-blue-50 rounded-lg p-6 text-center">
               <p className="text-gray-700 mb-3">Logged in as admin</p>
               <div className="flex gap-3 justify-center">
                 <button 
-                  onClick={() => setShowEventModal(true)}
-                  className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                  onClick={() => setShowSubmitModal(true)}
+                  className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
                 >
-                  Submit an Event
+                  Add Event
                 </button>
                 <button 
                   onClick={handleLogout}
-                  className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                  className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600"
                 >
                   Logout
                 </button>
               </div>
             </div>
-          ) : (
-            <>
-              <p className="text-gray-700 mb-3">Are you an authorized event coordinator?</p>
-              <button 
-                onClick={() => setShowLoginModal(true)}
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+          </div>
+        )}
+
+        {/* Login CTA for non-admins */}
+        {!isAdmin && (
+          <div className="mt-8 bg-blue-50 rounded-lg p-6 text-center">
+            <p className="text-gray-700 mb-3">Are you an authorized event coordinator?</p>
+            <button 
+              onClick={() => setShowLoginModal(true)}
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+            >
+              Admin Login
+            </button>
+          </div>
+        )}
+
+        {/* Event Details Modal */}
+        {showEventModal && selectedEvent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+              <h2 className="text-xl font-bold mb-4">{selectedEvent.title}</h2>
+              <div className="space-y-3 text-gray-700">
+                <p><strong>Date:</strong> {new Date(selectedEvent.date).toLocaleDateString()}</p>
+                <p><strong>Time:</strong> {selectedEvent.time}</p>
+                <p><strong>Location:</strong> {selectedEvent.location}</p>
+                <p><strong>Description:</strong> {selectedEvent.description}</p>
+                <p><strong>Category:</strong> {selectedEvent.category}</p>
+                <p><strong>Organizer:</strong> {selectedEvent.organizer}</p>
+              </div>
+              <button
+                onClick={() => setShowEventModal(false)}
+                className="mt-6 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
               >
-                Admin Login
+                Close
               </button>
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        )}
 
         {/* Login Modal */}
         {showLoginModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
               <h2 className="text-xl font-bold mb-4">Admin Login</h2>
-              <p className="text-gray-600 mb-4">Enter the admin password to submit events</p>
+              <p className="text-gray-600 mb-4">Enter the admin password to manage events</p>
               <input
                 type="password"
                 value={password}
@@ -388,11 +367,11 @@ export default function EventsPage() {
           </div>
         )}
 
-        {/* Event Submission Modal */}
-        {showEventModal && (
+        {/* Submit Event Modal */}
+        {showSubmitModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
             <div className="bg-white rounded-lg p-6 max-w-2xl w-full my-8">
-              <h2 className="text-xl font-bold mb-4">Submit New Event</h2>
+              <h2 className="text-xl font-bold mb-4">Add New Event</h2>
               
               <div className="space-y-4">
                 <div>
@@ -411,8 +390,8 @@ export default function EventsPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
                     <input
                       type="date"
-                      value={newEvent.date?.toISOString().split('T')[0]}
-                      onChange={(e) => setNewEvent({...newEvent, date: new Date(e.target.value)})}
+                      value={newEvent.date}
+                      onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       required
                     />
@@ -448,7 +427,7 @@ export default function EventsPage() {
                     onChange={(e) => setNewEvent({...newEvent, category: e.target.value})}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                   >
-                    {categories.filter(cat => cat !== 'all').map(category => (
+                    {categories.map(category => (
                       <option key={category} value={category}>{category}</option>
                     ))}
                   </select>
@@ -479,17 +458,17 @@ export default function EventsPage() {
 
               <div className="flex gap-3 justify-end mt-6">
                 <button
-                  onClick={() => setShowEventModal(false)}
+                  onClick={() => setShowSubmitModal(false)}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmitEvent}
-                  disabled={!newEvent.title || !newEvent.time || !newEvent.location || !newEvent.organizer || !newEvent.description || submitting}
+                  disabled={!newEvent.title || !newEvent.time || !newEvent.location || !newEvent.organizer || !newEvent.description}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                  {submitting ? 'Submitting...' : 'Submit Event'}
+                  Add Event
                 </button>
               </div>
             </div>

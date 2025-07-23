@@ -9,6 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.18",
+    "@fullcalendar/daygrid": "^6.1.18",
+    "@fullcalendar/interaction": "^6.1.18",
+    "@fullcalendar/react": "^6.1.18",
     "@types/leaflet.markercluster": "^1.5.5",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
