@@ -183,48 +183,22 @@ export default function Home() {
               >
                 Need help finding something? 💬
               </button>
+              <button
+                onClick={handleNearMe}
+                className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2 mx-auto"
+                aria-label="Find resources near me"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>Near Me</span>
+              </button>
             </div>
 
             {/* Categories */}
             <div className="mb-6">
-              <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
-                <div className="sm:flex-1" />
-                <h2 className="text-lg font-semibold text-gray-900">Or Select a Category Below</h2>
-                <div className="sm:flex-1 flex justify-center sm:justify-end">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleNearMe}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2"
-                      aria-label="Find resources near me"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <span>Near Me</span>
-                    </button>
-                    <Link
-                      href="/map"
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-400 hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2"
-                    >
-                      <span>🗺️</span> Map View
-                    </Link>
-                    <Link
-                      href="/dashboard"
-                      className="px-3 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2"
-                    >
-                      <span>📊</span> <span className="hidden sm:inline">Crisis Dashboard</span>
-                    </Link>
-                    <Link
-                      href="/providers"
-                      className="px-3 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2 relative"
-                    >
-                      <span>👨‍⚕️</span> <span className="hidden sm:inline">Find a Provider</span>
-                      <span className="absolute -top-1 -right-1 text-xs bg-yellow-400 text-black px-1.5 py-0.5 rounded-full font-bold">BETA</span>
-                    </Link>
-                  </div>
-                </div>
-              </div>
+              <h2 className="text-lg font-semibold text-gray-900 text-center mb-4">Or Select a Category Below</h2>
               <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
                 {categoriesWithCounts.map((category) => {
                   const icon = CATEGORY_ICONS[category.name] || '📍';
