@@ -83,8 +83,26 @@ export default function ProvidersPage() {
         </div>
       </div>
 
+      {/* Disclaimer */}
+      <div className="max-w-7xl mx-auto px-4 pt-6">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start">
+            <svg className="w-5 h-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p className="text-sm font-medium text-yellow-800">Beta Feature - Sample Data Only</p>
+              <p className="text-sm text-yellow-700 mt-1">
+                The provider names, phone numbers, and other details shown on this page are fictitious and for demonstration purposes only. 
+                This feature is currently in beta development.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Search and Filters */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 pb-6">
         <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
           {/* Search Bar */}
           <div>
