@@ -95,7 +95,9 @@ export default function EventsPage() {
   }, []);
 
   const handleLogin = () => {
-    const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'RobesonCalendar2025';
+    // For GitHub Pages deployment, we use a hardcoded password
+    // since environment variables aren't supported
+    const ADMIN_PASSWORD = 'SPARC';
     
     if (password === ADMIN_PASSWORD) {
       setIsAdmin(true);
