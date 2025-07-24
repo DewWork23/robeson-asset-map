@@ -14,7 +14,6 @@ interface Event {
   time: string;
   startTime?: string;
   endTime?: string;
-  allDay?: boolean;
   location: string;
   description: string;
   category: string;
@@ -61,7 +60,6 @@ export default function EventsPage() {
     time: '',
     startTime: '9:00 AM',
     endTime: '10:00 AM',
-    allDay: false,
     location: '',
     description: '',
     category: 'Community Service',
@@ -152,12 +150,7 @@ export default function EventsPage() {
     const id = Date.now().toString();
     
     // Format time string from start and end times
-    let timeString = '';
-    if (newEvent.allDay) {
-      timeString = 'All Day';
-    } else if (newEvent.startTime && newEvent.endTime) {
-      timeString = `${newEvent.startTime} - ${newEvent.endTime}`;
-    }
+    const timeString = `${newEvent.startTime} - ${newEvent.endTime}`;
     
     const eventToAdd: Event = {
       id,
@@ -168,7 +161,6 @@ export default function EventsPage() {
       description: newEvent.description || '',
       category: newEvent.category || 'Other',
       organizer: newEvent.organizer || '',
-      allDay: newEvent.allDay || false,
       startTime: newEvent.startTime,
       endTime: newEvent.endTime
     };
@@ -201,7 +193,6 @@ export default function EventsPage() {
       time: '',
       startTime: '9:00 AM',
       endTime: '10:00 AM',
-      allDay: false,
       location: '',
       description: '',
       category: 'Community Service',
@@ -224,8 +215,8 @@ export default function EventsPage() {
           body: JSON.stringify({
             title: eventToAdd.title,
             date: eventToAdd.date,
-            startTime: eventToAdd.allDay ? 'All Day' : eventToAdd.startTime || '',
-            endTime: eventToAdd.allDay ? 'All Day' : eventToAdd.endTime || '',
+            startTime: eventToAdd.startTime || '',
+            endTime: eventToAdd.endTime || '',
             location: eventToAdd.location,
             description: eventToAdd.description,
             category: eventToAdd.category,
@@ -238,6 +229,7 @@ export default function EventsPage() {
         // Since we're using no-cors, we can't read the response
         // Event already added to UI, just show success
         console.log('Event submitted to Google Sheets');
+        alert('Event submitted successfully! It will appear for all users after the next page refresh.');
         
       } catch (error) {
         console.error('Error submitting to Google Sheets:', error);
@@ -255,6 +247,7 @@ export default function EventsPage() {
       sessionStorage.setItem('pendingEvents', JSON.stringify(pendingEvents));
       
       console.log('Event saved locally - Google Sheets not configured');
+      alert('Event saved locally. Configure Google Sheets integration for persistent storage.');
     }
   };
 
@@ -341,29 +334,25 @@ export default function EventsPage() {
       }
     };
 
-    if (event.allDay || event.time === 'All Day') {
-      baseEvent.date = event.date;
-      baseEvent.allDay = true;
-    } else if (event.startTime && event.endTime) {
+    if (event.startTime && event.endTime) {
       // Convert times to proper datetime format
       baseEvent.start = `${event.date}T${convertTo24Hour(event.startTime)}`;
       baseEvent.end = `${event.date}T${convertTo24Hour(event.endTime)}`;
-      baseEvent.allDay = false;
     } else if (event.time && event.time.includes('-')) {
       // Handle legacy format "10:00 AM - 2:00 PM"
       const [startTime, endTime] = event.time.split(' - ');
       if (startTime && endTime) {
         baseEvent.start = `${event.date}T${convertTo24Hour(startTime.trim())}`;
         baseEvent.end = `${event.date}T${convertTo24Hour(endTime.trim())}`;
-        baseEvent.allDay = false;
       } else {
-        baseEvent.date = event.date;
-        baseEvent.allDay = true;
+        // Default to 9-10 AM if parsing fails
+        baseEvent.start = `${event.date}T09:00:00`;
+        baseEvent.end = `${event.date}T10:00:00`;
       }
     } else {
-      // Default to all-day if no time info
-      baseEvent.date = event.date;
-      baseEvent.allDay = true;
+      // Default to 9-10 AM if no time info
+      baseEvent.start = `${event.date}T09:00:00`;
+      baseEvent.end = `${event.date}T10:00:00`;
     }
 
     return baseEvent;
@@ -376,7 +365,7 @@ export default function EventsPage() {
       <main className="container mx-auto px-4 pt-20 pb-8">
         {/* Header with admin controls */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <div className="text-center md:text-left mb-4 md:mb-0 flex-grow">
+          <div className="text-center mb-4 md:mb-0 flex-grow">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Community Events</h1>
             <p className="text-sm md:text-base text-gray-600">Stay connected with what's happening in Robeson County</p>
           </div>
@@ -499,6 +488,12 @@ export default function EventsPage() {
             }
             .admin-calendar .fc-daygrid-day-frame {
               min-height: 80px;
+            }
+            /* Hide all-day row */
+            .fc-timegrid-axis-chunk:has(.fc-timegrid-slot-label-cushion:empty),
+            .fc-timegrid-slots tr:first-child,
+            .fc-timegrid-axis-cushion:empty {
+              display: none !important;
             }
             /* Mobile-specific styles */
             @media (max-width: 768px) {
@@ -764,22 +759,10 @@ export default function EventsPage() {
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      <input
-                        type="checkbox"
-                        checked={newEvent.allDay || false}
-                        onChange={(e) => setNewEvent({...newEvent, allDay: e.target.checked})}
-                        className="mr-2"
-                      />
-                      All Day Event
-                    </label>
-                  </div>
                 </div>
 
-                {/* Time Selection - only show if not all day */}
-                {!newEvent.allDay && (
-                  <div className="grid md:grid-cols-2 gap-4">
+                {/* Time Selection */}
+                <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
                       <select
@@ -806,8 +789,7 @@ export default function EventsPage() {
                         ))}
                       </select>
                     </div>
-                  </div>
-                )}
+                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
@@ -865,7 +847,7 @@ export default function EventsPage() {
                 </button>
                 <button
                   onClick={handleSubmitEvent}
-                  disabled={!newEvent.title || (!newEvent.allDay && (!newEvent.startTime || !newEvent.endTime)) || !newEvent.location || !newEvent.organizer || !newEvent.description}
+                  disabled={!newEvent.title || !newEvent.startTime || !newEvent.endTime || !newEvent.location || !newEvent.organizer || !newEvent.description}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   Add Event
