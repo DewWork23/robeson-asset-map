@@ -24,7 +24,10 @@ interface Event {
 interface CalendarEvent {
   id: string;
   title: string;
-  date: string;
+  date?: string;
+  start?: string;
+  end?: string;
+  allDay?: boolean;
   extendedProps: {
     time: string;
     location: string;
@@ -99,18 +102,7 @@ export default function EventsPage() {
       setEvents(data.events);
       
       // Convert to FullCalendar format
-      const fcEvents: CalendarEvent[] = data.events.map((event: Event) => ({
-        id: event.id,
-        title: event.title,
-        date: event.date,
-        extendedProps: {
-          time: event.time,
-          location: event.location,
-          description: event.description,
-          category: event.category,
-          organizer: event.organizer
-        }
-      }));
+      const fcEvents: CalendarEvent[] = data.events.map((event: Event) => convertToCalendarEvent(event));
       setCalendarEvents(fcEvents);
     } catch (error) {
       console.error('Error loading events:', error);
@@ -165,9 +157,33 @@ export default function EventsPage() {
       time: timeString
     } as Event;
 
+    // Add to local state for immediate display
+    const updatedEvents = [...events, eventToAdd];
+    setEvents(updatedEvents);
+    
+    // Convert to FullCalendar format
+    const fcEvent = convertToCalendarEvent(eventToAdd);
+    setCalendarEvents([...calendarEvents, fcEvent]);
+
+    // Reset form and close modal immediately for better UX
+    setShowSubmitModal(false);
+    setNewEvent({
+      title: '',
+      date: new Date().toISOString().split('T')[0],
+      time: '',
+      startTime: '9:00 AM',
+      endTime: '10:00 AM',
+      allDay: false,
+      location: '',
+      description: '',
+      category: 'Community Service',
+      organizer: ''
+    });
+
     // Check if Google Script URL is configured
     const scriptUrl = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL;
     
+    // Submit to Google Sheets in background
     if (scriptUrl) {
       try {
         // Send to Google Sheets via Apps Script
@@ -192,8 +208,8 @@ export default function EventsPage() {
         });
         
         // Since we're using no-cors, we can't read the response
-        // Assume success and update UI
-        alert('Event submitted successfully! It will appear after the next data refresh.');
+        // Event already added to UI, just show success
+        console.log('Event submitted to Google Sheets');
         
       } catch (error) {
         console.error('Error submitting to Google Sheets:', error);
@@ -210,44 +226,8 @@ export default function EventsPage() {
       pendingEvents.push(eventToAdd);
       sessionStorage.setItem('pendingEvents', JSON.stringify(pendingEvents));
       
-      alert('Event saved locally. Configure NEXT_PUBLIC_GOOGLE_SCRIPT_URL to enable direct submission to Google Sheets.');
+      console.log('Event saved locally - Google Sheets not configured');
     }
-    
-    // Add to local state for immediate display
-    const updatedEvents = [...events, eventToAdd];
-    setEvents(updatedEvents);
-    
-    // Convert to FullCalendar format
-    const fcEvent: CalendarEvent = {
-      id: eventToAdd.id,
-      title: eventToAdd.title,
-      date: eventToAdd.date,
-      extendedProps: {
-        time: eventToAdd.time,
-        location: eventToAdd.location,
-        description: eventToAdd.description,
-        category: eventToAdd.category,
-        organizer: eventToAdd.organizer
-      }
-    };
-    setCalendarEvents([...calendarEvents, fcEvent]);
-
-    // Reset form and close modal
-    setShowSubmitModal(false);
-    setNewEvent({
-      title: '',
-      date: new Date().toISOString().split('T')[0],
-      time: '',
-      startTime: '9:00 AM',
-      endTime: '10:00 AM',
-      allDay: false,
-      location: '',
-      description: '',
-      category: 'Community Service',
-      organizer: ''
-    });
-
-    // Alert is now handled above based on whether Google Sheets submission worked
   };
 
   // Get category color
@@ -294,6 +274,63 @@ export default function EventsPage() {
       grouped[event.date].push(event);
     });
     return grouped;
+  };
+
+  // Convert 12-hour time to 24-hour format
+  const convertTo24Hour = (time12h: string) => {
+    const [time, modifier] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    let hour = parseInt(hours, 10);
+    
+    if (modifier === 'PM' && hour !== 12) {
+      hour = hour + 12;
+    } else if (modifier === 'AM' && hour === 12) {
+      hour = 0;
+    }
+    
+    return `${hour.toString().padStart(2, '0')}:${minutes}:00`;
+  };
+
+  // Convert event to FullCalendar format
+  const convertToCalendarEvent = (event: Event): CalendarEvent => {
+    const baseEvent: CalendarEvent = {
+      id: event.id,
+      title: event.title,
+      extendedProps: {
+        time: event.time,
+        location: event.location,
+        description: event.description,
+        category: event.category,
+        organizer: event.organizer
+      }
+    };
+
+    if (event.allDay || event.time === 'All Day') {
+      baseEvent.date = event.date;
+      baseEvent.allDay = true;
+    } else if (event.startTime && event.endTime) {
+      // Convert times to proper datetime format
+      baseEvent.start = `${event.date}T${convertTo24Hour(event.startTime)}`;
+      baseEvent.end = `${event.date}T${convertTo24Hour(event.endTime)}`;
+      baseEvent.allDay = false;
+    } else if (event.time && event.time.includes('-')) {
+      // Handle legacy format "10:00 AM - 2:00 PM"
+      const [startTime, endTime] = event.time.split(' - ');
+      if (startTime && endTime) {
+        baseEvent.start = `${event.date}T${convertTo24Hour(startTime.trim())}`;
+        baseEvent.end = `${event.date}T${convertTo24Hour(endTime.trim())}`;
+        baseEvent.allDay = false;
+      } else {
+        baseEvent.date = event.date;
+        baseEvent.allDay = true;
+      }
+    } else {
+      // Default to all-day if no time info
+      baseEvent.date = event.date;
+      baseEvent.allDay = true;
+    }
+
+    return baseEvent;
   };
 
   return (
