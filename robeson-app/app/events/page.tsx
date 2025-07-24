@@ -97,7 +97,9 @@ export default function EventsPage() {
   const loadEvents = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/robeson-app/events.json');
+      // Use base path for GitHub Pages deployment
+      const basePath = process.env.NODE_ENV === 'production' ? '/robeson-app' : '';
+      const response = await fetch(`${basePath}/events.json`);
       const data = await response.json();
       setEvents(data.events);
       
@@ -106,6 +108,9 @@ export default function EventsPage() {
       setCalendarEvents(fcEvents);
     } catch (error) {
       console.error('Error loading events:', error);
+      // Initialize with empty arrays if loading fails
+      setEvents([]);
+      setCalendarEvents([]);
     } finally {
       setLoading(false);
     }
