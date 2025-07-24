@@ -67,17 +67,20 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     // Check if credentials are available
     if (!SHEET_ID || !API_KEY) {
       console.warn('Google Sheets credentials not found, falling back to CSV');
+      console.log('SHEET_ID:', SHEET_ID ? `${SHEET_ID.substring(0, 8)}...` : 'empty');
+      console.log('API_KEY:', API_KEY ? `${API_KEY.substring(0, 8)}...` : 'empty');
       return loadOrganizationsFromCSV();
     }
     
     console.log('Fetching fresh data from Google Sheets...');
+    console.log('Using SHEET_ID:', SHEET_ID.substring(0, 8) + '...');
     
     // Build the Google Sheets API URL
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
     
     // Add timeout to prevent hanging
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
     
     const response = await fetch(url, {
       signal: controller.signal,
