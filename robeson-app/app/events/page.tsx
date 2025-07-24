@@ -99,7 +99,7 @@ export default function EventsPage() {
     setLoading(true);
     try {
       // Fetch events.json from public directory
-      const response = await fetch('/robeson-app/events.json');
+      const response = await fetch('./events.json');
       console.log('Response status:', response.status);
       const data = await response.json();
       console.log('Loaded events data:', data);
@@ -279,6 +279,7 @@ export default function EventsPage() {
       .filter(event => {
         const eventDate = new Date(event.date);
         eventDate.setHours(0, 0, 0, 0);
+        console.log('Checking event:', event.title, 'Date:', event.date, 'EventDate:', eventDate, 'Today:', today, 'Is upcoming:', eventDate >= today);
         return eventDate >= today;
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
