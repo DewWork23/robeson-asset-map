@@ -46,7 +46,10 @@ export default function EventsPage() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [currentView, setCurrentView] = useState('timeGridWeek');
+  
+  // Check if mobile and set appropriate default view
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const [currentView, setCurrentView] = useState(isMobile ? 'timeGridDay' : 'timeGridWeek');
   const [newEvent, setNewEvent] = useState<Partial<Event>>({
     title: '',
     date: new Date().toISOString().split('T')[0],
@@ -263,9 +266,39 @@ export default function EventsPage() {
       <Navigation />
       
       <main className="container mx-auto px-4 pt-20 pb-8">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Community Events</h1>
-          <p className="text-gray-600">Stay connected with what's happening in Robeson County</p>
+        {/* Header with admin controls */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+          <div className="text-center md:text-left mb-4 md:mb-0 flex-grow">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Community Events</h1>
+            <p className="text-sm md:text-base text-gray-600">Stay connected with what's happening in Robeson County</p>
+          </div>
+          
+          {/* Admin controls */}
+          <div className="flex gap-2 flex-shrink-0">
+            {!isAdmin ? (
+              <button 
+                onClick={() => setShowLoginModal(true)}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm"
+              >
+                Admin Login
+              </button>
+            ) : (
+              <>
+                <button 
+                  onClick={() => setShowSubmitModal(true)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm"
+                >
+                  Add Event
+                </button>
+                <button 
+                  onClick={handleLogout}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 text-sm"
+                >
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Category Legend */}
@@ -334,7 +367,7 @@ export default function EventsPage() {
         )}
 
         {/* FullCalendar */}
-        <div className={`bg-white rounded-lg shadow-md p-6 ${isAdmin ? 'admin-calendar' : ''}`}>
+        <div className={`bg-white rounded-lg shadow-md p-2 md:p-6 ${isAdmin ? 'admin-calendar' : ''}`}>
           <style jsx global>{`
             .admin-calendar .fc-daygrid-day:hover {
               background-color: #EFF6FF;
@@ -343,6 +376,32 @@ export default function EventsPage() {
             .admin-calendar .fc-daygrid-day-frame {
               min-height: 80px;
             }
+            /* Mobile-specific styles */
+            @media (max-width: 768px) {
+              .fc-toolbar {
+                flex-direction: column;
+                gap: 0.5rem;
+              }
+              .fc-toolbar-title {
+                font-size: 1.1rem;
+              }
+              .fc-button {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.875rem;
+              }
+              .fc-col-header-cell {
+                font-size: 0.75rem;
+              }
+              .fc-daygrid-day-number {
+                font-size: 0.875rem;
+              }
+              .fc-event {
+                font-size: 0.75rem;
+              }
+              .fc-timegrid-slot-label {
+                font-size: 0.75rem;
+              }
+            }
           `}</style>
           {loading ? (
             <p className="text-center py-8">Loading events...</p>
@@ -350,9 +409,15 @@ export default function EventsPage() {
             <FullCalendar
               ref={calendarRef}
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              initialView="timeGridWeek"
+              initialView={isMobile ? 'timeGridDay' : 'timeGridWeek'}
               events={calendarEvents}
               eventClick={handleEventClick}
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: isMobile ? '' : 'timeGridDay,timeGridWeek,dayGridMonth'
+              }}
+              height={isMobile ? 'calc(100vh - 250px)' : 'calc(100vh - 350px)'}
               dateClick={isAdmin ? (arg) => {
                 setNewEvent({
                   ...newEvent,
@@ -362,7 +427,6 @@ export default function EventsPage() {
               } : undefined}
               eventColor="#3B82F6"
               eventDisplay="block"
-              height="auto"
               selectable={isAdmin}
               eventContent={(eventInfo) => {
                 const category = eventInfo.event.extendedProps.category;
@@ -383,85 +447,48 @@ export default function EventsPage() {
           )}
         </div>
 
-        {/* Admin Panel */}
-        {isAdmin && (
-          <div className="mt-8">
-            {/* Pending Events */}
-            {sessionStorage.getItem('pendingEvents') && 
-             JSON.parse(sessionStorage.getItem('pendingEvents') || '[]').length > 0 && 
-             !process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-4">
-                <h3 className="text-lg font-bold text-gray-800 mb-3">Pending Events (Local Storage)</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Google Sheets integration not configured. To enable automatic submission:
-                  1. Follow the instructions in DEPLOY_GOOGLE_SCRIPT.md
-                  2. Add NEXT_PUBLIC_GOOGLE_SCRIPT_URL to your .env.local file
-                  
-                  To manually add these events:
-                  1. Copy the JSON below
-                  2. Go to your GitHub repository
-                  3. Edit public/events.json
-                  4. Add these events to the "events" array
-                </p>
-                <div className="bg-white rounded border border-gray-200 p-4 font-mono text-xs overflow-x-auto">
-                  <pre>{JSON.stringify(JSON.parse(sessionStorage.getItem('pendingEvents') || '[]'), null, 2)}</pre>
-                </div>
-                <div className="mt-3 flex gap-3">
-                  <button 
-                    onClick={() => {
-                      navigator.clipboard.writeText(
-                        JSON.stringify(JSON.parse(sessionStorage.getItem('pendingEvents') || '[]'), null, 2)
-                      );
-                      alert('Event data copied to clipboard!');
-                    }}
-                    className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                  >
-                    Copy to Clipboard
-                  </button>
-                  <button 
-                    onClick={() => {
-                      sessionStorage.removeItem('pendingEvents');
-                      window.location.reload();
-                    }}
-                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                  >
-                    Clear Pending
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Admin Actions */}
-            <div className="bg-blue-50 rounded-lg p-6 text-center">
-              <p className="text-gray-700 mb-3">Logged in as admin</p>
-              <div className="flex gap-3 justify-center">
-                <button 
-                  onClick={() => setShowSubmitModal(true)}
-                  className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
-                >
-                  Add Event
-                </button>
-                <button 
-                  onClick={handleLogout}
-                  className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600"
-                >
-                  Logout
-                </button>
-              </div>
+        {/* Pending Events - only show when admin and has pending events */}
+        {isAdmin && sessionStorage.getItem('pendingEvents') && 
+         JSON.parse(sessionStorage.getItem('pendingEvents') || '[]').length > 0 && 
+         !process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL && (
+          <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-4">
+            <h3 className="text-lg font-bold text-gray-800 mb-3">Pending Events (Local Storage)</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Google Sheets integration not configured. To enable automatic submission:
+              1. Follow the instructions in DEPLOY_GOOGLE_SCRIPT.md
+              2. Add NEXT_PUBLIC_GOOGLE_SCRIPT_URL to your .env.local file
+              
+              To manually add these events:
+              1. Copy the JSON below
+              2. Go to your GitHub repository
+              3. Edit public/events.json
+              4. Add these events to the "events" array
+            </p>
+            <div className="bg-white rounded border border-gray-200 p-4 font-mono text-xs overflow-x-auto">
+              <pre>{JSON.stringify(JSON.parse(sessionStorage.getItem('pendingEvents') || '[]'), null, 2)}</pre>
             </div>
-          </div>
-        )}
-
-        {/* Login CTA for non-admins */}
-        {!isAdmin && (
-          <div className="mt-8 bg-blue-50 rounded-lg p-6 text-center">
-            <p className="text-gray-700 mb-3">Are you an authorized event coordinator?</p>
-            <button 
-              onClick={() => setShowLoginModal(true)}
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
-            >
-              Admin Login
-            </button>
+            <div className="mt-3 flex gap-3">
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    JSON.stringify(JSON.parse(sessionStorage.getItem('pendingEvents') || '[]'), null, 2)
+                  );
+                  alert('Event data copied to clipboard!');
+                }}
+                className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+              >
+                Copy to Clipboard
+              </button>
+              <button 
+                onClick={() => {
+                  sessionStorage.removeItem('pendingEvents');
+                  window.location.reload();
+                }}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                Clear Pending
+              </button>
+            </div>
           </div>
         )}
 
