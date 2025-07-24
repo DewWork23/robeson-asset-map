@@ -225,11 +225,13 @@ export default function EventsPage() {
       <Navigation />
       
       <main className="container mx-auto px-4 pt-20 pb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Community Events</h1>
-        <p className="text-gray-600 mb-6">Stay connected with what's happening in Robeson County</p>
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Community Events</h1>
+          <p className="text-gray-600">Stay connected with what's happening in Robeson County</p>
+        </div>
 
         {/* Category Legend */}
-        <div className="mb-6 flex flex-wrap gap-3">
+        <div className="mb-6 flex flex-wrap gap-3 justify-center">
           {categories.map(category => (
             <div key={category} className="flex items-center gap-2">
               <div 
@@ -241,8 +243,26 @@ export default function EventsPage() {
           ))}
         </div>
 
+        {/* Admin Notice */}
+        {isAdmin && (
+          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+            <p className="text-sm text-blue-800">
+              <span className="font-medium">Admin Mode:</span> Click on any date to add an event
+            </p>
+          </div>
+        )}
+
         {/* FullCalendar */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className={`bg-white rounded-lg shadow-md p-6 ${isAdmin ? 'admin-calendar' : ''}`}>
+          <style jsx global>{`
+            .admin-calendar .fc-daygrid-day:hover {
+              background-color: #EFF6FF;
+              cursor: pointer;
+            }
+            .admin-calendar .fc-daygrid-day-frame {
+              min-height: 80px;
+            }
+          `}</style>
           {loading ? (
             <p className="text-center py-8">Loading events...</p>
           ) : (
@@ -251,9 +271,17 @@ export default function EventsPage() {
               initialView="dayGridMonth"
               events={calendarEvents}
               eventClick={handleEventClick}
+              dateClick={isAdmin ? (arg) => {
+                setNewEvent({
+                  ...newEvent,
+                  date: arg.dateStr
+                });
+                setShowSubmitModal(true);
+              } : undefined}
               eventColor="#3B82F6"
               eventDisplay="block"
               height="auto"
+              selectable={isAdmin}
               eventContent={(eventInfo) => {
                 const category = eventInfo.event.extendedProps.category;
                 return (
