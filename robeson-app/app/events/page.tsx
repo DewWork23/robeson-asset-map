@@ -901,6 +901,7 @@ export default function EventsPage() {
                 </button>
               </div>
             </div>
+            </div>
           </div>
         )}
         </div>
