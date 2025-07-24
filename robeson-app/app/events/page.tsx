@@ -100,11 +100,13 @@ export default function EventsPage() {
     try {
       // Fetch events.json from public directory
       const response = await fetch('/robeson-app/events.json');
+      console.log('Response status:', response.status);
       const data = await response.json();
-      setEvents(data.events);
+      console.log('Loaded events data:', data);
+      setEvents(data.events || []);
       
       // Convert to FullCalendar format
-      const fcEvents: CalendarEvent[] = data.events.map((event: Event) => convertToCalendarEvent(event));
+      const fcEvents: CalendarEvent[] = (data.events || []).map((event: Event) => convertToCalendarEvent(event));
       setCalendarEvents(fcEvents);
     } catch (error) {
       console.error('Error loading events:', error);
@@ -171,11 +173,21 @@ export default function EventsPage() {
     };
 
     // Add to local state for immediate display
-    setEvents(prevEvents => [...prevEvents, eventToAdd]);
+    setEvents(prevEvents => {
+      const updated = [...prevEvents, eventToAdd];
+      console.log('Previous events:', prevEvents);
+      console.log('Adding event:', eventToAdd);
+      console.log('Updated events:', updated);
+      return updated;
+    });
     
     // Convert to FullCalendar format
     const fcEvent = convertToCalendarEvent(eventToAdd);
-    setCalendarEvents(prevCalendarEvents => [...prevCalendarEvents, fcEvent]);
+    setCalendarEvents(prevCalendarEvents => {
+      const updated = [...prevCalendarEvents, fcEvent];
+      console.log('Updated calendar events:', updated);
+      return updated;
+    });
     
     // Force agenda view to re-render
     setRefreshKey(prev => prev + 1);
@@ -259,16 +271,20 @@ export default function EventsPage() {
 
   // Get upcoming events sorted by date
   const getUpcomingEvents = () => {
+    console.log('getUpcomingEvents called. Current events:', events);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    return events
+    const upcoming = events
       .filter(event => {
         const eventDate = new Date(event.date);
         eventDate.setHours(0, 0, 0, 0);
         return eventDate >= today;
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    console.log('Filtered upcoming events:', upcoming);
+    return upcoming;
   };
 
   // Format date for agenda view
