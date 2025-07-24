@@ -903,12 +903,6 @@ export default function EventsPage() {
               <div className="bg-white rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <h2 className="text-xl font-bold mb-4">{isEditing ? 'Edit Event' : 'Add New Event'}</h2>
               
-              {validationError && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded-lg text-red-700 text-sm">
-                  {validationError}
-                </div>
-              )}
-              
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
@@ -927,8 +921,18 @@ export default function EventsPage() {
                     <input
                       type="date"
                       value={newEvent.date}
-                      onChange={(e) => setNewEvent({...newEvent, date: e.target.value, endDate: e.target.value > (newEvent.endDate || '') ? e.target.value : newEvent.endDate})}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      onChange={(e) => {
+                        setNewEvent({...newEvent, date: e.target.value, endDate: e.target.value > (newEvent.endDate || '') ? e.target.value : newEvent.endDate});
+                        // Clear validation error when user makes changes
+                        if (validationError) {
+                          const eventDateTime = new Date(`${e.target.value}T${convertTo24Hour(newEvent.startTime || '9:00 AM')}`);
+                          const now = new Date();
+                          if (eventDateTime >= now || isEditing) {
+                            setValidationError('');
+                          }
+                        }
+                      }}
+                      className={`w-full px-4 py-2 border ${validationError ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
                       required
                     />
                   </div>
@@ -951,8 +955,18 @@ export default function EventsPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
                       <select
                         value={newEvent.startTime}
-                        onChange={(e) => setNewEvent({...newEvent, startTime: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        onChange={(e) => {
+                          setNewEvent({...newEvent, startTime: e.target.value});
+                          // Clear validation error when user makes changes
+                          if (validationError) {
+                            const eventDateTime = new Date(`${newEvent.date}T${convertTo24Hour(e.target.value)}`);
+                            const now = new Date();
+                            if (eventDateTime >= now || isEditing) {
+                              setValidationError('');
+                            }
+                          }
+                        }}
+                        className={`w-full px-4 py-2 border ${validationError ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
                         required
                       >
                         {timeOptions.map(time => (
@@ -974,6 +988,16 @@ export default function EventsPage() {
                       </select>
                     </div>
                 </div>
+
+                {/* Validation Error Message */}
+                {validationError && (
+                  <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-300 rounded-lg text-red-700">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-sm font-medium">{validationError}</span>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
@@ -1048,10 +1072,16 @@ export default function EventsPage() {
                 </button>
                 <button
                   onClick={handleSubmitEvent}
-                  disabled={!newEvent.title || !newEvent.startTime || !newEvent.endTime || !newEvent.location || !newEvent.organizer || !newEvent.description}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  disabled={!newEvent.title || !newEvent.startTime || !newEvent.endTime || !newEvent.location || !newEvent.organizer || !newEvent.description || !!validationError}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed relative group"
+                  title={validationError || ''}
                 >
                   {isEditing ? 'Update Event' : 'Add Event'}
+                  {validationError && (
+                    <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 text-xs text-white bg-gray-800 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      {validationError}
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
