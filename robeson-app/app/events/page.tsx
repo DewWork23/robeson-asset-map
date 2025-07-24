@@ -99,7 +99,8 @@ export default function EventsPage() {
     setLoading(true);
     try {
       // Fetch events.json from public directory
-      const response = await fetch('./events.json');
+      const basePath = window.location.pathname.includes('/robeson-app/') ? '/robeson-app' : '';
+      const response = await fetch(`${basePath}/events.json`);
       console.log('Response status:', response.status);
       const data = await response.json();
       console.log('Loaded events data:', data);
@@ -273,16 +274,15 @@ export default function EventsPage() {
   const getUpcomingEvents = () => {
     console.log('getUpcomingEvents called. Current events:', events);
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayStr = today.toISOString().split('T')[0];
     
     const upcoming = events
       .filter(event => {
-        const eventDate = new Date(event.date);
-        eventDate.setHours(0, 0, 0, 0);
-        console.log('Checking event:', event.title, 'Date:', event.date, 'EventDate:', eventDate, 'Today:', today, 'Is upcoming:', eventDate >= today);
-        return eventDate >= today;
+        // Compare date strings directly to avoid timezone issues
+        console.log('Checking event:', event.title, 'Event date:', event.date, 'Today:', todayStr, 'Is upcoming:', event.date >= todayStr);
+        return event.date >= todayStr;
       })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      .sort((a, b) => a.date.localeCompare(b.date));
     
     console.log('Filtered upcoming events:', upcoming);
     return upcoming;
