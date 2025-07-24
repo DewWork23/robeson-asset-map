@@ -97,9 +97,8 @@ export default function EventsPage() {
   const loadEvents = async () => {
     setLoading(true);
     try {
-      // Use base path for GitHub Pages deployment
-      const basePath = process.env.NODE_ENV === 'production' ? '/robeson-app' : '';
-      const response = await fetch(`${basePath}/events.json`);
+      // Fetch events.json from public directory
+      const response = await fetch('/events.json');
       const data = await response.json();
       setEvents(data.events);
       
@@ -145,6 +144,9 @@ export default function EventsPage() {
   };
 
   const handleSubmitEvent = async () => {
+    console.log('handleSubmitEvent called');
+    console.log('Form data:', newEvent);
+    
     // Generate a unique ID
     const id = Date.now().toString();
     
@@ -171,7 +173,12 @@ export default function EventsPage() {
     };
 
     // Add to local state for immediate display
-    setEvents(prevEvents => [...prevEvents, eventToAdd]);
+    console.log('Adding event to state:', eventToAdd);
+    setEvents(prevEvents => {
+      const updated = [...prevEvents, eventToAdd];
+      console.log('Updated events array:', updated);
+      return updated;
+    });
     
     // Convert to FullCalendar format
     const fcEvent = convertToCalendarEvent(eventToAdd);
@@ -259,9 +266,20 @@ export default function EventsPage() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    return events
-      .filter(event => new Date(event.date) >= today)
+    console.log('Getting upcoming events. Total events:', events.length);
+    console.log('Today:', today);
+    
+    const upcoming = events
+      .filter(event => {
+        const eventDate = new Date(event.date);
+        eventDate.setHours(0, 0, 0, 0);
+        console.log('Event date:', event.date, 'Event date obj:', eventDate, 'Is upcoming:', eventDate >= today);
+        return eventDate >= today;
+      })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    console.log('Upcoming events:', upcoming);
+    return upcoming;
   };
 
   // Format date for agenda view
