@@ -97,7 +97,7 @@ export default function EventsPage() {
   const loadEvents = async () => {
     setLoading(true);
     try {
-      // Fetch events.json from public directory with base path
+      // Fetch events.json from public directory
       const response = await fetch('/robeson-app/events.json');
       const data = await response.json();
       setEvents(data.events);
