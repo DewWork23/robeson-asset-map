@@ -96,12 +96,50 @@ export default function EventsPage() {
   const loadEvents = async () => {
     setLoading(true);
     try {
-      // Fetch events.json from public directory
+      // Try to load from Google Sheets first
+      const sheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID;
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+      
+      if (sheetId && apiKey) {
+        console.log('Loading events from Google Sheets...');
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Events!A:K?key=${apiKey}`;
+        
+        const response = await fetch(url);
+        if (response.ok) {
+          const data = await response.json();
+          const rows = data.values || [];
+          
+          if (rows.length > 1) {
+            // Skip header row and convert to Event objects
+            const googleEvents: Event[] = rows.slice(1).map((row: string[], index: number) => ({
+              id: (index + 1).toString(),
+              title: row[0] || '',
+              date: row[1] || '',
+              time: (row[2] && row[3]) ? `${row[2]} - ${row[3]}` : '',
+              startTime: row[2] || '9:00 AM',
+              endTime: row[3] || '10:00 AM',
+              location: row[4] || '',
+              description: row[5] || '',
+              category: row[6] || 'Community Service',
+              organizer: row[7] || ''
+            }));
+            
+            console.log('Loaded', googleEvents.length, 'events from Google Sheets');
+            setEvents(googleEvents);
+            
+            // Convert to FullCalendar format
+            const fcEvents: CalendarEvent[] = googleEvents.map(event => convertToCalendarEvent(event));
+            setCalendarEvents(fcEvents);
+            return;
+          }
+        }
+      }
+      
+      // Fall back to events.json if Google Sheets fails or is not configured
+      console.log('Falling back to events.json...');
       const basePath = window.location.pathname.includes('/robeson-app/') ? '/robeson-app' : '';
       const response = await fetch(`${basePath}/events.json`);
-      console.log('Response status:', response.status);
       const data = await response.json();
-      console.log('Loaded events data:', data);
       setEvents(data.events || []);
       
       // Convert to FullCalendar format
@@ -363,15 +401,15 @@ export default function EventsPage() {
       <Navigation />
       
       <main className="container mx-auto px-4 pt-20 pb-8">
-        {/* Header with admin controls */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <div className="text-center mb-4 md:mb-0 flex-grow">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Community Events</h1>
-            <p className="text-sm md:text-base text-gray-600">Stay connected with what's happening in Robeson County</p>
-          </div>
-          
-          {/* Admin controls */}
-          <div className="flex gap-2 flex-shrink-0">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Community Events</h1>
+          <p className="text-sm md:text-base text-gray-600">Stay connected with what's happening in Robeson County</p>
+        </div>
+        
+        {/* Admin controls */}
+        <div className="flex justify-end mb-4">
+          <div className="flex gap-2">
             {!isAdmin ? (
               <button 
                 onClick={() => setShowLoginModal(true)}
@@ -489,10 +527,17 @@ export default function EventsPage() {
             .admin-calendar .fc-daygrid-day-frame {
               min-height: 80px;
             }
-            /* Hide all-day row */
-            .fc-timegrid-axis-chunk:has(.fc-timegrid-slot-label-cushion:empty),
-            .fc-timegrid-slots tr:first-child,
-            .fc-timegrid-axis-cushion:empty {
+            /* Hide all-day row and label */
+            .fc-timegrid-axis-cushion {
+              display: none !important;
+            }
+            .fc-timegrid-divider {
+              display: none !important;
+            }
+            .fc-scrollgrid-shrink-frame:has(.fc-timegrid-axis-cushion) {
+              display: none !important;
+            }
+            .fc-timegrid-body .fc-scrollgrid-section:first-child {
               display: none !important;
             }
             /* Mobile-specific styles */
