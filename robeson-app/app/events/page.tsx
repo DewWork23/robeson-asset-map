@@ -132,6 +132,7 @@ export default function EventsPage() {
             }));
             
             console.log('Loaded', googleEvents.length, 'events from Google Sheets');
+            console.log('Event IDs:', googleEvents.map(e => ({ id: e.id, title: e.title })));
             setEvents(googleEvents);
             
             // Convert to FullCalendar format
@@ -203,8 +204,8 @@ export default function EventsPage() {
           })
         });
         
-        console.log('Event deleted from Google Sheets');
-        alert('Event deleted successfully!');
+        console.log('Delete request sent for event ID:', eventId);
+        alert('Event deleted! If it reappears after refresh, please ensure:\n1. Google Apps Script is redeployed with latest code\n2. Your Events sheet has "Event ID" as the first column');
       } catch (error) {
         console.error('Error deleting from Google Sheets:', error);
         alert('Event deleted locally, but there was an error removing it from Google Sheets.');
@@ -991,11 +992,11 @@ export default function EventsPage() {
 
                 {/* Validation Error Message */}
                 {validationError && (
-                  <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-300 rounded-lg text-red-700">
-                    <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  <div className="flex items-center gap-2 p-4 bg-red-100 border-2 border-red-400 rounded-lg text-red-800 animate-pulse">
+                    <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-sm font-medium">{validationError}</span>
+                    <span className="font-semibold">{validationError}</span>
                   </div>
                 )}
 
