@@ -156,22 +156,26 @@ export default function EventsPage() {
       timeString = `${newEvent.startTime} - ${newEvent.endTime}`;
     }
     
-    const eventToAdd = {
-      ...newEvent,
+    const eventToAdd: Event = {
       id,
+      title: newEvent.title || '',
+      date: newEvent.date || new Date().toISOString().split('T')[0],
       time: timeString,
+      location: newEvent.location || '',
+      description: newEvent.description || '',
+      category: newEvent.category || 'Other',
+      organizer: newEvent.organizer || '',
       allDay: newEvent.allDay || false,
       startTime: newEvent.startTime,
       endTime: newEvent.endTime
-    } as Event;
+    };
 
     // Add to local state for immediate display
-    const updatedEvents = [...events, eventToAdd];
-    setEvents(updatedEvents);
+    setEvents(prevEvents => [...prevEvents, eventToAdd]);
     
     // Convert to FullCalendar format
     const fcEvent = convertToCalendarEvent(eventToAdd);
-    setCalendarEvents([...calendarEvents, fcEvent]);
+    setCalendarEvents(prevCalendarEvents => [...prevCalendarEvents, fcEvent]);
 
     // Reset form and close modal immediately for better UX
     setShowSubmitModal(false);
