@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navigation from '@/components/Navigation';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
 interface Event {
@@ -11,6 +12,9 @@ interface Event {
   title: string;
   date: string;
   time: string;
+  startTime?: string;
+  endTime?: string;
+  allDay?: boolean;
   location: string;
   description: string;
   category: string;
@@ -31,6 +35,7 @@ interface CalendarEvent {
 }
 
 export default function EventsPage() {
+  const calendarRef = useRef<FullCalendar>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -41,10 +46,14 @@ export default function EventsPage() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [currentView, setCurrentView] = useState('timeGridWeek');
   const [newEvent, setNewEvent] = useState<Partial<Event>>({
     title: '',
     date: new Date().toISOString().split('T')[0],
     time: '',
+    startTime: '9:00 AM',
+    endTime: '10:00 AM',
+    allDay: false,
     location: '',
     description: '',
     category: 'Community Service',
@@ -52,6 +61,22 @@ export default function EventsPage() {
   });
 
   const categories = ['Community Service', 'Health', 'Career', 'Education', 'Recreation'];
+
+  // Generate time options for dropdowns
+  const generateTimeOptions = () => {
+    const times = [];
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+        const ampm = hour < 12 ? 'AM' : 'PM';
+        const minuteStr = minute.toString().padStart(2, '0');
+        times.push(`${hour12}:${minuteStr} ${ampm}`);
+      }
+    }
+    return times;
+  };
+
+  const timeOptions = generateTimeOptions();
 
   // Check if admin on component mount and load events
   useEffect(() => {
@@ -121,9 +146,19 @@ export default function EventsPage() {
   const handleSubmitEvent = async () => {
     // Generate a unique ID
     const id = Date.now().toString();
+    
+    // Format time string from start and end times
+    let timeString = '';
+    if (newEvent.allDay) {
+      timeString = 'All Day';
+    } else if (newEvent.startTime && newEvent.endTime) {
+      timeString = `${newEvent.startTime} - ${newEvent.endTime}`;
+    }
+    
     const eventToAdd = {
       ...newEvent,
-      id
+      id,
+      time: timeString
     } as Event;
 
     // Check if Google Script URL is configured
@@ -141,8 +176,8 @@ export default function EventsPage() {
           body: JSON.stringify({
             title: eventToAdd.title,
             date: eventToAdd.date,
-            startTime: eventToAdd.time?.split('-')[0] || '',
-            endTime: eventToAdd.time?.split('-')[1] || '',
+            startTime: eventToAdd.allDay ? 'All Day' : eventToAdd.startTime || '',
+            endTime: eventToAdd.allDay ? 'All Day' : eventToAdd.endTime || '',
             location: eventToAdd.location,
             description: eventToAdd.description,
             category: eventToAdd.category,
@@ -199,6 +234,9 @@ export default function EventsPage() {
       title: '',
       date: new Date().toISOString().split('T')[0],
       time: '',
+      startTime: '9:00 AM',
+      endTime: '10:00 AM',
+      allDay: false,
       location: '',
       description: '',
       category: 'Community Service',
@@ -243,6 +281,49 @@ export default function EventsPage() {
           ))}
         </div>
 
+        {/* View Toggle Buttons */}
+        <div className="mb-4 flex justify-center gap-2">
+          <button
+            onClick={() => {
+              calendarRef.current?.getApi().changeView('timeGridDay');
+              setCurrentView('timeGridDay');
+            }}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              currentView === 'timeGridDay' 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Day
+          </button>
+          <button
+            onClick={() => {
+              calendarRef.current?.getApi().changeView('timeGridWeek');
+              setCurrentView('timeGridWeek');
+            }}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              currentView === 'timeGridWeek' 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Week
+          </button>
+          <button
+            onClick={() => {
+              calendarRef.current?.getApi().changeView('dayGridMonth');
+              setCurrentView('dayGridMonth');
+            }}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              currentView === 'dayGridMonth' 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Month
+          </button>
+        </div>
+
         {/* Admin Notice */}
         {isAdmin && (
           <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
@@ -267,8 +348,9 @@ export default function EventsPage() {
             <p className="text-center py-8">Loading events...</p>
           ) : (
             <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
+              ref={calendarRef}
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+              initialView="timeGridWeek"
               events={calendarEvents}
               eventClick={handleEventClick}
               dateClick={isAdmin ? (arg) => {
@@ -473,17 +555,49 @@ export default function EventsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                    <input
-                      type="text"
-                      value={newEvent.time}
-                      onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
-                      placeholder="e.g., 10:00 AM - 2:00 PM"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      required
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <input
+                        type="checkbox"
+                        checked={newEvent.allDay || false}
+                        onChange={(e) => setNewEvent({...newEvent, allDay: e.target.checked})}
+                        className="mr-2"
+                      />
+                      All Day Event
+                    </label>
                   </div>
                 </div>
+
+                {/* Time Selection - only show if not all day */}
+                {!newEvent.allDay && (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                      <select
+                        value={newEvent.startTime}
+                        onChange={(e) => setNewEvent({...newEvent, startTime: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        required
+                      >
+                        {timeOptions.map(time => (
+                          <option key={time} value={time}>{time}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                      <select
+                        value={newEvent.endTime}
+                        onChange={(e) => setNewEvent({...newEvent, endTime: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        required
+                      >
+                        {timeOptions.map(time => (
+                          <option key={time} value={time}>{time}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
@@ -541,7 +655,7 @@ export default function EventsPage() {
                 </button>
                 <button
                   onClick={handleSubmitEvent}
-                  disabled={!newEvent.title || !newEvent.time || !newEvent.location || !newEvent.organizer || !newEvent.description}
+                  disabled={!newEvent.title || (!newEvent.allDay && (!newEvent.startTime || !newEvent.endTime)) || !newEvent.location || !newEvent.organizer || !newEvent.description}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   Add Event
