@@ -49,6 +49,9 @@ export default function EventsPage() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState('');
   
   // Check if mobile and set appropriate default view
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -179,6 +182,16 @@ export default function EventsPage() {
     sessionStorage.removeItem('calendarAdmin');
   };
 
+  const handleDeleteEvent = (eventId: string) => {
+    // Remove from local state
+    setEvents(prevEvents => prevEvents.filter(e => e.id !== eventId));
+    setCalendarEvents(prevCalendarEvents => prevCalendarEvents.filter(e => e.id !== eventId));
+    
+    // Note: In a real app, you'd also delete from Google Sheets
+    // For now, just show a message
+    alert('Event deleted locally. Note: This won\'t remove it from Google Sheets.');
+  };
+
   const handleEventClick = (info: any) => {
     const event = events.find(e => e.id === info.event.id);
     if (event) {
@@ -188,8 +201,19 @@ export default function EventsPage() {
   };
 
   const handleSubmitEvent = async () => {
-    // Generate a unique ID
-    const id = Date.now().toString();
+    // Validate date and time
+    const eventDateTime = new Date(`${newEvent.date}T${convertTo24Hour(newEvent.startTime || '9:00 AM')}`);
+    const now = new Date();
+    
+    if (eventDateTime < now && !isEditing) {
+      setValidationError("Can't choose a time that's already occurred");
+      return;
+    }
+    
+    setValidationError('');
+    
+    // Generate a unique ID or use existing one for edits
+    const id = isEditing && editingEventId ? editingEventId : Date.now().toString();
     
     // Format time string from start and end times
     const timeString = `${newEvent.startTime} - ${newEvent.endTime}`;
@@ -209,27 +233,40 @@ export default function EventsPage() {
     };
 
     // Add to local state for immediate display
-    setEvents(prevEvents => {
-      const updated = [...prevEvents, eventToAdd];
-      console.log('Previous events:', prevEvents);
-      console.log('Adding event:', eventToAdd);
-      console.log('Updated events:', updated);
-      return updated;
-    });
+    if (isEditing) {
+      // Update existing event
+      setEvents(prevEvents => prevEvents.map(e => e.id === id ? eventToAdd : e));
+    } else {
+      // Add new event
+      setEvents(prevEvents => {
+        const updated = [...prevEvents, eventToAdd];
+        console.log('Previous events:', prevEvents);
+        console.log('Adding event:', eventToAdd);
+        console.log('Updated events:', updated);
+        return updated;
+      });
+    }
     
     // Convert to FullCalendar format
     const fcEvent = convertToCalendarEvent(eventToAdd);
-    setCalendarEvents(prevCalendarEvents => {
-      const updated = [...prevCalendarEvents, fcEvent];
-      console.log('Updated calendar events:', updated);
-      return updated;
-    });
+    if (isEditing) {
+      setCalendarEvents(prevCalendarEvents => prevCalendarEvents.map(e => e.id === id ? fcEvent : e));
+    } else {
+      setCalendarEvents(prevCalendarEvents => {
+        const updated = [...prevCalendarEvents, fcEvent];
+        console.log('Updated calendar events:', updated);
+        return updated;
+      });
+    }
     
     // Force agenda view to re-render
     setRefreshKey(prev => prev + 1);
 
     // Reset form and close modal immediately for better UX
     setShowSubmitModal(false);
+    setIsEditing(false);
+    setEditingEventId(null);
+    setValidationError('');
     setNewEvent({
       title: '',
       date: new Date().toISOString().split('T')[0],
@@ -747,12 +784,53 @@ export default function EventsPage() {
                 <p><strong>Category:</strong> {selectedEvent.category}</p>
                 <p><strong>Organizer:</strong> {selectedEvent.organizer}</p>
               </div>
-              <button
-                onClick={() => setShowEventModal(false)}
-                className="mt-6 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
-                Close
-              </button>
+              <div className="mt-6 flex gap-3">
+                {isAdmin && (
+                  <>
+                    <button
+                      onClick={() => {
+                        // Load event data into form for editing
+                        setNewEvent({
+                          title: selectedEvent.title,
+                          date: selectedEvent.date,
+                          endDate: selectedEvent.endDate || selectedEvent.date,
+                          time: selectedEvent.time,
+                          startTime: selectedEvent.startTime || '9:00 AM',
+                          endTime: selectedEvent.endTime || '10:00 AM',
+                          location: selectedEvent.location,
+                          description: selectedEvent.description,
+                          category: selectedEvent.category,
+                          organizer: selectedEvent.organizer
+                        });
+                        setIsEditing(true);
+                        setEditingEventId(selectedEvent.id);
+                        setShowEventModal(false);
+                        setShowSubmitModal(true);
+                      }}
+                      className="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm('Are you sure you want to delete this event?')) {
+                          handleDeleteEvent(selectedEvent.id);
+                          setShowEventModal(false);
+                        }
+                      }}
+                      className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => setShowEventModal(false)}
+                  className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -799,7 +877,13 @@ export default function EventsPage() {
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
             <div className="flex items-center justify-center min-h-screen p-4">
               <div className="bg-white rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold mb-4">Add New Event</h2>
+              <h2 className="text-xl font-bold mb-4">{isEditing ? 'Edit Event' : 'Add New Event'}</h2>
+              
+              {validationError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-300 rounded-lg text-red-700 text-sm">
+                  {validationError}
+                </div>
+              )}
               
               <div className="space-y-4">
                 <div>
@@ -916,7 +1000,24 @@ export default function EventsPage() {
 
               <div className="flex gap-3 justify-end mt-6">
                 <button
-                  onClick={() => setShowSubmitModal(false)}
+                  onClick={() => {
+                    setShowSubmitModal(false);
+                    setIsEditing(false);
+                    setEditingEventId(null);
+                    setValidationError('');
+                    setNewEvent({
+                      title: '',
+                      date: new Date().toISOString().split('T')[0],
+                      endDate: new Date().toISOString().split('T')[0],
+                      time: '',
+                      startTime: '9:00 AM',
+                      endTime: '10:00 AM',
+                      location: '',
+                      description: '',
+                      category: 'Community Service',
+                      organizer: ''
+                    });
+                  }}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800"
                 >
                   Cancel
@@ -926,7 +1027,7 @@ export default function EventsPage() {
                   disabled={!newEvent.title || !newEvent.startTime || !newEvent.endTime || !newEvent.location || !newEvent.organizer || !newEvent.description}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                  Add Event
+                  {isEditing ? 'Update Event' : 'Add Event'}
                 </button>
               </div>
             </div>
