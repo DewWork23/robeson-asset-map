@@ -34,6 +34,10 @@ This guide explains how to securely configure your Google Sheets API credentials
    **Secret 2:**
    - Name: `GOOGLE_API_KEY`
    - Value: Your Google API Key
+   
+   **Secret 3:** (Optional - for event submission)
+   - Name: `GOOGLE_SCRIPT_URL`
+   - Value: Your Google Apps Script Web App URL (from deploying the script)
 
 ### 3. Verify Setup
 
@@ -50,6 +54,7 @@ For local development, continue using `.env.local`:
 ```bash
 NEXT_PUBLIC_GOOGLE_SHEET_ID=your_sheet_id
 NEXT_PUBLIC_GOOGLE_API_KEY=your_api_key
+NEXT_PUBLIC_GOOGLE_SCRIPT_URL=your_script_url  # Optional - for event submission
 ```
 
 This file is gitignored and won't be committed.

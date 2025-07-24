@@ -18,11 +18,12 @@ The system works in two parts:
 
 ### Step 2: Configure Your Application
 
-Add the Google Apps Script URL to your `.env.local` file:
+Add the Google Apps Script URL to your GitHub Secrets:
 
-```
-NEXT_PUBLIC_GOOGLE_SCRIPT_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
-```
+1. Go to your repository → Settings → Secrets and variables → Actions
+2. Add a new secret named `GOOGLE_SCRIPT_URL`
+3. Paste your Web App URL as the value
+4. The next GitHub Pages deployment will include this configuration
 
 ### Step 3: Test the Integration
 

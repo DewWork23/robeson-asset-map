@@ -31,11 +31,15 @@ Follow these steps to deploy the Google Apps Script that will handle writing eve
 4. Click "Deploy"
 5. **IMPORTANT**: Copy the Web App URL - you'll need this!
 
-## 6. Update Your Next.js App
-1. Add the Web App URL to your `.env.local` file:
-   ```
-   NEXT_PUBLIC_GOOGLE_SCRIPT_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
-   ```
+## 6. Add to GitHub Secrets
+Since you're using GitHub Pages, you need to add the URL as a GitHub Secret:
+
+1. Go to your repository on GitHub
+2. Click "Settings" → "Secrets and variables" → "Actions"
+3. Click "New repository secret"
+4. Name: `GOOGLE_SCRIPT_URL`
+5. Value: `https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec` (paste your actual URL)
+6. Click "Add secret"
 
 ## 7. Test the Endpoint
 You can test if it's working by visiting the URL in your browser. You should see:
