@@ -107,8 +107,8 @@ export default function EventsPage() {
       
       if (sheetId && apiKey) {
         console.log('Loading events from Google Sheets...');
-        // Read specifically from Events sheet (A:L to include End Date column)
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Events!A:L?key=${apiKey}`;
+        // Read specifically from Events sheet (A:M to include Event ID and all columns)
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Events!A:M?key=${apiKey}`;
         
         const response = await fetch(url);
         if (response.ok) {
@@ -118,17 +118,17 @@ export default function EventsPage() {
           if (rows.length > 1) {
             // Skip header row and convert to Event objects
             const googleEvents: Event[] = rows.slice(1).map((row: string[], index: number) => ({
-              id: (index + 1).toString(),
-              title: row[0] || '',
-              date: row[1] || '',
-              endDate: row[2] || row[1] || '',
-              time: (row[3] && row[4]) ? `${row[3]} - ${row[4]}` : '',
-              startTime: row[3] || '9:00 AM',
-              endTime: row[4] || '10:00 AM',
-              location: row[5] || '',
-              description: row[6] || '',
-              category: row[7] || 'Community Service',
-              organizer: row[8] || ''
+              id: row[0] || (index + 1).toString(), // Use Event ID from sheet
+              title: row[1] || '',
+              date: row[2] || '',
+              endDate: row[3] || row[2] || '',
+              time: (row[4] && row[5]) ? `${row[4]} - ${row[5]}` : '',
+              startTime: row[4] || '9:00 AM',
+              endTime: row[5] || '10:00 AM',
+              location: row[6] || '',
+              description: row[7] || '',
+              category: row[8] || 'Community Service',
+              organizer: row[9] || ''
             }));
             
             console.log('Loaded', googleEvents.length, 'events from Google Sheets');
@@ -182,14 +182,36 @@ export default function EventsPage() {
     sessionStorage.removeItem('calendarAdmin');
   };
 
-  const handleDeleteEvent = (eventId: string) => {
-    // Remove from local state
+  const handleDeleteEvent = async (eventId: string) => {
+    // Remove from local state immediately for better UX
     setEvents(prevEvents => prevEvents.filter(e => e.id !== eventId));
     setCalendarEvents(prevCalendarEvents => prevCalendarEvents.filter(e => e.id !== eventId));
     
-    // Note: In a real app, you'd also delete from Google Sheets
-    // For now, just show a message
-    alert('Event deleted locally. Note: This won\'t remove it from Google Sheets.');
+    // Try to delete from Google Sheets
+    const scriptUrl = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL;
+    if (scriptUrl) {
+      try {
+        await fetch(scriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'delete',
+            id: eventId
+          })
+        });
+        
+        console.log('Event deleted from Google Sheets');
+        alert('Event deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting from Google Sheets:', error);
+        alert('Event deleted locally, but there was an error removing it from Google Sheets.');
+      }
+    } else {
+      alert('Event deleted locally. Google Sheets integration not configured.');
+    }
   };
 
   const handleEventClick = (info: any) => {
@@ -294,6 +316,8 @@ export default function EventsPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            action: isEditing ? 'update' : 'add',
+            id: eventToAdd.id,
             title: eventToAdd.title,
             date: eventToAdd.date,
             endDate: eventToAdd.endDate || eventToAdd.date,
@@ -310,8 +334,8 @@ export default function EventsPage() {
         
         // Since we're using no-cors, we can't read the response
         // Event already added to UI, just show success
-        console.log('Event submitted to Google Sheets');
-        alert('Event submitted successfully! It will appear for all users after the next page refresh.');
+        console.log(isEditing ? 'Event updated in Google Sheets' : 'Event submitted to Google Sheets');
+        alert(isEditing ? 'Event updated successfully!' : 'Event added successfully!');
         
       } catch (error) {
         console.error('Error submitting to Google Sheets:', error);
