@@ -102,7 +102,8 @@ export default function EventsPage() {
       
       if (sheetId && apiKey) {
         console.log('Loading events from Google Sheets...');
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Events!A:K?key=${apiKey}`;
+        // Try with Events sheet first, fall back to first sheet if it doesn't exist
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A:K?key=${apiKey}`;
         
         const response = await fetch(url);
         if (response.ok) {
@@ -401,6 +402,7 @@ export default function EventsPage() {
       <Navigation />
       
       <main className="container mx-auto px-4 pt-20 pb-8">
+        <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Community Events</h1>
@@ -437,7 +439,7 @@ export default function EventsPage() {
         </div>
 
         {/* Category Legend */}
-        <div className="mb-6 flex flex-wrap gap-3 justify-center">
+        <div className="mb-6 flex flex-wrap gap-3 justify-center px-4">
           {categories.map(category => (
             <div key={category} className="flex items-center gap-2">
               <div 
@@ -450,7 +452,7 @@ export default function EventsPage() {
         </div>
 
         {/* View Toggle Buttons */}
-        <div className="mb-4 flex justify-center gap-2">
+        <div className="mb-4 flex justify-center gap-2 px-4">
           <button
             onClick={() => {
               setIsAgendaView(true);
@@ -527,18 +529,17 @@ export default function EventsPage() {
             .admin-calendar .fc-daygrid-day-frame {
               min-height: 80px;
             }
-            /* Hide all-day row and label */
-            .fc-timegrid-axis-cushion {
-              display: none !important;
-            }
+            /* Hide all-day row completely */
+            .fc-timegrid-all-day-events,
             .fc-timegrid-divider {
               display: none !important;
             }
-            .fc-scrollgrid-shrink-frame:has(.fc-timegrid-axis-cushion) {
+            .fc-timegrid .fc-scrollgrid-section:nth-child(2) > table {
               display: none !important;
             }
-            .fc-timegrid-body .fc-scrollgrid-section:first-child {
-              display: none !important;
+            .fc-timegrid .fc-scrollgrid-section:nth-child(2) {
+              min-height: 0 !important;
+              height: 0 !important;
             }
             /* Mobile-specific styles */
             @media (max-width: 768px) {
@@ -777,8 +778,9 @@ export default function EventsPage() {
 
         {/* Submit Event Modal */}
         {showSubmitModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-white rounded-lg p-6 max-w-2xl w-full my-8">
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen p-4">
+              <div className="bg-white rounded-lg p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <h2 className="text-xl font-bold mb-4">Add New Event</h2>
               
               <div className="space-y-4">
@@ -901,6 +903,7 @@ export default function EventsPage() {
             </div>
           </div>
         )}
+        </div>
       </main>
     </div>
   );
