@@ -53,7 +53,7 @@ export default function EventsPage() {
   // Check if mobile and set appropriate default view
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const [currentView, setCurrentView] = useState(isMobile ? 'timeGridDay' : 'timeGridWeek');
-  const [isAgendaView, setIsAgendaView] = useState(false);
+  const [isAgendaView, setIsAgendaView] = useState(true); // Default to agenda view
   const [newEvent, setNewEvent] = useState<Partial<Event>>({
     title: '',
     date: new Date().toISOString().split('T')[0],
@@ -154,7 +154,10 @@ export default function EventsPage() {
     const eventToAdd = {
       ...newEvent,
       id,
-      time: timeString
+      time: timeString,
+      allDay: newEvent.allDay || false,
+      startTime: newEvent.startTime,
+      endTime: newEvent.endTime
     } as Event;
 
     // Add to local state for immediate display
@@ -390,6 +393,18 @@ export default function EventsPage() {
         <div className="mb-4 flex justify-center gap-2">
           <button
             onClick={() => {
+              setIsAgendaView(true);
+            }}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              isAgendaView 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Agenda
+          </button>
+          <button
+            onClick={() => {
               calendarRef.current?.getApi().changeView('timeGridDay');
               setCurrentView('timeGridDay');
               setIsAgendaView(false);
@@ -429,18 +444,6 @@ export default function EventsPage() {
             }`}
           >
             Month
-          </button>
-          <button
-            onClick={() => {
-              setIsAgendaView(true);
-            }}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              isAgendaView 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            Agenda
           </button>
         </div>
 
