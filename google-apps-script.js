@@ -15,7 +15,17 @@ function doPost(e) {
     
     // Open the spreadsheet
     const sheet = SpreadsheetApp.openById('1a6iGXkroz1IeH3O2DNrHi1UqnoCfX6N37eDRtWuySbs');
-    const eventsSheet = sheet.getSheetByName('Events') || sheet.getActiveSheet();
+    // Force use of Events sheet - create it if it doesn't exist
+    let eventsSheet = sheet.getSheetByName('Events');
+    if (!eventsSheet) {
+      eventsSheet = sheet.insertSheet('Events');
+      // Add headers
+      eventsSheet.appendRow([
+        'Title', 'Date', 'Start Time', 'End Time', 'Location', 
+        'Description', 'Category', 'Organizer', 'Contact Email', 
+        'Contact Phone', 'Submitted At'
+      ]);
+    }
     
     // Add the new event data
     eventsSheet.appendRow([
@@ -63,7 +73,10 @@ function doGet(e) {
 // Function to set up the spreadsheet with headers (run once)
 function setupSpreadsheet() {
   const sheet = SpreadsheetApp.openById('1a6iGXkroz1IeH3O2DNrHi1UqnoCfX6N37eDRtWuySbs');
-  const eventsSheet = sheet.getSheetByName('Events') || sheet.getActiveSheet();
+  let eventsSheet = sheet.getSheetByName('Events');
+  if (!eventsSheet) {
+    eventsSheet = sheet.insertSheet('Events');
+  }
   
   // Set headers if the sheet is empty
   if (eventsSheet.getLastRow() === 0) {

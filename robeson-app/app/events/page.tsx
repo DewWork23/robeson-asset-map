@@ -102,8 +102,8 @@ export default function EventsPage() {
       
       if (sheetId && apiKey) {
         console.log('Loading events from Google Sheets...');
-        // Try with Events sheet first, fall back to first sheet if it doesn't exist
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A:K?key=${apiKey}`;
+        // Read specifically from Events sheet
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Events!A:K?key=${apiKey}`;
         
         const response = await fetch(url);
         if (response.ok) {
@@ -403,15 +403,10 @@ export default function EventsPage() {
       
       <main className="container mx-auto px-4 pt-20 pb-8">
         <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Community Events</h1>
-          <p className="text-sm md:text-base text-gray-600">Stay connected with what's happening in Robeson County</p>
-        </div>
-        
-        {/* Admin controls */}
-        <div className="flex justify-end mb-4">
-          <div className="flex gap-2">
+        {/* Header with admin controls */}
+        <div className="relative mb-6">
+          {/* Admin controls - absolute positioned top right */}
+          <div className="absolute top-0 right-0 flex gap-2">
             {!isAdmin ? (
               <button 
                 onClick={() => setShowLoginModal(true)}
@@ -435,6 +430,12 @@ export default function EventsPage() {
                 </button>
               </>
             )}
+          </div>
+          
+          {/* Header text - centered */}
+          <div className="text-center">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Community Events</h1>
+            <p className="text-sm md:text-base text-gray-600">Stay connected with what's happening in Robeson County</p>
           </div>
         </div>
 
