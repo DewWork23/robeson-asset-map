@@ -50,6 +50,7 @@ export default function EventsPage() {
   // Check if mobile and set appropriate default view
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const [currentView, setCurrentView] = useState(isMobile ? 'timeGridDay' : 'timeGridWeek');
+  const [isAgendaView, setIsAgendaView] = useState(false);
   const [newEvent, setNewEvent] = useState<Partial<Event>>({
     title: '',
     date: new Date().toISOString().split('T')[0],
@@ -261,6 +262,40 @@ export default function EventsPage() {
     return colors[category] || '#6B7280';
   };
 
+  // Get upcoming events sorted by date
+  const getUpcomingEvents = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return events
+      .filter(event => new Date(event.date) >= today)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  };
+
+  // Format date for agenda view
+  const formatAgendaDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    return date.toLocaleDateString('en-US', options);
+  };
+
+  // Group events by date
+  const groupEventsByDate = (events: Event[]) => {
+    const grouped: { [key: string]: Event[] } = {};
+    events.forEach(event => {
+      if (!grouped[event.date]) {
+        grouped[event.date] = [];
+      }
+      grouped[event.date].push(event);
+    });
+    return grouped;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
@@ -320,9 +355,10 @@ export default function EventsPage() {
             onClick={() => {
               calendarRef.current?.getApi().changeView('timeGridDay');
               setCurrentView('timeGridDay');
+              setIsAgendaView(false);
             }}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              currentView === 'timeGridDay' 
+              currentView === 'timeGridDay' && !isAgendaView
                 ? 'bg-blue-500 text-white' 
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
@@ -333,9 +369,10 @@ export default function EventsPage() {
             onClick={() => {
               calendarRef.current?.getApi().changeView('timeGridWeek');
               setCurrentView('timeGridWeek');
+              setIsAgendaView(false);
             }}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              currentView === 'timeGridWeek' 
+              currentView === 'timeGridWeek' && !isAgendaView
                 ? 'bg-blue-500 text-white' 
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
@@ -346,14 +383,27 @@ export default function EventsPage() {
             onClick={() => {
               calendarRef.current?.getApi().changeView('dayGridMonth');
               setCurrentView('dayGridMonth');
+              setIsAgendaView(false);
             }}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              currentView === 'dayGridMonth' 
+              currentView === 'dayGridMonth' && !isAgendaView
                 ? 'bg-blue-500 text-white' 
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
             Month
+          </button>
+          <button
+            onClick={() => {
+              setIsAgendaView(true);
+            }}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              isAgendaView 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Agenda
           </button>
         </div>
 
@@ -366,9 +416,10 @@ export default function EventsPage() {
           </div>
         )}
 
-        {/* FullCalendar */}
-        <div className={`bg-white rounded-lg shadow-md p-2 md:p-6 ${isAdmin ? 'admin-calendar' : ''}`}>
-          <style jsx global>{`
+        {/* Calendar or Agenda View */}
+        {!isAgendaView ? (
+          <div className={`bg-white rounded-lg shadow-md p-2 md:p-6 ${isAdmin ? 'admin-calendar' : ''}`}>
+            <style jsx global>{`
             .admin-calendar .fc-daygrid-day:hover {
               background-color: #EFF6FF;
               cursor: pointer;
@@ -445,7 +496,66 @@ export default function EventsPage() {
               }}
             />
           )}
-        </div>
+          </div>
+        ) : (
+          /* Agenda View */
+          <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Upcoming Events</h2>
+            {loading ? (
+              <p className="text-center py-8">Loading events...</p>
+            ) : (
+              <div className="space-y-6">
+                {Object.entries(groupEventsByDate(getUpcomingEvents())).map(([date, dayEvents]) => (
+                  <div key={date}>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
+                      {formatAgendaDate(date)}
+                    </h3>
+                    <div className="space-y-3">
+                      {dayEvents.map(event => (
+                        <div 
+                          key={event.id}
+                          onClick={() => {
+                            setSelectedEvent(event);
+                            setShowEventModal(true);
+                          }}
+                          className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                        >
+                          <div 
+                            className="w-1 h-16 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: getCategoryColor(event.category) }}
+                          />
+                          <div className="flex-grow">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium text-gray-800">{event.title}</h4>
+                              <span className="text-sm text-gray-500">{event.time}</span>
+                            </div>
+                            <p className="text-sm text-gray-600">
+                              <span className="font-medium">Location:</span> {event.location}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span 
+                                className="text-xs px-2 py-1 rounded-full text-white"
+                                style={{ backgroundColor: getCategoryColor(event.category) }}
+                              >
+                                {event.category}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                Organized by {event.organizer}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                {getUpcomingEvents().length === 0 && (
+                  <p className="text-center text-gray-500 py-8">No upcoming events scheduled.</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Pending Events - only show when admin and has pending events */}
         {isAdmin && sessionStorage.getItem('pendingEvents') && 
