@@ -118,7 +118,7 @@ export default function EventsPage() {
     }
   };
 
-  const handleSubmitEvent = () => {
+  const handleSubmitEvent = async () => {
     // Generate a unique ID
     const id = Date.now().toString();
     const eventToAdd = {
@@ -126,7 +126,55 @@ export default function EventsPage() {
       id
     } as Event;
 
-    // Add to local state
+    // Check if Google Script URL is configured
+    const scriptUrl = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL;
+    
+    if (scriptUrl) {
+      try {
+        // Send to Google Sheets via Apps Script
+        const response = await fetch(scriptUrl, {
+          method: 'POST',
+          mode: 'no-cors', // Required for Google Apps Script
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: eventToAdd.title,
+            date: eventToAdd.date,
+            startTime: eventToAdd.time?.split('-')[0] || '',
+            endTime: eventToAdd.time?.split('-')[1] || '',
+            location: eventToAdd.location,
+            description: eventToAdd.description,
+            category: eventToAdd.category,
+            organizer: eventToAdd.organizer,
+            contactEmail: '', // Add if needed
+            contactPhone: ''  // Add if needed
+          })
+        });
+        
+        // Since we're using no-cors, we can't read the response
+        // Assume success and update UI
+        alert('Event submitted successfully! It will appear after the next data refresh.');
+        
+      } catch (error) {
+        console.error('Error submitting to Google Sheets:', error);
+        alert('Error submitting event. It has been saved locally for now.');
+        
+        // Fall back to local storage
+        const pendingEvents = JSON.parse(sessionStorage.getItem('pendingEvents') || '[]');
+        pendingEvents.push(eventToAdd);
+        sessionStorage.setItem('pendingEvents', JSON.stringify(pendingEvents));
+      }
+    } else {
+      // No Google Script URL configured - use local storage
+      const pendingEvents = JSON.parse(sessionStorage.getItem('pendingEvents') || '[]');
+      pendingEvents.push(eventToAdd);
+      sessionStorage.setItem('pendingEvents', JSON.stringify(pendingEvents));
+      
+      alert('Event saved locally. Configure NEXT_PUBLIC_GOOGLE_SCRIPT_URL to enable direct submission to Google Sheets.');
+    }
+    
+    // Add to local state for immediate display
     const updatedEvents = [...events, eventToAdd];
     setEvents(updatedEvents);
     
@@ -145,11 +193,6 @@ export default function EventsPage() {
     };
     setCalendarEvents([...calendarEvents, fcEvent]);
 
-    // Store in sessionStorage for admin to copy
-    const pendingEvents = JSON.parse(sessionStorage.getItem('pendingEvents') || '[]');
-    pendingEvents.push(eventToAdd);
-    sessionStorage.setItem('pendingEvents', JSON.stringify(pendingEvents));
-
     // Reset form and close modal
     setShowSubmitModal(false);
     setNewEvent({
@@ -162,7 +205,7 @@ export default function EventsPage() {
       organizer: ''
     });
 
-    alert('Event added locally! To make it permanent, copy the event data from the admin panel and add it to the events.json file in the GitHub repository.');
+    // Alert is now handled above based on whether Google Sheets submission worked
   };
 
   // Get category color
@@ -235,11 +278,16 @@ export default function EventsPage() {
           <div className="mt-8">
             {/* Pending Events */}
             {sessionStorage.getItem('pendingEvents') && 
-             JSON.parse(sessionStorage.getItem('pendingEvents') || '[]').length > 0 && (
+             JSON.parse(sessionStorage.getItem('pendingEvents') || '[]').length > 0 && 
+             !process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-4">
-                <h3 className="text-lg font-bold text-gray-800 mb-3">Pending Events</h3>
+                <h3 className="text-lg font-bold text-gray-800 mb-3">Pending Events (Local Storage)</h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  To make these events permanent:
+                  Google Sheets integration not configured. To enable automatic submission:
+                  1. Follow the instructions in DEPLOY_GOOGLE_SCRIPT.md
+                  2. Add NEXT_PUBLIC_GOOGLE_SCRIPT_URL to your .env.local file
+                  
+                  To manually add these events:
                   1. Copy the JSON below
                   2. Go to your GitHub repository
                   3. Edit public/events.json
