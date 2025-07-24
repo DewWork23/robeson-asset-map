@@ -11,6 +11,7 @@ interface Event {
   id: string;
   title: string;
   date: string;
+  endDate?: string;
   time: string;
   startTime?: string;
   endTime?: string;
@@ -57,6 +58,7 @@ export default function EventsPage() {
   const [newEvent, setNewEvent] = useState<Partial<Event>>({
     title: '',
     date: new Date().toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
     time: '',
     startTime: '9:00 AM',
     endTime: '10:00 AM',
@@ -102,8 +104,8 @@ export default function EventsPage() {
       
       if (sheetId && apiKey) {
         console.log('Loading events from Google Sheets...');
-        // Read specifically from Events sheet
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Events!A:K?key=${apiKey}`;
+        // Read specifically from Events sheet (A:L to include End Date column)
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Events!A:L?key=${apiKey}`;
         
         const response = await fetch(url);
         if (response.ok) {
@@ -116,13 +118,14 @@ export default function EventsPage() {
               id: (index + 1).toString(),
               title: row[0] || '',
               date: row[1] || '',
-              time: (row[2] && row[3]) ? `${row[2]} - ${row[3]}` : '',
-              startTime: row[2] || '9:00 AM',
-              endTime: row[3] || '10:00 AM',
-              location: row[4] || '',
-              description: row[5] || '',
-              category: row[6] || 'Community Service',
-              organizer: row[7] || ''
+              endDate: row[2] || row[1] || '',
+              time: (row[3] && row[4]) ? `${row[3]} - ${row[4]}` : '',
+              startTime: row[3] || '9:00 AM',
+              endTime: row[4] || '10:00 AM',
+              location: row[5] || '',
+              description: row[6] || '',
+              category: row[7] || 'Community Service',
+              organizer: row[8] || ''
             }));
             
             console.log('Loaded', googleEvents.length, 'events from Google Sheets');
@@ -195,6 +198,7 @@ export default function EventsPage() {
       id,
       title: newEvent.title || '',
       date: newEvent.date || new Date().toISOString().split('T')[0],
+      endDate: newEvent.endDate || newEvent.date,
       time: timeString,
       location: newEvent.location || '',
       description: newEvent.description || '',
@@ -229,6 +233,7 @@ export default function EventsPage() {
     setNewEvent({
       title: '',
       date: new Date().toISOString().split('T')[0],
+      endDate: new Date().toISOString().split('T')[0],
       time: '',
       startTime: '9:00 AM',
       endTime: '10:00 AM',
@@ -254,6 +259,7 @@ export default function EventsPage() {
           body: JSON.stringify({
             title: eventToAdd.title,
             date: eventToAdd.date,
+            endDate: eventToAdd.endDate || eventToAdd.date,
             startTime: eventToAdd.startTime || '',
             endTime: eventToAdd.endTime || '',
             location: eventToAdd.location,
@@ -376,7 +382,9 @@ export default function EventsPage() {
     if (event.startTime && event.endTime) {
       // Convert times to proper datetime format
       baseEvent.start = `${event.date}T${convertTo24Hour(event.startTime)}`;
-      baseEvent.end = `${event.date}T${convertTo24Hour(event.endTime)}`;
+      // Use endDate if it's different from start date (multi-day event)
+      const endDateToUse = event.endDate && event.endDate !== event.date ? event.endDate : event.date;
+      baseEvent.end = `${endDateToUse}T${convertTo24Hour(event.endTime)}`;
     } else if (event.time && event.time.includes('-')) {
       // Handle legacy format "10:00 AM - 2:00 PM"
       const [startTime, endTime] = event.time.split(' - ');
@@ -531,16 +539,24 @@ export default function EventsPage() {
               min-height: 80px;
             }
             /* Hide all-day row completely */
+            .fc-timegrid-axis-cushion,
             .fc-timegrid-all-day-events,
-            .fc-timegrid-divider {
+            .fc-timegrid-divider,
+            .fc-scrollgrid-shrink-cushion,
+            .fc-timegrid-axis-frame:first-child {
               display: none !important;
             }
-            .fc-timegrid .fc-scrollgrid-section:nth-child(2) > table {
+            .fc-timegrid .fc-scrollgrid-section:has(.fc-timegrid-divider),
+            .fc-timegrid .fc-scrollgrid-section:first-of-type table {
               display: none !important;
             }
             .fc-timegrid .fc-scrollgrid-section:nth-child(2) {
               min-height: 0 !important;
               height: 0 !important;
+            }
+            /* Hide the all-day text specifically */
+            .fc-timegrid-axis-cushion:contains("all-day") {
+              display: none !important;
             }
             /* Mobile-specific styles */
             @media (max-width: 768px) {
@@ -581,13 +597,14 @@ export default function EventsPage() {
               headerToolbar={{
                 left: 'prev,next today',
                 center: 'title',
-                right: isMobile ? '' : 'timeGridDay,timeGridWeek,dayGridMonth'
+                right: ''
               }}
               height={isMobile ? 'calc(100vh - 250px)' : 'calc(100vh - 350px)'}
               dateClick={isAdmin ? (arg) => {
                 setNewEvent({
                   ...newEvent,
-                  date: arg.dateStr
+                  date: arg.dateStr,
+                  endDate: arg.dateStr
                 });
                 setShowSubmitModal(true);
               } : undefined}
@@ -723,7 +740,7 @@ export default function EventsPage() {
             <div className="bg-white rounded-lg p-6 max-w-md w-full">
               <h2 className="text-xl font-bold mb-4">{selectedEvent.title}</h2>
               <div className="space-y-3 text-gray-700">
-                <p><strong>Date:</strong> {new Date(selectedEvent.date).toLocaleDateString()}</p>
+                <p><strong>Date:</strong> {new Date(selectedEvent.date).toLocaleDateString()}{selectedEvent.endDate && selectedEvent.endDate !== selectedEvent.date ? ` - ${new Date(selectedEvent.endDate).toLocaleDateString()}` : ''}</p>
                 <p><strong>Time:</strong> {selectedEvent.time}</p>
                 <p><strong>Location:</strong> {selectedEvent.location}</p>
                 <p><strong>Description:</strong> {selectedEvent.description}</p>
@@ -798,11 +815,22 @@ export default function EventsPage() {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                     <input
                       type="date"
                       value={newEvent.date}
-                      onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                      onChange={(e) => setNewEvent({...newEvent, date: e.target.value, endDate: e.target.value > (newEvent.endDate || '') ? e.target.value : newEvent.endDate})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                    <input
+                      type="date"
+                      value={newEvent.endDate || newEvent.date}
+                      onChange={(e) => setNewEvent({...newEvent, endDate: e.target.value})}
+                      min={newEvent.date}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       required
                     />

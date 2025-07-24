@@ -21,7 +21,7 @@ function doPost(e) {
       eventsSheet = sheet.insertSheet('Events');
       // Add headers
       eventsSheet.appendRow([
-        'Title', 'Date', 'Start Time', 'End Time', 'Location', 
+        'Title', 'Date', 'End Date', 'Start Time', 'End Time', 'Location', 
         'Description', 'Category', 'Organizer', 'Contact Email', 
         'Contact Phone', 'Submitted At'
       ]);
@@ -31,6 +31,7 @@ function doPost(e) {
     eventsSheet.appendRow([
       data.title,
       data.date,
+      data.endDate || data.date,
       data.startTime || '',
       data.endTime || '',
       data.location || '',
@@ -83,6 +84,7 @@ function setupSpreadsheet() {
     eventsSheet.appendRow([
       'Title',
       'Date',
+      'End Date',
       'Start Time',
       'End Time',
       'Location',
