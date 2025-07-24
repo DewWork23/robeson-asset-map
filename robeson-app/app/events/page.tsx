@@ -117,19 +117,25 @@ export default function EventsPage() {
           
           if (rows.length > 1) {
             // Skip header row and convert to Event objects
-            const googleEvents: Event[] = rows.slice(1).map((row: string[], index: number) => ({
-              id: row[0] || (index + 1).toString(), // Use Event ID from sheet
-              title: row[1] || '',
-              date: row[2] || '',
-              endDate: row[3] || row[2] || '',
-              time: (row[4] && row[5]) ? `${row[4]} - ${row[5]}` : '',
-              startTime: row[4] || '9:00 AM',
-              endTime: row[5] || '10:00 AM',
-              location: row[6] || '',
-              description: row[7] || '',
-              category: row[8] || 'Community Service',
-              organizer: row[9] || ''
-            }));
+            const googleEvents: Event[] = rows.slice(1).map((row: string[], index: number) => {
+              // Debug first few rows to see structure
+              if (index < 3) {
+                console.log(`Row ${index}:`, row);
+              }
+              return {
+                id: row[0] || (index + 1).toString(), // Use Event ID from sheet
+                title: row[1] || '',
+                date: row[2] || '',
+                endDate: row[3] || row[2] || '',
+                time: (row[4] && row[5]) ? `${row[4]} - ${row[5]}` : '',
+                startTime: row[4] || '9:00 AM',
+                endTime: row[5] || '10:00 AM',
+                location: row[6] || '',
+                description: row[7] || '',
+                category: row[8] || 'Community Service',
+                organizer: row[9] || ''
+              };
+            });
             
             console.log('Loaded', googleEvents.length, 'events from Google Sheets');
             console.log('Event IDs:', googleEvents.map(e => ({ id: e.id, title: e.title })));
@@ -245,7 +251,7 @@ export default function EventsPage() {
       id,
       title: newEvent.title || '',
       date: newEvent.date || new Date().toISOString().split('T')[0],
-      endDate: newEvent.endDate || newEvent.date,
+      endDate: newEvent.endDate || newEvent.date || new Date().toISOString().split('T')[0],
       time: timeString,
       location: newEvent.location || '',
       description: newEvent.description || '',
@@ -254,6 +260,8 @@ export default function EventsPage() {
       startTime: newEvent.startTime,
       endTime: newEvent.endTime
     };
+    
+    console.log('Event to add:', eventToAdd);
 
     // Add to local state for immediate display
     if (isEditing) {
@@ -309,6 +317,25 @@ export default function EventsPage() {
     // Submit to Google Sheets in background
     if (scriptUrl) {
       try {
+        // Debug what we're sending
+        const dataToSend = {
+          action: isEditing ? 'update' : 'add',
+          id: eventToAdd.id,
+          title: eventToAdd.title,
+          date: eventToAdd.date,
+          endDate: eventToAdd.endDate || eventToAdd.date,
+          startTime: eventToAdd.startTime || '',
+          endTime: eventToAdd.endTime || '',
+          location: eventToAdd.location,
+          description: eventToAdd.description,
+          category: eventToAdd.category,
+          organizer: eventToAdd.organizer,
+          contactEmail: '', // Add if needed
+          contactPhone: ''  // Add if needed
+        };
+        
+        console.log('Sending to Google Sheets:', dataToSend);
+        
         // Send to Google Sheets via Apps Script
         const response = await fetch(scriptUrl, {
           method: 'POST',
@@ -316,21 +343,7 @@ export default function EventsPage() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            action: isEditing ? 'update' : 'add',
-            id: eventToAdd.id,
-            title: eventToAdd.title,
-            date: eventToAdd.date,
-            endDate: eventToAdd.endDate || eventToAdd.date,
-            startTime: eventToAdd.startTime || '',
-            endTime: eventToAdd.endTime || '',
-            location: eventToAdd.location,
-            description: eventToAdd.description,
-            category: eventToAdd.category,
-            organizer: eventToAdd.organizer,
-            contactEmail: '', // Add if needed
-            contactPhone: ''  // Add if needed
-          })
+          body: JSON.stringify(dataToSend)
         });
         
         // Since we're using no-cors, we can't read the response
@@ -838,7 +851,7 @@ export default function EventsPage() {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm('Are you sure you want to delete this event?')) {
+                        if (confirm(`Are you sure you want to delete this event?\n\nEvent: ${selectedEvent.title}\nID: ${selectedEvent.id}`)) {
                           handleDeleteEvent(selectedEvent.id);
                           setShowEventModal(false);
                         }
