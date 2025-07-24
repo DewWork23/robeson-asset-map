@@ -54,6 +54,7 @@ export default function EventsPage() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const [currentView, setCurrentView] = useState(isMobile ? 'timeGridDay' : 'timeGridWeek');
   const [isAgendaView, setIsAgendaView] = useState(true); // Default to agenda view
+  const [refreshKey, setRefreshKey] = useState(0); // Force re-render key
   const [newEvent, setNewEvent] = useState<Partial<Event>>({
     title: '',
     date: new Date().toISOString().split('T')[0],
@@ -175,6 +176,9 @@ export default function EventsPage() {
     // Convert to FullCalendar format
     const fcEvent = convertToCalendarEvent(eventToAdd);
     setCalendarEvents(prevCalendarEvents => [...prevCalendarEvents, fcEvent]);
+    
+    // Force agenda view to re-render
+    setRefreshKey(prev => prev + 1);
 
     // Reset form and close modal immediately for better UX
     setShowSubmitModal(false);
@@ -551,7 +555,7 @@ export default function EventsPage() {
           </div>
         ) : (
           /* Agenda View */
-          <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
+          <div className="bg-white rounded-lg shadow-md p-4 md:p-6" key={refreshKey}>
             <h2 className="text-xl font-bold text-gray-800 mb-4">Upcoming Events</h2>
             {loading ? (
               <p className="text-center py-8">Loading events...</p>
