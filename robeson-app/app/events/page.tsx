@@ -963,13 +963,16 @@ export default function EventsPage() {
         {/* Event Details Modal */}
         {showEventModal && selectedEvent && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <h2 className="text-xl font-bold mb-4">{selectedEvent.title}</h2>
               <div className="space-y-3 text-gray-700">
                 <p><strong>Date:</strong> {new Date(selectedEvent.date).toLocaleDateString()}{selectedEvent.endDate && selectedEvent.endDate !== selectedEvent.date ? ` - ${new Date(selectedEvent.endDate).toLocaleDateString()}` : ''}</p>
                 <p><strong>Time:</strong> {selectedEvent.time}</p>
                 <p><strong>Location:</strong> {selectedEvent.location}</p>
-                <p><strong>Description:</strong> {selectedEvent.description}</p>
+                <div>
+                  <strong>Description:</strong>
+                  <div className="mt-1 whitespace-pre-wrap">{selectedEvent.description}</div>
+                </div>
                 <p><strong>Category:</strong> {selectedEvent.category}</p>
                 <p><strong>Organizer:</strong> {selectedEvent.organizer}</p>
                 {selectedEvent.link && (
@@ -1305,8 +1308,9 @@ export default function EventsPage() {
                   <textarea
                     value={newEvent.description}
                     onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    rows={6}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg resize-y"
+                    placeholder="Enter event description. Press Enter for new lines."
                     required
                   />
                 </div>
