@@ -42,7 +42,7 @@ function addEvent(data) {
     eventsSheet.appendRow([
       'Event ID', 'Title', 'Date', 'End Date', 'Start Time', 'End Time', 'Location', 
       'Description', 'Category', 'Organizer', 'Contact Email', 
-      'Contact Phone', 'Submitted At'
+      'Contact Phone', 'Submitted At', 'Link'
     ]);
   }
   
@@ -61,7 +61,8 @@ function addEvent(data) {
     data.organizer || '',
     data.contactEmail || '',
     data.contactPhone || '',
-    new Date().toISOString()
+    new Date().toISOString(),
+    data.link || ''
   ]);
   
   return ContentService
@@ -98,8 +99,8 @@ function updateEvent(data) {
     throw new Error('Event not found with ID: ' + data.id);
   }
   
-  // Update the row
-  eventsSheet.getRange(rowToUpdate, 2, 1, 12).setValues([[
+  // Update the row (columns 2-14, skipping the ID in column 1)
+  eventsSheet.getRange(rowToUpdate, 2, 1, 13).setValues([[
     data.title,
     data.date,
     data.endDate || data.date,
@@ -111,7 +112,8 @@ function updateEvent(data) {
     data.organizer || '',
     data.contactEmail || '',
     data.contactPhone || '',
-    new Date().toISOString()
+    new Date().toISOString(),
+    data.link || ''
   ]]);
   
   return ContentService
@@ -191,7 +193,8 @@ function setupSpreadsheet() {
       'Organizer',
       'Contact Email',
       'Contact Phone',
-      'Submitted At'
+      'Submitted At',
+      'Link'
     ]);
   }
 }
