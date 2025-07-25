@@ -922,7 +922,7 @@ export default function EventsPage() {
                       className="text-blue-500 underline hover:text-blue-600"
                       onClick={(e) => {
                         e.preventDefault();
-                        const link = selectedEvent.link.trim();
+                        const link = selectedEvent.link?.trim() || '';
                         let finalUrl = link;
                         if (!link.match(/^https?:\/\//i)) {
                           finalUrl = link.startsWith('//') ? `https:${link}` : `https://${link}`;
