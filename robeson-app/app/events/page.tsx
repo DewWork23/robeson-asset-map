@@ -155,23 +155,47 @@ export default function EventsPage() {
               }
               
               // Map based on the actual column order in the sheet
-              // Assuming: Event ID, Title, Date, End Date, Start Time, End Time, Location, Description, Category, Organizer, Contact Email, Contact Phone, Submitted At, Link
-              // Generate consistent ID based on title and date if no ID exists
-              const eventId = row[0] || `${row[1]}_${row[2]}_${index}`.replace(/\s+/g, '_');
-              return {
-                id: eventId,
-                title: row[1] || '',
-                date: row[2] || '',
-                endDate: row[3] || row[2] || '',
-                time: (row[4] && row[5]) ? `${row[4]} - ${row[5]}` : '',
-                startTime: row[4] || '9:00 AM',
-                endTime: row[5] || '10:00 AM',
-                location: row[6] || '',
-                description: row[7] || '',
-                category: row[8] || 'Community Service',
-                organizer: row[9] || '',
-                link: row[13] || ''
-              };
+              // Check if this might be the old format (without contact fields properly placed)
+              // If column 10 looks like a timestamp, assume old format
+              const isOldFormat = row[10] && row[10].includes('T') && row[10].includes('Z');
+              
+              let eventData;
+              if (isOldFormat) {
+                // Old format: columns shifted due to missing contact fields
+                console.log('Detected old format - timestamp in column 10');
+                eventData = {
+                  id: row[0] || `${row[1]}_${row[2]}_${index}`.replace(/\s+/g, '_'),
+                  title: row[1] || '',
+                  date: row[2] || '',
+                  endDate: row[3] || row[2] || '',
+                  time: (row[4] && row[5]) ? `${row[4]} - ${row[5]}` : '',
+                  startTime: row[4] || '9:00 AM',
+                  endTime: row[5] || '10:00 AM',
+                  location: row[6] || '',
+                  description: row[7] || '',
+                  category: row[8] || 'Community Service',
+                  organizer: row[9] || '',
+                  link: row[11] || '' // Link is in column 11 in old format
+                };
+              } else {
+                // New format: proper column order
+                eventData = {
+                  id: row[0] || `${row[1]}_${row[2]}_${index}`.replace(/\s+/g, '_'),
+                  title: row[1] || '',
+                  date: row[2] || '',
+                  endDate: row[3] || row[2] || '',
+                  time: (row[4] && row[5]) ? `${row[4]} - ${row[5]}` : '',
+                  startTime: row[4] || '9:00 AM',
+                  endTime: row[5] || '10:00 AM',
+                  location: row[6] || '',
+                  description: row[7] || '',
+                  category: row[8] || 'Community Service',
+                  organizer: row[9] || '',
+                  link: row[13] || '' // Link is in column 13 in new format
+                };
+              }
+              
+              return eventData;
             });
             
             console.log('Loaded', googleEvents.length, 'events from Google Sheets');
