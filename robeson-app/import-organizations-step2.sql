@@ -23,11 +23,13 @@ SELECT
   "Service Type",
   "Address",
   CASE 
-    WHEN "Latitude" = '' OR "Latitude" IS NULL THEN NULL 
+    WHEN "Latitude" = '' OR "Latitude" IS NULL OR TRIM("Latitude") = '' THEN NULL 
+    WHEN "Latitude" !~ '^-?[0-9]+\.?[0-9]*$' THEN NULL
     ELSE CAST("Latitude" AS DECIMAL(10,8))
   END,
   CASE 
-    WHEN "Longitude" = '' OR "Longitude" IS NULL THEN NULL 
+    WHEN "Longitude" = '' OR "Longitude" IS NULL OR TRIM("Longitude") = '' THEN NULL 
+    WHEN "Longitude" !~ '^-?[0-9]+\.?[0-9]*$' THEN NULL
     ELSE CAST("Longitude" AS DECIMAL(11,8))
   END,
   "Phone",

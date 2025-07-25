@@ -1,5 +1,9 @@
--- Step 1: Create temporary import table that matches your CSV headers exactly
-CREATE TEMP TABLE IF NOT EXISTS temp_import (
+-- Step 1: Drop existing temp table if it exists and recreate
+DROP TABLE IF EXISTS temp_import;
+
+-- Create temporary import table that matches your CSV headers exactly
+-- IMPORTANT: All columns are TEXT to handle empty values in CSV
+CREATE TABLE temp_import (
   "Agency" TEXT,
   "Category" TEXT,
   "Service Type" TEXT,
@@ -19,3 +23,4 @@ CREATE TEMP TABLE IF NOT EXISTS temp_import (
 );
 
 -- After running this, import your CSV into the temp_import table using Supabase's CSV import feature
+-- Make sure all columns are mapped as TEXT type during import
