@@ -684,9 +684,9 @@ export default function EventsPage() {
           </button>
           <button
             onClick={() => {
-              calendarRef.current?.getApi().changeView('timeGridDay');
               setCurrentView('timeGridDay');
               setIsAgendaView(false);
+              setRefreshKey(prev => prev + 1);
             }}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               currentView === 'timeGridDay' && !isAgendaView
@@ -698,9 +698,9 @@ export default function EventsPage() {
           </button>
           <button
             onClick={() => {
-              calendarRef.current?.getApi().changeView('timeGridWeek');
               setCurrentView('timeGridWeek');
               setIsAgendaView(false);
+              setRefreshKey(prev => prev + 1);
             }}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               currentView === 'timeGridWeek' && !isAgendaView
@@ -712,9 +712,9 @@ export default function EventsPage() {
           </button>
           <button
             onClick={() => {
-              calendarRef.current?.getApi().changeView('dayGridMonth');
               setCurrentView('dayGridMonth');
               setIsAgendaView(false);
+              setRefreshKey(prev => prev + 1);
             }}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               currentView === 'dayGridMonth' && !isAgendaView
@@ -795,9 +795,10 @@ export default function EventsPage() {
             <p className="text-center py-8">Loading events...</p>
           ) : (
             <FullCalendar
+              key={`${currentView}-${refreshKey}`}
               ref={calendarRef}
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              initialView={isMobile ? 'timeGridDay' : 'timeGridWeek'}
+              initialView={currentView}
               events={calendarEvents}
               eventClick={handleEventClick}
               headerToolbar={{
