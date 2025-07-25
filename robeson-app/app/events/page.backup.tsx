@@ -6,8 +6,6 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { supabase } from '@/lib/supabase';
-import type { EventRecord } from '@/lib/supabase';
 
 interface Event {
   id: string;
@@ -22,8 +20,6 @@ interface Event {
   category: string;
   organizer: string;
   link?: string;
-  contactEmail?: string;
-  contactPhone?: string;
 }
 
 interface CalendarEvent {
@@ -103,6 +99,28 @@ export default function EventsPage() {
       setIsAdmin(true);
     }
     
+    // Clean up old deleted events on mount
+    try {
+      const deletedEvents = JSON.parse(localStorage.getItem('deletedEvents') || '[]');
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      const activeDeletedEvents = deletedEvents.filter((d: any) => {
+        try {
+          const deletedAt = new Date(d.deletedAt);
+          return deletedAt > fiveMinutesAgo;
+        } catch {
+          return false;
+        }
+      });
+      // Only keep recent deletions, clear if too old
+      if (activeDeletedEvents.length === 0 && deletedEvents.length > 0) {
+        localStorage.removeItem('deletedEvents');
+      } else if (activeDeletedEvents.length !== deletedEvents.length) {
+        localStorage.setItem('deletedEvents', JSON.stringify(activeDeletedEvents));
+      }
+    } catch (error) {
+      console.error('Error cleaning up deleted events:', error);
+      localStorage.removeItem('deletedEvents');
+    }
     
     loadEvents();
   }, []);
@@ -110,50 +128,7 @@ export default function EventsPage() {
   const loadEvents = async () => {
     setLoading(true);
     try {
-      console.log('Loading events from Supabase...');
-      
-      // Load events from Supabase
-      const { data: supabaseEvents, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('date', { ascending: true });
-      
-      if (error) {
-        console.error('Error loading events from Supabase:', error);
-        throw error;
-      }
-      
-      if (supabaseEvents) {
-        console.log('Loaded', supabaseEvents.length, 'events from Supabase');
-        
-        // Convert Supabase events to our Event format
-        const events: Event[] = supabaseEvents.map((record: EventRecord) => ({
-          id: record.id,
-          title: record.title,
-          date: record.date,
-          endDate: record.end_date || record.date,
-          time: `${record.start_time} - ${record.end_time}`,
-          startTime: record.start_time,
-          endTime: record.end_time,
-          location: record.location,
-          description: record.description,
-          category: record.category,
-          organizer: record.organizer,
-          link: record.link || '',
-          contactEmail: record.contact_email || '',
-          contactPhone: record.contact_phone || ''
-        }));
-        
-        setEvents(events);
-        
-        // Convert to FullCalendar format
-        const fcEvents: CalendarEvent[] = events.map(event => convertToCalendarEvent(event));
-        setCalendarEvents(fcEvents);
-        return;
-      }
-      
-      // Fallback to Google Sheets if Supabase fails
-      console.log('Fallback: Loading from Google Sheets...');
+      // Try to load from Google Sheets first
       const sheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID;
       const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
       
@@ -322,28 +297,47 @@ export default function EventsPage() {
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    try {
-      // Delete from Supabase
-      const { error } = await supabase
-        .from('events')
-        .delete()
-        .eq('id', eventId);
-      
-      if (error) {
-        console.error('Error deleting event:', error);
-        alert('Error deleting event');
-        return;
+    // Remove from local state immediately for better UX
+    setEvents(prevEvents => prevEvents.filter(e => e.id !== eventId));
+    setCalendarEvents(prevCalendarEvents => prevCalendarEvents.filter(e => e.id !== eventId));
+    
+    // Store deletion in localStorage to persist across refreshes
+    const deletedEvents = JSON.parse(localStorage.getItem('deletedEvents') || '[]');
+    deletedEvents.push({ id: eventId, deletedAt: new Date().toISOString() });
+    localStorage.setItem('deletedEvents', JSON.stringify(deletedEvents));
+    
+    // Try to delete from Google Sheets
+    const scriptUrl = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL;
+    if (scriptUrl) {
+      try {
+        await fetch(scriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'delete',
+            id: eventId
+          })
+        });
+        
+        console.log('Delete request sent for event ID:', eventId);
+        alert('Event deleted');
+        
+        // Clean up old deletions after 5 minutes
+        setTimeout(() => {
+          const currentDeleted = JSON.parse(localStorage.getItem('deletedEvents') || '[]');
+          const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+          const filtered = currentDeleted.filter((d: any) => new Date(d.deletedAt) > fiveMinutesAgo);
+          localStorage.setItem('deletedEvents', JSON.stringify(filtered));
+        }, 5 * 60 * 1000);
+      } catch (error) {
+        console.error('Error deleting from Google Sheets:', error);
+        alert('Event deleted');
       }
-      
-      // Remove from local state after successful deletion
-      setEvents(prevEvents => prevEvents.filter(e => e.id !== eventId));
-      setCalendarEvents(prevCalendarEvents => prevCalendarEvents.filter(e => e.id !== eventId));
-      
-      console.log('Event deleted successfully:', eventId);
+    } else {
       alert('Event deleted');
-    } catch (error) {
-      console.error('Error deleting event:', error);
-      alert('Error deleting event');
     }
   };
 
@@ -393,6 +387,36 @@ export default function EventsPage() {
     
     console.log('Event to add:', eventToAdd);
 
+    // Add to local state for immediate display
+    if (isEditing) {
+      // Update existing event
+      setEvents(prevEvents => prevEvents.map(e => e.id === id ? eventToAdd : e));
+    } else {
+      // Add new event
+      setEvents(prevEvents => {
+        const updated = [...prevEvents, eventToAdd];
+        console.log('Previous events:', prevEvents);
+        console.log('Adding event:', eventToAdd);
+        console.log('Updated events:', updated);
+        return updated;
+      });
+    }
+    
+    // Convert to FullCalendar format
+    const fcEvent = convertToCalendarEvent(eventToAdd);
+    if (isEditing) {
+      setCalendarEvents(prevCalendarEvents => prevCalendarEvents.map(e => e.id === id ? fcEvent : e));
+    } else {
+      setCalendarEvents(prevCalendarEvents => {
+        const updated = [...prevCalendarEvents, fcEvent];
+        console.log('Updated calendar events:', updated);
+        return updated;
+      });
+    }
+    
+    // Force agenda view to re-render
+    setRefreshKey(prev => prev + 1);
+
     // Reset form and close modal immediately for better UX
     setShowSubmitModal(false);
     setIsEditing(false);
@@ -412,82 +436,65 @@ export default function EventsPage() {
       link: ''
     });
 
-    try {
-      if (isEditing && editingEventId) {
-        // Update existing event in Supabase
-        const { error } = await supabase
-          .from('events')
-          .update({
-            title: eventToAdd.title,
-            date: eventToAdd.date,
-            end_date: eventToAdd.endDate,
-            start_time: eventToAdd.startTime || '',
-            end_time: eventToAdd.endTime || '',
-            location: eventToAdd.location,
-            description: eventToAdd.description,
-            category: eventToAdd.category,
-            organizer: eventToAdd.organizer,
-            contact_email: eventToAdd.contactEmail || null,
-            contact_phone: eventToAdd.contactPhone || null,
-            link: eventToAdd.link || null
-          })
-          .eq('id', editingEventId);
+    // Check if Google Script URL is configured
+    const scriptUrl = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL;
+    
+    // Submit to Google Sheets in background
+    if (scriptUrl) {
+      try {
+        // Debug what we're sending
+        const dataToSend = {
+          action: isEditing ? 'update' : 'add',
+          id: eventToAdd.id,
+          title: eventToAdd.title,
+          date: eventToAdd.date,
+          endDate: eventToAdd.endDate || eventToAdd.date,
+          startTime: eventToAdd.startTime || '',
+          endTime: eventToAdd.endTime || '',
+          location: eventToAdd.location,
+          description: eventToAdd.description,
+          category: eventToAdd.category,
+          organizer: eventToAdd.organizer,
+          contactEmail: '', // Add if needed
+          contactPhone: '',  // Add if needed
+          link: eventToAdd.link || ''
+        };
         
-        if (error) throw error;
+        console.log('Sending to Google Sheets:', dataToSend);
         
-        // Update local state
-        setEvents(prevEvents => prevEvents.map(e => e.id === editingEventId ? eventToAdd : e));
-        const fcEvent = convertToCalendarEvent(eventToAdd);
-        setCalendarEvents(prevCalendarEvents => prevCalendarEvents.map(e => e.id === editingEventId ? fcEvent : e));
+        // Send to Google Sheets via Apps Script
+        const response = await fetch(scriptUrl, {
+          method: 'POST',
+          mode: 'no-cors', // Required for Google Apps Script
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(dataToSend)
+        });
         
-        alert('Event updated');
-      } else {
-        // Insert new event into Supabase
-        const { data, error } = await supabase
-          .from('events')
-          .insert([{
-            title: eventToAdd.title,
-            date: eventToAdd.date,
-            end_date: eventToAdd.endDate,
-            start_time: eventToAdd.startTime || '',
-            end_time: eventToAdd.endTime || '',
-            location: eventToAdd.location,
-            description: eventToAdd.description,
-            category: eventToAdd.category,
-            organizer: eventToAdd.organizer,
-            contact_email: eventToAdd.contactEmail || null,
-            contact_phone: eventToAdd.contactPhone || null,
-            link: eventToAdd.link || null
-          }])
-          .select()
-          .single();
+        // Since we're using no-cors, we can't read the response
+        // Event already added to UI, just show success
+        console.log(isEditing ? 'Event updated in Google Sheets' : 'Event submitted to Google Sheets');
+        alert(isEditing ? 'Event updated' : 'Event added');
         
-        if (error) throw error;
+      } catch (error) {
+        console.error('Error submitting to Google Sheets:', error);
+        alert('Event saved');
         
-        // Update event with Supabase-generated ID
-        if (data) {
-          eventToAdd.id = data.id;
-          setEvents(prevEvents => [...prevEvents, eventToAdd]);
-          const fcEvent = convertToCalendarEvent(eventToAdd);
-          setCalendarEvents(prevCalendarEvents => [...prevCalendarEvents, fcEvent]);
-        }
-        
-        alert('Event added');
+        // Fall back to local storage
+        const pendingEvents = JSON.parse(sessionStorage.getItem('pendingEvents') || '[]');
+        pendingEvents.push(eventToAdd);
+        sessionStorage.setItem('pendingEvents', JSON.stringify(pendingEvents));
       }
+    } else {
+      // No Google Script URL configured - use local storage
+      const pendingEvents = JSON.parse(sessionStorage.getItem('pendingEvents') || '[]');
+      pendingEvents.push(eventToAdd);
+      sessionStorage.setItem('pendingEvents', JSON.stringify(pendingEvents));
       
-      // Force agenda view to re-render
-      setRefreshKey(prev => prev + 1);
-      
-    } catch (error) {
-      console.error('Error saving event:', error);
-      alert('Error saving event');
-      
-      // Show the modal again so user doesn't lose their data
-      setShowSubmitModal(true);
-      setIsEditing(isEditing);
-      setEditingEventId(editingEventId);
+      console.log('Event saved locally - Google Sheets not configured');
+      alert('Event saved');
     }
-
   };
 
   // Get category color

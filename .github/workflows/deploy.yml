@@ -38,6 +38,8 @@ jobs:
           NEXT_PUBLIC_GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
           NEXT_PUBLIC_GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           NEXT_PUBLIC_GOOGLE_SCRIPT_URL: ${{ secrets.GOOGLE_SCRIPT_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           cd robeson-app
           npm run build
