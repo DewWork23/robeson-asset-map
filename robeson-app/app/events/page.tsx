@@ -800,34 +800,64 @@ export default function EventsPage() {
                       {dayEvents.map(event => (
                         <div 
                           key={event.id}
-                          onClick={() => {
-                            setSelectedEvent(event);
-                            setShowEventModal(true);
-                          }}
-                          className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                          className="border-l-4 p-4 bg-gray-50 rounded-lg"
+                          style={{ borderLeftColor: getCategoryColor(event.category) }}
                         >
-                          <div 
-                            className="w-1 h-16 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: getCategoryColor(event.category) }}
-                          />
-                          <div className="flex-grow">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-medium text-gray-800">{event.title}</h4>
-                              <span className="text-sm text-gray-500">{event.time}</span>
+                          <div className="mb-3">
+                            <div className="flex flex-wrap items-baseline gap-3 mb-2">
+                              <h4 className="text-xl font-semibold text-gray-800">{event.title}</h4>
+                              <span className="text-base text-gray-600">{event.time}</span>
                             </div>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-base text-gray-700 mb-2">
                               <span className="font-medium">Location:</span> {event.location}
                             </p>
-                            <div className="flex items-center gap-2 mt-1">
+                            <p className="text-base text-gray-700 mb-2">
+                              <span className="font-medium">Organizer:</span> {event.organizer}
+                            </p>
+                            {event.description && (
+                              <div className="mb-2">
+                                <p className="font-medium text-gray-700 mb-1">Description:</p>
+                                <p className="text-base text-gray-600 whitespace-pre-wrap">{event.description}</p>
+                              </div>
+                            )}
+                            {event.link && (
+                              <p className="text-base text-gray-700 mb-2">
+                                <span className="font-medium">Link:</span>{' '}
+                                <a 
+                                  href={(() => {
+                                    const link = event.link.trim();
+                                    if (link.match(/^https?:\/\//i)) return link;
+                                    if (link.startsWith('//')) return `https:${link}`;
+                                    return `https://${link}`;
+                                  })()} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 underline hover:text-blue-800"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {event.link.includes('zoom') ? 'Join Zoom Meeting' : event.link}
+                                </a>
+                              </p>
+                            )}
+                            <div className="flex items-center gap-3 mt-3">
                               <span 
-                                className="text-xs px-2 py-1 rounded-full text-white"
+                                className="text-sm px-3 py-1 rounded-full text-white font-medium"
                                 style={{ backgroundColor: getCategoryColor(event.category) }}
                               >
                                 {event.category}
                               </span>
-                              <span className="text-xs text-gray-500">
-                                Organized by {event.organizer}
-                              </span>
+                              {isAdmin && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedEvent(event);
+                                    setShowEventModal(true);
+                                  }}
+                                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                                >
+                                  Edit/Delete
+                                </button>
+                              )}
                             </div>
                           </div>
                         </div>
