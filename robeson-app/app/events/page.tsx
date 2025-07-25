@@ -904,7 +904,9 @@ export default function EventsPage() {
                   <p>
                     <strong>Link:</strong>{' '}
                     <a 
-                      href={selectedEvent.link} 
+                      href={selectedEvent.link.startsWith('http://') || selectedEvent.link.startsWith('https://') 
+                        ? selectedEvent.link 
+                        : `https://${selectedEvent.link}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-blue-500 underline hover:text-blue-600"
