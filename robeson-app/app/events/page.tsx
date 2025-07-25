@@ -111,7 +111,12 @@ export default function EventsPage() {
           return false;
         }
       });
-      localStorage.setItem('deletedEvents', JSON.stringify(activeDeletedEvents));
+      // Only keep recent deletions, clear if too old
+      if (activeDeletedEvents.length === 0 && deletedEvents.length > 0) {
+        localStorage.removeItem('deletedEvents');
+      } else if (activeDeletedEvents.length !== deletedEvents.length) {
+        localStorage.setItem('deletedEvents', JSON.stringify(activeDeletedEvents));
+      }
     } catch (error) {
       console.error('Error cleaning up deleted events:', error);
       localStorage.removeItem('deletedEvents');
@@ -151,8 +156,10 @@ export default function EventsPage() {
               
               // Map based on the actual column order in the sheet
               // Assuming: Event ID, Title, Date, End Date, Start Time, End Time, Location, Description, Category, Organizer, Contact Email, Contact Phone, Submitted At, Link
+              // Generate consistent ID based on title and date if no ID exists
+              const eventId = row[0] || `${row[1]}_${row[2]}_${index}`.replace(/\s+/g, '_');
               return {
-                id: row[0] || (index + 1).toString(),
+                id: eventId,
                 title: row[1] || '',
                 date: row[2] || '',
                 endDate: row[3] || row[2] || '',
