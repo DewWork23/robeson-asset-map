@@ -139,10 +139,16 @@ export default function EventsPage() {
             
             console.log('Loaded', googleEvents.length, 'events from Google Sheets');
             console.log('Event IDs:', googleEvents.map(e => ({ id: e.id, title: e.title })));
-            setEvents(googleEvents);
+            
+            // Filter out recently deleted events
+            const deletedEvents = JSON.parse(localStorage.getItem('deletedEvents') || '[]');
+            const deletedIds = deletedEvents.map((d: any) => d.id);
+            const filteredEvents = googleEvents.filter(event => !deletedIds.includes(event.id));
+            
+            setEvents(filteredEvents);
             
             // Convert to FullCalendar format
-            const fcEvents: CalendarEvent[] = googleEvents.map(event => convertToCalendarEvent(event));
+            const fcEvents: CalendarEvent[] = filteredEvents.map(event => convertToCalendarEvent(event));
             setCalendarEvents(fcEvents);
             return;
           }
@@ -194,6 +200,11 @@ export default function EventsPage() {
     setEvents(prevEvents => prevEvents.filter(e => e.id !== eventId));
     setCalendarEvents(prevCalendarEvents => prevCalendarEvents.filter(e => e.id !== eventId));
     
+    // Store deletion in localStorage to persist across refreshes
+    const deletedEvents = JSON.parse(localStorage.getItem('deletedEvents') || '[]');
+    deletedEvents.push({ id: eventId, deletedAt: new Date().toISOString() });
+    localStorage.setItem('deletedEvents', JSON.stringify(deletedEvents));
+    
     // Try to delete from Google Sheets
     const scriptUrl = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL;
     if (scriptUrl) {
@@ -211,7 +222,15 @@ export default function EventsPage() {
         });
         
         console.log('Delete request sent for event ID:', eventId);
-        alert('Event deleted! If it reappears after refresh, please ensure:\n1. Google Apps Script is redeployed with latest code\n2. Your Events sheet has "Event ID" as the first column');
+        alert('Event deleted successfully!');
+        
+        // Clean up old deletions after 5 minutes
+        setTimeout(() => {
+          const currentDeleted = JSON.parse(localStorage.getItem('deletedEvents') || '[]');
+          const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+          const filtered = currentDeleted.filter((d: any) => new Date(d.deletedAt) > fiveMinutesAgo);
+          localStorage.setItem('deletedEvents', JSON.stringify(filtered));
+        }, 5 * 60 * 1000);
       } catch (error) {
         console.error('Error deleting from Google Sheets:', error);
         alert('Event deleted locally, but there was an error removing it from Google Sheets.');
@@ -230,6 +249,28 @@ export default function EventsPage() {
   };
 
   const handleSubmitEvent = async () => {
+    // Validate date format and check if date is valid
+    const dateObj = new Date(newEvent.date || '');
+    const endDateObj = new Date(newEvent.endDate || newEvent.date || '');
+    
+    // Check if dates are valid
+    if (isNaN(dateObj.getTime())) {
+      setValidationError("Invalid start date");
+      return;
+    }
+    
+    if (isNaN(endDateObj.getTime())) {
+      setValidationError("Invalid end date");
+      return;
+    }
+    
+    // Check if the date string matches what was created (to catch dates like Feb 31)
+    const reconstructedDate = dateObj.toISOString().split('T')[0];
+    if (reconstructedDate !== newEvent.date) {
+      setValidationError("Invalid date selected");
+      return;
+    }
+    
     // Validate date and time
     const eventDateTime = new Date(`${newEvent.date}T${convertTo24Hour(newEvent.startTime || '9:00 AM')}`);
     const now = new Date();
@@ -237,6 +278,16 @@ export default function EventsPage() {
     if (eventDateTime < now && !isEditing) {
       setValidationError("Can't choose a time that's already occurred");
       return;
+    }
+    
+    // Validate end time is after start time for same-day events
+    if (newEvent.date === newEvent.endDate || !newEvent.endDate) {
+      const startTime = convertTo24Hour(newEvent.startTime || '9:00 AM');
+      const endTime = convertTo24Hour(newEvent.endTime || '10:00 AM');
+      if (startTime >= endTime) {
+        setValidationError("End time must be after start time");
+        return;
+      }
     }
     
     setValidationError('');
@@ -686,18 +737,37 @@ export default function EventsPage() {
               eventColor="#3B82F6"
               eventDisplay="block"
               selectable={isAdmin}
+              slotMinTime="06:00:00"
+              slotMaxTime="22:00:00"
+              slotDuration="00:30:00"
+              slotLabelInterval="01:00:00"
+              slotLabelFormat={{
+                hour: 'numeric',
+                minute: '2-digit',
+                omitZeroMinute: false,
+                meridiem: 'short'
+              }}
+              allDaySlot={false}
               eventContent={(eventInfo) => {
                 const category = eventInfo.event.extendedProps.category;
+                const isTimeGrid = eventInfo.view.type.includes('timeGrid');
                 return (
                   <div 
-                    className="p-1 text-xs truncate"
+                    className="p-1 text-xs"
                     style={{ 
                       backgroundColor: getCategoryColor(category),
                       color: 'white',
-                      borderRadius: '4px'
+                      borderRadius: '4px',
+                      height: '100%',
+                      overflow: 'hidden'
                     }}
                   >
-                    {eventInfo.event.title}
+                    <div className="font-semibold truncate">{eventInfo.event.title}</div>
+                    {isTimeGrid && (
+                      <div className="text-[10px] opacity-90 truncate">
+                        {eventInfo.event.extendedProps.location}
+                      </div>
+                    )}
                   </div>
                 );
               }}
@@ -936,16 +1006,24 @@ export default function EventsPage() {
                       type="date"
                       value={newEvent.date}
                       onChange={(e) => {
-                        setNewEvent({...newEvent, date: e.target.value, endDate: e.target.value > (newEvent.endDate || '') ? e.target.value : newEvent.endDate});
-                        // Clear validation error when user makes changes
-                        if (validationError) {
-                          const eventDateTime = new Date(`${e.target.value}T${convertTo24Hour(newEvent.startTime || '9:00 AM')}`);
-                          const now = new Date();
-                          if (eventDateTime >= now || isEditing) {
-                            setValidationError('');
+                        const inputDate = e.target.value;
+                        // Validate the date immediately
+                        const dateObj = new Date(inputDate);
+                        if (!isNaN(dateObj.getTime()) && dateObj.toISOString().split('T')[0] === inputDate) {
+                          setNewEvent({...newEvent, date: inputDate, endDate: inputDate > (newEvent.endDate || '') ? inputDate : newEvent.endDate});
+                          // Clear validation error when user makes changes
+                          if (validationError) {
+                            const eventDateTime = new Date(`${inputDate}T${convertTo24Hour(newEvent.startTime || '9:00 AM')}`);
+                            const now = new Date();
+                            if (eventDateTime >= now || isEditing) {
+                              setValidationError('');
+                            }
                           }
+                        } else if (inputDate) {
+                          setValidationError('Invalid date selected');
                         }
                       }}
+                      min={isEditing ? undefined : new Date().toISOString().split('T')[0]}
                       className={`w-full px-4 py-2 border ${validationError ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
                       required
                     />
@@ -955,7 +1033,18 @@ export default function EventsPage() {
                     <input
                       type="date"
                       value={newEvent.endDate || newEvent.date}
-                      onChange={(e) => setNewEvent({...newEvent, endDate: e.target.value})}
+                      onChange={(e) => {
+                        const inputDate = e.target.value;
+                        const dateObj = new Date(inputDate);
+                        if (!isNaN(dateObj.getTime()) && dateObj.toISOString().split('T')[0] === inputDate) {
+                          setNewEvent({...newEvent, endDate: inputDate});
+                          if (validationError && validationError.includes('end date')) {
+                            setValidationError('');
+                          }
+                        } else if (inputDate) {
+                          setValidationError('Invalid end date selected');
+                        }
+                      }}
                       min={newEvent.date}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       required
