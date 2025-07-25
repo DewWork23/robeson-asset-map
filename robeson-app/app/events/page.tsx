@@ -224,6 +224,12 @@ export default function EventsPage() {
             console.log('Currently deleted event IDs:', deletedIds);
             
             const filteredEvents = googleEvents.filter(event => {
+              // Check if event has no ID - this is a problem
+              if (!event.id) {
+                console.warn('Event has no ID, will not persist across refreshes:', event.title);
+                // Still include it but warn
+              }
+              
               // Check if deleted
               if (deletedIds.includes(event.id)) {
                 console.log('Filtering out deleted event:', event.id, event.title);
