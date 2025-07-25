@@ -643,24 +643,19 @@ export default function EventsPage() {
             .admin-calendar .fc-daygrid-day-frame {
               min-height: 80px;
             }
-            /* Hide all-day row completely */
-            .fc-timegrid-axis-cushion,
-            .fc-timegrid-all-day-events,
-            .fc-timegrid-divider,
-            .fc-scrollgrid-shrink-cushion,
-            .fc-timegrid-axis-frame:first-child {
+            /* Style the time grid */
+            .fc-timegrid-slot-label {
+              font-size: 0.875rem;
+              color: #4B5563;
+            }
+            .fc-timegrid-axis {
+              width: 60px;
+            }
+            /* Remove all-day section but keep time labels */
+            .fc-timegrid-all-day-events {
               display: none !important;
             }
-            .fc-timegrid .fc-scrollgrid-section:has(.fc-timegrid-divider),
-            .fc-timegrid .fc-scrollgrid-section:first-of-type table {
-              display: none !important;
-            }
-            .fc-timegrid .fc-scrollgrid-section:nth-child(2) {
-              min-height: 0 !important;
-              height: 0 !important;
-            }
-            /* Hide the all-day text specifically */
-            .fc-timegrid-axis-cushion:contains("all-day") {
+            .fc-timegrid-divider {
               display: none !important;
             }
             /* Mobile-specific styles */
@@ -686,7 +681,10 @@ export default function EventsPage() {
                 font-size: 0.75rem;
               }
               .fc-timegrid-slot-label {
-                font-size: 0.75rem;
+                font-size: 0.7rem;
+              }
+              .fc-timegrid-axis {
+                width: 45px;
               }
             }
           `}</style>
@@ -723,7 +721,7 @@ export default function EventsPage() {
               slotLabelFormat={{
                 hour: 'numeric',
                 minute: '2-digit',
-                omitZeroMinute: false,
+                omitZeroMinute: true,
                 meridiem: 'short'
               }}
               allDaySlot={false}
