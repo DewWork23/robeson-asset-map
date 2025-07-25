@@ -968,7 +968,23 @@ export default function EventsPage() {
               <div className="space-y-3 text-gray-700">
                 <p><strong>Date:</strong> {new Date(selectedEvent.date).toLocaleDateString()}{selectedEvent.endDate && selectedEvent.endDate !== selectedEvent.date ? ` - ${new Date(selectedEvent.endDate).toLocaleDateString()}` : ''}</p>
                 <p><strong>Time:</strong> {selectedEvent.time}</p>
-                <p><strong>Location:</strong> {selectedEvent.location}</p>
+                <div>
+                  <strong>Location:</strong> {selectedEvent.location}
+                  {selectedEvent.location && (
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(selectedEvent.location)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-2 inline-flex items-center text-blue-500 hover:text-blue-600 text-sm"
+                    >
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Get Directions
+                    </a>
+                  )}
+                </div>
                 <div>
                   <strong>Description:</strong>
                   <div className="mt-1 whitespace-pre-wrap">{selectedEvent.description}</div>
