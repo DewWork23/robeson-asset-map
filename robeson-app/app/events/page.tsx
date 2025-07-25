@@ -249,45 +249,16 @@ export default function EventsPage() {
   };
 
   const handleSubmitEvent = async () => {
-    // Validate date format and check if date is valid
-    const dateObj = new Date(newEvent.date || '');
-    const endDateObj = new Date(newEvent.endDate || newEvent.date || '');
-    
-    // Check if dates are valid
-    if (isNaN(dateObj.getTime())) {
-      setValidationError("Invalid start date");
+    // Since we're doing real-time validation, just do a final check
+    if (validationError) {
       return;
     }
     
-    if (isNaN(endDateObj.getTime())) {
-      setValidationError("Invalid end date");
+    // Final validation to ensure all required fields are filled
+    if (!newEvent.title || !newEvent.date || !newEvent.startTime || !newEvent.endTime || 
+        !newEvent.location || !newEvent.organizer || !newEvent.description) {
+      setValidationError('Please fill in all required fields');
       return;
-    }
-    
-    // Check if the date string matches what was created (to catch dates like Feb 31)
-    const reconstructedDate = dateObj.toISOString().split('T')[0];
-    if (reconstructedDate !== newEvent.date) {
-      setValidationError("Invalid date selected");
-      return;
-    }
-    
-    // Validate date and time
-    const eventDateTime = new Date(`${newEvent.date}T${convertTo24Hour(newEvent.startTime || '9:00 AM')}`);
-    const now = new Date();
-    
-    if (eventDateTime < now && !isEditing) {
-      setValidationError("Can't choose a time that's already occurred");
-      return;
-    }
-    
-    // Validate end time is after start time for same-day events
-    if (newEvent.date === newEvent.endDate || !newEvent.endDate) {
-      const startTime = convertTo24Hour(newEvent.startTime || '9:00 AM');
-      const endTime = convertTo24Hour(newEvent.endTime || '10:00 AM');
-      if (startTime >= endTime) {
-        setValidationError("End time must be after start time");
-        return;
-      }
     }
     
     setValidationError('');
@@ -437,14 +408,22 @@ export default function EventsPage() {
   // Get upcoming events sorted by date
   const getUpcomingEvents = () => {
     console.log('getUpcomingEvents called. Current events:', events);
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
     
     const upcoming = events
       .filter(event => {
-        // Compare date strings directly to avoid timezone issues
-        console.log('Checking event:', event.title, 'Event date:', event.date, 'Today:', todayStr, 'Is upcoming:', event.date >= todayStr);
-        return event.date >= todayStr;
+        // For today's events, check the actual time
+        if (event.date === todayStr) {
+          // Parse the event's end time
+          const eventEndTime = event.endTime || event.time.split(' - ')[1] || '11:59 PM';
+          const eventEndDateTime = new Date(`${event.date}T${convertTo24Hour(eventEndTime.trim())}`);
+          console.log('Today event:', event.title, 'End time:', eventEndDateTime, 'Now:', now, 'Is upcoming:', eventEndDateTime > now);
+          return eventEndDateTime > now;
+        }
+        // For future dates, include them
+        console.log('Checking event:', event.title, 'Event date:', event.date, 'Today:', todayStr, 'Is upcoming:', event.date > todayStr);
+        return event.date > todayStr;
       })
       .sort((a, b) => a.date.localeCompare(b.date));
     
@@ -1007,20 +986,41 @@ export default function EventsPage() {
                       value={newEvent.date}
                       onChange={(e) => {
                         const inputDate = e.target.value;
+                        setNewEvent({...newEvent, date: inputDate});
+                        
                         // Validate the date immediately
-                        const dateObj = new Date(inputDate);
-                        if (!isNaN(dateObj.getTime()) && dateObj.toISOString().split('T')[0] === inputDate) {
-                          setNewEvent({...newEvent, date: inputDate, endDate: inputDate > (newEvent.endDate || '') ? inputDate : newEvent.endDate});
-                          // Clear validation error when user makes changes
-                          if (validationError) {
+                        if (inputDate) {
+                          const dateObj = new Date(inputDate);
+                          
+                          // Check if date is valid
+                          if (isNaN(dateObj.getTime())) {
+                            setValidationError('Invalid date format');
+                            return;
+                          }
+                          
+                          // Check if the date string matches (catches dates like Feb 31)
+                          if (dateObj.toISOString().split('T')[0] !== inputDate) {
+                            setValidationError('Invalid date selected');
+                            return;
+                          }
+                          
+                          // Check if date is in the past (for new events only)
+                          if (!isEditing) {
                             const eventDateTime = new Date(`${inputDate}T${convertTo24Hour(newEvent.startTime || '9:00 AM')}`);
                             const now = new Date();
-                            if (eventDateTime >= now || isEditing) {
-                              setValidationError('');
+                            if (eventDateTime < now) {
+                              setValidationError("Can't select a past date/time");
+                              return;
                             }
                           }
-                        } else if (inputDate) {
-                          setValidationError('Invalid date selected');
+                          
+                          // Update end date if needed
+                          if (inputDate > (newEvent.endDate || '')) {
+                            setNewEvent(prev => ({...prev, endDate: inputDate}));
+                          }
+                          
+                          // Clear any existing validation errors
+                          setValidationError('');
                         }
                       }}
                       min={isEditing ? undefined : new Date().toISOString().split('T')[0]}
@@ -1059,14 +1059,22 @@ export default function EventsPage() {
                       <select
                         value={newEvent.startTime}
                         onChange={(e) => {
-                          setNewEvent({...newEvent, startTime: e.target.value});
-                          // Clear validation error when user makes changes
-                          if (validationError) {
-                            const eventDateTime = new Date(`${newEvent.date}T${convertTo24Hour(e.target.value)}`);
+                          const newStartTime = e.target.value;
+                          setNewEvent({...newEvent, startTime: newStartTime});
+                          
+                          // Validate time for today's date
+                          if (!isEditing && newEvent.date === new Date().toISOString().split('T')[0]) {
+                            const eventDateTime = new Date(`${newEvent.date}T${convertTo24Hour(newStartTime)}`);
                             const now = new Date();
-                            if (eventDateTime >= now || isEditing) {
-                              setValidationError('');
+                            if (eventDateTime < now) {
+                              setValidationError("Can't select a time that has already passed");
+                              return;
                             }
+                          }
+                          
+                          // Clear validation error if valid
+                          if (validationError && !validationError.includes('end time')) {
+                            setValidationError('');
                           }
                         }}
                         className={`w-full px-4 py-2 border ${validationError ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
@@ -1081,7 +1089,25 @@ export default function EventsPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
                       <select
                         value={newEvent.endTime}
-                        onChange={(e) => setNewEvent({...newEvent, endTime: e.target.value})}
+                        onChange={(e) => {
+                          const newEndTime = e.target.value;
+                          setNewEvent({...newEvent, endTime: newEndTime});
+                          
+                          // Validate end time is after start time for same-day events
+                          if (newEvent.date === newEvent.endDate || !newEvent.endDate) {
+                            const startTime = convertTo24Hour(newEvent.startTime || '9:00 AM');
+                            const endTime = convertTo24Hour(newEndTime);
+                            if (startTime >= endTime) {
+                              setValidationError('End time must be after start time');
+                              return;
+                            }
+                          }
+                          
+                          // Clear validation error if it was about end time
+                          if (validationError && validationError.includes('end time')) {
+                            setValidationError('');
+                          }
+                        }}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                         required
                       >
