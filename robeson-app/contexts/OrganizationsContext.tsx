@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Organization } from '@/types/organization';
 import { loadOrganizationsFromGoogleSheets } from '@/lib/googleSheetsParser';
+import { supabase } from '@/lib/supabase';
+import type { OrganizationRecord } from '@/lib/supabase';
 
 interface OrganizationsContextType {
   organizations: Organization[];
@@ -26,11 +28,61 @@ export function OrganizationsProvider({ children }: OrganizationsProviderProps) 
     try {
       setLoading(true);
       setError(null);
-      const data = await loadOrganizationsFromGoogleSheets();
-      setOrganizations(data);
+      
+      console.log('Loading organizations from Supabase...');
+      
+      // Try to load from Supabase first
+      const { data: supabaseOrgs, error: supabaseError } = await supabase
+        .from('organizations')
+        .select('*')
+        .order('organization_name');
+      
+      if (supabaseError) {
+        console.error('Error loading from Supabase:', supabaseError);
+        throw supabaseError;
+      }
+      
+      if (supabaseOrgs && supabaseOrgs.length > 0) {
+        console.log('Loaded', supabaseOrgs.length, 'organizations from Supabase');
+        
+        // Convert Supabase records to Organization format
+        const organizations: Organization[] = supabaseOrgs.map((record: OrganizationRecord) => ({
+          id: record.id,
+          organizationName: record.organization_name,
+          category: record.category,
+          serviceType: record.service_type || '',
+          address: record.address || '',
+          phone: record.phone || '',
+          email: record.email || '',
+          website: record.website || '',
+          hours: record.hours || '',
+          servicesOffered: record.services_offered || '',
+          costPayment: record.cost_payment || '',
+          description: record.description || '',
+          crisisService: record.crisis_service,
+          languages: record.languages || '',
+          specialNotes: record.special_notes || '',
+          latitude: record.latitude || undefined,
+          longitude: record.longitude || undefined
+        }));
+        
+        setOrganizations(organizations);
+      } else {
+        // Fallback to Google Sheets if Supabase is empty
+        console.log('Supabase empty, falling back to Google Sheets...');
+        const data = await loadOrganizationsFromGoogleSheets();
+        setOrganizations(data);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load organizations');
-      console.error('Error loading organizations:', err);
+      // Final fallback to Google Sheets if Supabase fails
+      console.error('Supabase failed, falling back to Google Sheets:', err);
+      try {
+        const data = await loadOrganizationsFromGoogleSheets();
+        setOrganizations(data);
+      } catch (fallbackErr) {
+        setError(fallbackErr instanceof Error ? fallbackErr.message : 'Failed to load organizations');
+        console.error('Error loading organizations from both sources:', fallbackErr);
+      }
     } finally {
       setLoading(false);
     }

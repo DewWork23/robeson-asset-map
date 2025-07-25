@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Organization } from '@/types/organization';
-import { loadOrganizationsFromGoogleSheets, filterOrganizations } from '@/lib/googleSheetsParser';
+import { filterOrganizations } from '@/lib/googleSheetsParser';
+import { useOrganizations } from '@/contexts/OrganizationsContext';
 import OrganizationCard from '@/components/OrganizationCard';
 import SimpleSearchBar from '@/components/SimpleSearchBar';
 import OrganizationMap from '@/components/OrganizationMap';
@@ -13,10 +14,9 @@ import FeedbackBanner from '@/components/FeedbackBanner';
 
 export default function NearMePage() {
   const router = useRouter();
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const { organizations, loading } = useOrganizations();
   const [filteredOrgs, setFilteredOrgs] = useState<Organization[]>([]);
   const [searchTerm, setSearchTerm] = useState('📍 Near me');
-  const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -37,19 +37,6 @@ export default function NearMePage() {
     } else {
       setLocationError('Geolocation is not supported by your browser.');
     }
-
-    // Load organizations
-    async function loadData() {
-      try {
-        const orgs = await loadOrganizationsFromGoogleSheets();
-        setOrganizations(orgs);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error loading organizations:', error);
-        setLoading(false);
-      }
-    }
-    loadData();
   }, []);
 
   useEffect(() => {
