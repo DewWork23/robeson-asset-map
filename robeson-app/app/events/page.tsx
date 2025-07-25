@@ -19,6 +19,7 @@ interface Event {
   description: string;
   category: string;
   organizer: string;
+  link?: string;
 }
 
 interface CalendarEvent {
@@ -34,6 +35,7 @@ interface CalendarEvent {
     description: string;
     category: string;
     organizer: string;
+    link?: string;
   };
 }
 
@@ -68,7 +70,8 @@ export default function EventsPage() {
     location: '',
     description: '',
     category: 'Community Service',
-    organizer: ''
+    organizer: '',
+    link: ''
   });
 
   const categories = ['Community Service', 'Health', 'Career', 'Education', 'Recreation'];
@@ -128,7 +131,7 @@ export default function EventsPage() {
               }
               
               // Map based on the actual column order in the sheet
-              // Assuming: Event ID, Title, Date, End Date, Start Time, End Time, Location, Description, Category, Organizer, Contact Email, Contact Phone, Submitted At
+              // Assuming: Event ID, Title, Date, End Date, Start Time, End Time, Location, Description, Category, Organizer, Contact Email, Contact Phone, Submitted At, Link
               return {
                 id: row[0] || (index + 1).toString(),
                 title: row[1] || '',
@@ -140,7 +143,8 @@ export default function EventsPage() {
                 location: row[6] || '',
                 description: row[7] || '',
                 category: row[8] || 'Community Service',
-                organizer: row[9] || ''
+                organizer: row[9] || '',
+                link: row[13] || ''
               };
             });
             
@@ -241,7 +245,7 @@ export default function EventsPage() {
         });
         
         console.log('Delete request sent for event ID:', eventId);
-        alert('Event deleted successfully!');
+        alert('Event deleted');
         
         // Clean up old deletions after 5 minutes
         setTimeout(() => {
@@ -252,10 +256,10 @@ export default function EventsPage() {
         }, 5 * 60 * 1000);
       } catch (error) {
         console.error('Error deleting from Google Sheets:', error);
-        alert('Event deleted locally, but there was an error removing it from Google Sheets.');
+        alert('Event deleted');
       }
     } else {
-      alert('Event deleted locally. Google Sheets integration not configured.');
+      alert('Event deleted');
     }
   };
 
@@ -299,7 +303,8 @@ export default function EventsPage() {
       category: newEvent.category || 'Other',
       organizer: newEvent.organizer || '',
       startTime: newEvent.startTime,
-      endTime: newEvent.endTime
+      endTime: newEvent.endTime,
+      link: newEvent.link || ''
     };
     
     console.log('Event to add:', eventToAdd);
@@ -349,7 +354,8 @@ export default function EventsPage() {
       location: '',
       description: '',
       category: 'Community Service',
-      organizer: ''
+      organizer: '',
+      link: ''
     });
 
     // Check if Google Script URL is configured
@@ -372,7 +378,8 @@ export default function EventsPage() {
           category: eventToAdd.category,
           organizer: eventToAdd.organizer,
           contactEmail: '', // Add if needed
-          contactPhone: ''  // Add if needed
+          contactPhone: '',  // Add if needed
+          link: eventToAdd.link || ''
         };
         
         console.log('Sending to Google Sheets:', dataToSend);
@@ -390,11 +397,11 @@ export default function EventsPage() {
         // Since we're using no-cors, we can't read the response
         // Event already added to UI, just show success
         console.log(isEditing ? 'Event updated in Google Sheets' : 'Event submitted to Google Sheets');
-        alert(isEditing ? 'Event updated successfully!' : 'Event added successfully!');
+        alert(isEditing ? 'Event updated' : 'Event added');
         
       } catch (error) {
         console.error('Error submitting to Google Sheets:', error);
-        alert('Error submitting event. It has been saved locally for now.');
+        alert('Event saved');
         
         // Fall back to local storage
         const pendingEvents = JSON.parse(sessionStorage.getItem('pendingEvents') || '[]');
@@ -408,7 +415,7 @@ export default function EventsPage() {
       sessionStorage.setItem('pendingEvents', JSON.stringify(pendingEvents));
       
       console.log('Event saved locally - Google Sheets not configured');
-      alert('Event saved locally. Configure Google Sheets integration for persistent storage.');
+      alert('Event saved');
     }
   };
 
@@ -432,17 +439,22 @@ export default function EventsPage() {
     
     const upcoming = events
       .filter(event => {
-        // For today's events, check the actual time
-        if (event.date === todayStr) {
-          // Parse the event's end time
-          const eventEndTime = event.endTime || event.time.split(' - ')[1] || '11:59 PM';
-          const eventEndDateTime = new Date(`${event.date}T${convertTo24Hour(eventEndTime.trim())}`);
-          console.log('Today event:', event.title, 'End time:', eventEndDateTime, 'Now:', now, 'Is upcoming:', eventEndDateTime > now);
-          return eventEndDateTime > now;
+        // Check if date is valid
+        if (!event.date || event.date.trim() === '') {
+          console.log('Filtering out event with empty date:', event.title);
+          return false;
         }
-        // For future dates, include them
-        console.log('Checking event:', event.title, 'Event date:', event.date, 'Today:', todayStr, 'Is upcoming:', event.date > todayStr);
-        return event.date > todayStr;
+        
+        // Validate the date format
+        const dateObj = new Date(event.date);
+        if (isNaN(dateObj.getTime())) {
+          console.log('Filtering out event with invalid date:', event.title, event.date);
+          return false;
+        }
+        
+        // Include all events from today forward
+        console.log('Checking event:', event.title, 'Event date:', event.date, 'Today:', todayStr, 'Is upcoming:', event.date >= todayStr);
+        return event.date >= todayStr;
       })
       .sort((a, b) => a.date.localeCompare(b.date));
     
@@ -499,7 +511,8 @@ export default function EventsPage() {
         location: event.location,
         description: event.description,
         category: event.category,
-        organizer: event.organizer
+        organizer: event.organizer,
+        link: event.link
       }
     };
 
@@ -856,7 +869,7 @@ export default function EventsPage() {
                   navigator.clipboard.writeText(
                     JSON.stringify(JSON.parse(sessionStorage.getItem('pendingEvents') || '[]'), null, 2)
                   );
-                  alert('Event data copied to clipboard!');
+                  alert('Copied');
                 }}
                 className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
               >
@@ -887,6 +900,19 @@ export default function EventsPage() {
                 <p><strong>Description:</strong> {selectedEvent.description}</p>
                 <p><strong>Category:</strong> {selectedEvent.category}</p>
                 <p><strong>Organizer:</strong> {selectedEvent.organizer}</p>
+                {selectedEvent.link && (
+                  <p>
+                    <strong>Link:</strong>{' '}
+                    <a 
+                      href={selectedEvent.link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline hover:text-blue-600"
+                    >
+                      {selectedEvent.link.includes('zoom') ? 'Join Zoom Meeting' : 'Event Link'}
+                    </a>
+                  </p>
+                )}
               </div>
               <div className="mt-6 flex gap-3">
                 {isAdmin && (
@@ -904,7 +930,8 @@ export default function EventsPage() {
                           location: selectedEvent.location,
                           description: selectedEvent.description,
                           category: selectedEvent.category,
-                          organizer: selectedEvent.organizer
+                          organizer: selectedEvent.organizer,
+                          link: selectedEvent.link || ''
                         });
                         setIsEditing(true);
                         setEditingEventId(selectedEvent.id);
@@ -917,7 +944,7 @@ export default function EventsPage() {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm(`Are you sure you want to delete this event?\n\nEvent: ${selectedEvent.title}\nID: ${selectedEvent.id}`)) {
+                        if (confirm(`Are you sure you want to delete this event?\n\n${selectedEvent.title}`)) {
                           handleDeleteEvent(selectedEvent.id);
                           setShowEventModal(false);
                         }
@@ -1190,6 +1217,18 @@ export default function EventsPage() {
                     required
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Event Link (Optional)</label>
+                  <input
+                    type="url"
+                    value={newEvent.link}
+                    onChange={(e) => setNewEvent({...newEvent, link: e.target.value})}
+                    placeholder="https://zoom.us/j/123456789 or event website"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Add a Zoom link, event website, or registration page</p>
+                </div>
               </div>
 
               <div className="flex gap-3 justify-end mt-6">
@@ -1209,7 +1248,8 @@ export default function EventsPage() {
                       location: '',
                       description: '',
                       category: 'Community Service',
-                      organizer: ''
+                      organizer: '',
+                      link: ''
                     });
                   }}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800"
