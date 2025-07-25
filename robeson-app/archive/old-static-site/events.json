@@ -1,0 +1,34 @@
+{
+  "events": [
+    {
+      "id": "1",
+      "title": "Community Food Drive",
+      "date": "2025-07-28",
+      "time": "10:00 AM - 2:00 PM",
+      "location": "Robeson County Community Center",
+      "description": "Help us collect non-perishable food items for local families in need.",
+      "category": "Community Service",
+      "organizer": "Robeson County Food Bank"
+    },
+    {
+      "id": "2",
+      "title": "Free Health Screening",
+      "date": "2025-07-30",
+      "time": "9:00 AM - 4:00 PM",
+      "location": "Public Health Department",
+      "description": "Free blood pressure, diabetes, and vision screenings. No appointment needed.",
+      "category": "Health",
+      "organizer": "Robeson County Health Department"
+    },
+    {
+      "id": "3",
+      "title": "Job Fair",
+      "date": "2025-08-05",
+      "time": "11:00 AM - 3:00 PM",
+      "location": "Robeson Community College",
+      "description": "Connect with local employers. Bring your resume!",
+      "category": "Career",
+      "organizer": "Workforce Development Center"
+    }
+  ]
+}
