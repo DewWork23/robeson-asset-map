@@ -620,31 +620,31 @@ export default function EventsPage() {
       <main className="container mx-auto px-4 pt-20 pb-8">
         <div className="max-w-6xl mx-auto">
         {/* Header with admin controls */}
-        <div className="relative mb-6">
-          {/* Admin controls - absolute positioned top right */}
-          <div className="absolute top-0 right-0 flex gap-2">
+        <div className="mb-6">
+          {/* Admin controls - mobile friendly */}
+          <div className="flex justify-end mb-4">
             {!isAdmin ? (
               <button 
                 onClick={() => setShowLoginModal(true)}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm"
+                className="bg-blue-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-blue-600 text-sm"
               >
                 Admin Login
               </button>
             ) : (
-              <>
+              <div className="flex gap-2">
                 <button 
                   onClick={() => setShowSubmitModal(true)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm"
+                  className="bg-blue-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-blue-600 text-sm"
                 >
                   Add Event
                 </button>
                 <button 
                   onClick={handleLogout}
-                  className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 text-sm"
+                  className="bg-gray-500 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-gray-600 text-sm"
                 >
                   Logout
                 </button>
-              </>
+              </div>
             )}
           </div>
           
