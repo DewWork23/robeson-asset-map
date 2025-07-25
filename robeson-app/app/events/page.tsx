@@ -98,6 +98,25 @@ export default function EventsPage() {
     if (adminStatus === 'true') {
       setIsAdmin(true);
     }
+    
+    // Clean up old deleted events on mount
+    try {
+      const deletedEvents = JSON.parse(localStorage.getItem('deletedEvents') || '[]');
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      const activeDeletedEvents = deletedEvents.filter((d: any) => {
+        try {
+          const deletedAt = new Date(d.deletedAt);
+          return deletedAt > fiveMinutesAgo;
+        } catch {
+          return false;
+        }
+      });
+      localStorage.setItem('deletedEvents', JSON.stringify(activeDeletedEvents));
+    } catch (error) {
+      console.error('Error cleaning up deleted events:', error);
+      localStorage.removeItem('deletedEvents');
+    }
+    
     loadEvents();
   }, []);
 
@@ -110,8 +129,8 @@ export default function EventsPage() {
       
       if (sheetId && apiKey) {
         console.log('Loading events from Google Sheets...');
-        // Read specifically from Events sheet (A:M to include Event ID and all columns)
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Events!A:M?key=${apiKey}`;
+        // Read specifically from Events sheet (A:N to include Event ID and all columns including Link)
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Events!A:N?key=${apiKey}`;
         
         const response = await fetch(url);
         if (response.ok) {
@@ -153,10 +172,28 @@ export default function EventsPage() {
             
             // Filter out events with invalid dates and recently deleted events
             const deletedEvents = JSON.parse(localStorage.getItem('deletedEvents') || '[]');
-            const deletedIds = deletedEvents.map((d: any) => d.id);
+            
+            // Clean up deletions older than 5 minutes
+            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+            const activeDeletedEvents = deletedEvents.filter((d: any) => {
+              const deletedAt = new Date(d.deletedAt);
+              return deletedAt > fiveMinutesAgo;
+            });
+            
+            // Update localStorage with only recent deletions
+            if (activeDeletedEvents.length !== deletedEvents.length) {
+              localStorage.setItem('deletedEvents', JSON.stringify(activeDeletedEvents));
+            }
+            
+            const deletedIds = activeDeletedEvents.map((d: any) => d.id);
+            console.log('Currently deleted event IDs:', deletedIds);
+            
             const filteredEvents = googleEvents.filter(event => {
               // Check if deleted
-              if (deletedIds.includes(event.id)) return false;
+              if (deletedIds.includes(event.id)) {
+                console.log('Filtering out deleted event:', event.id, event.title);
+                return false;
+              }
               
               // Check if date is valid
               if (!event.date || event.date.trim() === '') {
