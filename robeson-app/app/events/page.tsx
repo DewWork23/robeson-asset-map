@@ -134,8 +134,8 @@ export default function EventsPage() {
       
       if (sheetId && apiKey) {
         console.log('Loading events from Google Sheets...');
-        // Read specifically from Events sheet (A:N to include Event ID and all columns including Link)
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Events!A:N?key=${apiKey}`;
+        // Read specifically from Events sheet (A:O to ensure we get all columns even if shifted)
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Events!A:O?key=${apiKey}`;
         
         const response = await fetch(url);
         if (response.ok) {
@@ -154,31 +154,35 @@ export default function EventsPage() {
                 console.log(`Row ${index} mapping - ID: ${row[0]}, Title: ${row[1]}, Date: ${row[2]}`);
               }
               
-              // Map based on the actual column order in the sheet
-              // Check if this might be the old format (without contact fields properly placed)
-              // If column 10 looks like a timestamp, assume old format
-              const isOldFormat = row[10] && row[10].includes('T') && row[10].includes('Z');
+              // Debug: Log the actual row data to understand the structure
+              if (index < 3) {
+                console.log(`Row ${index} full data:`, row);
+              }
+              
+              // Check if End Date column is missing (data shifted by 1)
+              // If what should be End Date looks like a time (contains AM/PM), data is shifted
+              const endDateColumnHasTime = row[3] && (row[3].includes('AM') || row[3].includes('PM'));
               
               let eventData;
-              if (isOldFormat) {
-                // Old format: columns shifted due to missing contact fields
-                console.log('Detected old format - timestamp in column 10');
+              if (endDateColumnHasTime) {
+                // Data is shifted - End Date column is missing
+                console.log('Detected shifted data format - missing End Date column');
                 eventData = {
                   id: row[0] || `${row[1]}_${row[2]}_${index}`.replace(/\s+/g, '_'),
                   title: row[1] || '',
                   date: row[2] || '',
-                  endDate: row[3] || row[2] || '',
-                  time: (row[4] && row[5]) ? `${row[4]} - ${row[5]}` : '',
-                  startTime: row[4] || '9:00 AM',
-                  endTime: row[5] || '10:00 AM',
-                  location: row[6] || '',
-                  description: row[7] || '',
-                  category: row[8] || 'Community Service',
-                  organizer: row[9] || '',
-                  link: row[11] || '' // Link is in column 11 in old format
+                  endDate: row[2] || '', // Use same as start date
+                  time: (row[3] && row[4]) ? `${row[3]} - ${row[4]}` : '',
+                  startTime: row[3] || '9:00 AM',
+                  endTime: row[4] || '10:00 AM',
+                  location: row[5] || '',
+                  description: row[6] || '',
+                  category: row[7] || 'Community Service',
+                  organizer: row[8] || '',
+                  link: row[12] || '' // Link would be in column 12 with shifted data
                 };
               } else {
-                // New format: proper column order
+                // Standard format with all columns
                 eventData = {
                   id: row[0] || `${row[1]}_${row[2]}_${index}`.replace(/\s+/g, '_'),
                   title: row[1] || '',
@@ -191,7 +195,7 @@ export default function EventsPage() {
                   description: row[7] || '',
                   category: row[8] || 'Community Service',
                   organizer: row[9] || '',
-                  link: row[13] || '' // Link is in column 13 in new format
+                  link: row[13] || ''
                 };
               }
               
