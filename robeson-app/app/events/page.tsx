@@ -116,14 +116,21 @@ export default function EventsPage() {
           const rows = data.values || [];
           
           if (rows.length > 1) {
+            // Debug header row
+            console.log('Header row:', rows[0]);
+            
             // Skip header row and convert to Event objects
             const googleEvents: Event[] = rows.slice(1).map((row: string[], index: number) => {
               // Debug first few rows to see structure
               if (index < 3) {
                 console.log(`Row ${index}:`, row);
+                console.log(`Row ${index} mapping - ID: ${row[0]}, Title: ${row[1]}, Date: ${row[2]}`);
               }
+              
+              // Map based on the actual column order in the sheet
+              // Assuming: Event ID, Title, Date, End Date, Start Time, End Time, Location, Description, Category, Organizer, Contact Email, Contact Phone, Submitted At
               return {
-                id: row[0] || (index + 1).toString(), // Use Event ID from sheet
+                id: row[0] || (index + 1).toString(),
                 title: row[1] || '',
                 date: row[2] || '',
                 endDate: row[3] || row[2] || '',
@@ -138,13 +145,25 @@ export default function EventsPage() {
             });
             
             console.log('Loaded', googleEvents.length, 'events from Google Sheets');
-            console.log('Event IDs:', googleEvents.map(e => ({ id: e.id, title: e.title })));
+            console.log('Event IDs:', googleEvents.map(e => ({ id: e.id, title: e.title, date: e.date })));
             
-            // Filter out recently deleted events
+            // Filter out events with invalid dates and recently deleted events
             const deletedEvents = JSON.parse(localStorage.getItem('deletedEvents') || '[]');
             const deletedIds = deletedEvents.map((d: any) => d.id);
-            const filteredEvents = googleEvents.filter(event => !deletedIds.includes(event.id));
+            const filteredEvents = googleEvents.filter(event => {
+              // Check if deleted
+              if (deletedIds.includes(event.id)) return false;
+              
+              // Check if date is valid
+              if (!event.date || event.date.trim() === '') {
+                console.log('Filtering out event with empty date:', event.title);
+                return false;
+              }
+              
+              return true;
+            });
             
+            console.log('After filtering, events count:', filteredEvents.length);
             setEvents(filteredEvents);
             
             // Convert to FullCalendar format
@@ -635,7 +654,7 @@ export default function EventsPage() {
         {/* Calendar or Agenda View */}
         {!isAgendaView ? (
           <div className={`bg-white rounded-lg shadow-md p-2 md:p-6 ${isAdmin ? 'admin-calendar' : ''}`}>
-            <style jsx global>{`
+            <style>{`
             .admin-calendar .fc-daygrid-day:hover {
               background-color: #EFF6FF;
               cursor: pointer;
