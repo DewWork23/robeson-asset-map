@@ -904,12 +904,31 @@ export default function EventsPage() {
                   <p>
                     <strong>Link:</strong>{' '}
                     <a 
-                      href={selectedEvent.link.startsWith('http://') || selectedEvent.link.startsWith('https://') 
-                        ? selectedEvent.link 
-                        : `https://${selectedEvent.link}`} 
+                      href={(() => {
+                        const link = selectedEvent.link.trim();
+                        // If it already has a protocol, use as-is
+                        if (link.match(/^https?:\/\//i)) {
+                          return link;
+                        }
+                        // If it starts with //, treat as protocol-relative
+                        if (link.startsWith('//')) {
+                          return `https:${link}`;
+                        }
+                        // Otherwise, prepend https://
+                        return `https://${link}`;
+                      })()} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-blue-500 underline hover:text-blue-600"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const link = selectedEvent.link.trim();
+                        let finalUrl = link;
+                        if (!link.match(/^https?:\/\//i)) {
+                          finalUrl = link.startsWith('//') ? `https:${link}` : `https://${link}`;
+                        }
+                        window.open(finalUrl, '_blank', 'noopener,noreferrer');
+                      }}
                     >
                       {selectedEvent.link.includes('zoom') ? 'Join Zoom Meeting' : 'Event Link'}
                     </a>
