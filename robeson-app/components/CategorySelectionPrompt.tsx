@@ -173,7 +173,7 @@ export default function CategorySelectionPrompt({ onCategorySelect }: CategorySe
       <div className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="max-w-4xl w-full">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-6">
               Find Resources in Robeson County
             </h1>
             
