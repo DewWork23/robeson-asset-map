@@ -154,7 +154,6 @@ button, a {
 
 /* Ensure map is fully interactive */
 #map {
-  touch-action: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -163,8 +162,17 @@ button, a {
 
 /* Fix for mobile map interaction */
 .leaflet-container {
-  touch-action: none;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Allow touch on zoom controls */
+.leaflet-control-zoom,
+.leaflet-control-zoom a,
+.leaflet-control-layers,
+.leaflet-control {
+  touch-action: auto !important;
+  pointer-events: auto !important;
 }
 
 /* Ensure scrollbars are always visible on map page */
