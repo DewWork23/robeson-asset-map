@@ -254,8 +254,8 @@ export default function AdminDashboard() {
           .from('events')
           .update({
             title: editingEvent.title,
-            date: editingEvent.date,
-            end_date: editingEvent.end_date,
+            date: editingEvent.date + 'T00:00:00',
+            end_date: (editingEvent.end_date || editingEvent.date) + 'T00:00:00',
             start_time: editingEvent.start_time,
             end_time: editingEvent.end_time,
             location: editingEvent.location,
@@ -277,8 +277,8 @@ export default function AdminDashboard() {
           .from('events')
           .insert({
             title: editingEvent.title,
-            date: editingEvent.date,
-            end_date: editingEvent.end_date || editingEvent.date,
+            date: editingEvent.date + 'T00:00:00',
+            end_date: (editingEvent.end_date || editingEvent.date) + 'T00:00:00',
             start_time: editingEvent.start_time || '9:00 AM',
             end_time: editingEvent.end_time || '10:00 AM',
             location: editingEvent.location,
