@@ -374,7 +374,7 @@ export default function EventsPage() {
               eventColor="#3B82F6"
               eventDisplay="block"
               selectable={false}
-              slotMinTime="06:00:00"
+              slotMinTime="08:00:00"
               slotMaxTime="22:00:00"
               slotDuration="00:30:00"
               slotLabelInterval="01:00:00"
