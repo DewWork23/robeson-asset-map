@@ -482,7 +482,19 @@ export default function AdminDashboard() {
                                       console.log('Edit clicked for org:', org.id, org.organizationName);
                                       handleOrgEdit(org);
                                     }}
-                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-2"
+                                    style={{
+                                      backgroundColor: '#2563eb',
+                                      color: 'white',
+                                      padding: '6px 12px',
+                                      borderRadius: '6px',
+                                      border: 'none',
+                                      marginRight: '8px',
+                                      cursor: 'pointer',
+                                      fontSize: '14px',
+                                      fontWeight: '500'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
                                   >
                                     Edit
                                   </button>
@@ -492,7 +504,18 @@ export default function AdminDashboard() {
                                       console.log('Delete clicked for org:', org.id, org.organizationName);
                                       handleOrgDelete(org.id);
                                     }}
-                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                    style={{
+                                      backgroundColor: '#dc2626',
+                                      color: 'white',
+                                      padding: '6px 12px',
+                                      borderRadius: '6px',
+                                      border: 'none',
+                                      cursor: 'pointer',
+                                      fontSize: '14px',
+                                      fontWeight: '500'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
                                   >
                                     Delete
                                   </button>
