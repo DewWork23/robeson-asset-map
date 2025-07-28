@@ -17,6 +17,21 @@ interface CachedData {
   timestamp: number;
 }
 
+// Organization overrides for specific data corrections
+function applyOrganizationOverrides(organizations: Organization[]): Organization[] {
+  return organizations.map(org => {
+    // Update Monarch's address and phone
+    if (org.organizationName && org.organizationName.toLowerCase().includes('monarch')) {
+      return {
+        ...org,
+        address: '2003 Godwin Ave Suite C, Lumberton, NC 28358',
+        phone: '(866) 272-7826'
+      };
+    }
+    return org;
+  });
+}
+
 function getCachedData(): Organization[] | null {
   if (typeof window === 'undefined') return null;
   
@@ -150,6 +165,9 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     const withoutCoords = organizations.filter(org => !org.latitude || !org.longitude).length;
     console.log(`Organizations with coordinates: ${withCoords}, without: ${withoutCoords}`);
     
+    // Apply organization overrides
+    organizations = applyOrganizationOverrides(organizations);
+    
     // Cache the data
     setCachedData(organizations);
     
@@ -247,6 +265,9 @@ async function loadOrganizationsFromCSV(): Promise<Organization[]> {
     }
     
     console.log(`Successfully loaded ${organizations.length} organizations from CSV`);
+    
+    // Apply organization overrides
+    organizations = applyOrganizationOverrides(organizations);
     
     // Cache the CSV data too
     setCachedData(organizations);

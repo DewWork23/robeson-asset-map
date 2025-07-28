@@ -83,7 +83,7 @@ export default function Navigation() {
           {/* Hamburger Menu Button */}
           <button
             onClick={toggleMenu}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mx-auto"
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mx-auto flex items-center gap-2"
             aria-label="Toggle navigation menu"
           >
             <svg
@@ -108,6 +108,7 @@ export default function Navigation() {
                 />
               )}
             </svg>
+            <span className="font-medium text-gray-700">Menu</span>
           </button>
         </div>
 

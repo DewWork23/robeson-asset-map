@@ -181,7 +181,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       showCoverageOnHover: false,
       maxClusterRadius: 40, // Reduced to prevent over-clustering
       spiderfyOnMaxZoom: false, // Disable spiderfy - we'll handle zoom manually
-      disableClusteringAtZoom: 14, // Show individual markers at zoom 14+ (earlier than before)
+      disableClusteringAtZoom: 12, // Show individual markers at zoom 12+ (much earlier)
       animate: true,
       animateAddingMarkers: true,
       removeOutsideVisibleBounds: false, // Keep all markers loaded
