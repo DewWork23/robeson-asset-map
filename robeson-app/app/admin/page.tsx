@@ -365,41 +365,43 @@ export default function AdminDashboard() {
   return (
     <>
       <Navigation />
-      <main className="min-h-screen bg-gray-50 pt-20">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+      <main className="min-h-screen bg-gray-50 pt-16 sm:pt-20">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <div className="mb-4 sm:mb-8">
+            <div className="flex justify-between items-center mb-3 sm:mb-4">
+              <h1 className="text-xl sm:text-3xl font-bold text-gray-900">Admin Dashboard</h1>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+                className="bg-red-500 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-red-600 text-sm sm:text-base"
               >
                 Logout
               </button>
             </div>
             
-            {/* Tab Navigation */}
-            <div className="flex gap-4 border-b border-gray-200">
+            {/* Tab Navigation - Mobile Friendly */}
+            <div className="flex gap-2 sm:gap-4 border-b border-gray-200">
               <button
                 onClick={() => setActiveTab('organizations')}
-                className={`pb-2 px-1 font-medium transition-colors ${
+                className={`pb-2 px-2 sm:px-1 font-medium transition-colors text-sm sm:text-base ${
                   activeTab === 'organizations'
                     ? 'text-blue-600 border-b-2 border-blue-600'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 Organizations
+                <span className="ml-1 text-xs sm:text-sm">({organizations.length})</span>
               </button>
               <button
                 onClick={() => setActiveTab('events')}
-                className={`pb-2 px-1 font-medium transition-colors ${
+                className={`pb-2 px-2 sm:px-1 font-medium transition-colors text-sm sm:text-base ${
                   activeTab === 'events'
                     ? 'text-blue-600 border-b-2 border-blue-600'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
                 Events
+                <span className="ml-1 text-xs sm:text-sm">({events.length})</span>
               </button>
             </div>
           </div>
@@ -407,14 +409,26 @@ export default function AdminDashboard() {
           {/* Organizations Tab */}
           {activeTab === 'organizations' && (
             <div>
-              {/* Search Bar and Add Button */}
-              <div className="mb-6 flex gap-4">
+              <style jsx global>{`
+                @media (max-width: 639px) {
+                  .desktop-only {
+                    display: none !important;
+                  }
+                }
+                @media (min-width: 640px) {
+                  .mobile-only {
+                    display: none !important;
+                  }
+                }
+              `}</style>
+              {/* Search Bar and Add Button - Mobile Optimized */}
+              <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <input
                   type="text"
                   placeholder="Search organizations..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 px-4 py-2 border rounded-lg"
+                  className="flex-1 px-3 sm:px-4 py-2 border rounded-lg text-sm sm:text-base"
                 />
                 <button
                   onClick={() => {
@@ -436,16 +450,55 @@ export default function AdminDashboard() {
                       specialNotes: ''
                     });
                   }}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                  className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 text-sm sm:text-base"
                 >
                   Add Organization
                 </button>
               </div>
 
-              {/* Organizations List */}
-              <div className="bg-white rounded-lg shadow-md">
-                <div style={{ overflowX: 'auto' }}>
-                  <table className="w-full divide-y divide-gray-200">
+              {/* Organizations List - Responsive */}
+              {/* Mobile Card View */}
+              <div className="mobile-only space-y-3">
+                {filteredOrgs.length === 0 ? (
+                  <div className="bg-white rounded-lg shadow-md p-6 text-center text-gray-500">
+                    No organizations found. Click "Add Organization" to create one.
+                  </div>
+                ) : (
+                  filteredOrgs.map((org) => (
+                    <div key={org.id} className="bg-white rounded-lg shadow-md p-4">
+                      <div className="mb-3">
+                        <h3 className="font-semibold text-gray-900 text-base">{org.organizationName}</h3>
+                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700 mt-1">
+                          {org.category}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600 space-y-1 mb-3">
+                        {org.phone && <p><span className="font-medium">Phone:</span> {org.phone}</p>}
+                        {org.address && <p className="line-clamp-2"><span className="font-medium">Address:</span> {org.address}</p>}
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleOrgEdit(org)}
+                          className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleOrgDelete(org.id)}
+                          className="flex-1 px-3 py-2 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="desktop-only bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -530,67 +583,115 @@ export default function AdminDashboard() {
           {/* Events Tab */}
           {activeTab === 'events' && (
             <div>
-              <div className="mb-4 flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Manage Events</h2>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      setEditingEvent({
-                        title: '',
-                        date: new Date().toISOString().split('T')[0],
-                        end_date: new Date().toISOString().split('T')[0],
-                        start_time: '9:00 AM',
-                        end_time: '10:00 AM',
-                        location: '',
-                        description: '',
-                        category: 'Community Service',
-                        organizer: ''
-                      });
-                      setIsEditingEvent(false);
-                      setShowEventModal(true);
-                    }}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                  >
-                    Add Event
-                  </button>
-                  <Link
-                    href="/events"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    Go to Calendar
-                  </Link>
+              <div className="mb-4">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                  <h2 className="text-lg sm:text-xl font-semibold">Manage Events</h2>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setEditingEvent({
+                          title: '',
+                          date: new Date().toISOString().split('T')[0],
+                          end_date: new Date().toISOString().split('T')[0],
+                          start_time: '9:00 AM',
+                          end_time: '10:00 AM',
+                          location: '',
+                          description: '',
+                          category: 'Community Service',
+                          organizer: ''
+                        });
+                        setIsEditingEvent(false);
+                        setShowEventModal(true);
+                      }}
+                      className="flex-1 sm:flex-none bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 text-sm sm:text-base"
+                    >
+                      <span className="sm:hidden">Add</span>
+                      <span className="hidden sm:inline">Add Event</span>
+                    </button>
+                    <Link
+                      href="/events"
+                      className="flex-1 sm:flex-none bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 text-sm sm:text-base text-center"
+                    >
+                      <span className="sm:hidden">Calendar</span>
+                      <span className="hidden sm:inline">Go to Calendar</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
               
               {loadingEvents ? (
                 <div className="text-center py-8">Loading events...</div>
               ) : (
-                <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Title
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Location
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Category
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Time
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                <>
+                  {/* Mobile Card View */}
+                  <div className="mobile-only space-y-3">
+                    {events.length === 0 ? (
+                      <div className="bg-white rounded-lg shadow-md p-6 text-center text-gray-500">
+                        No events scheduled. Click "Add" to create one.
+                      </div>
+                    ) : (
+                      events.map((event) => (
+                        <div key={event.id} className="bg-white rounded-lg shadow-md p-4">
+                          <div className="mb-3">
+                            <h3 className="font-semibold text-gray-900 text-base">{event.title}</h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {new Date(event.date + 'T00:00:00').toLocaleDateString()}
+                              {event.end_date && event.end_date !== event.date && 
+                                ` - ${new Date(event.end_date + 'T00:00:00').toLocaleDateString()}`
+                              }
+                            </p>
+                          </div>
+                          <div className="text-sm text-gray-600 space-y-1 mb-3">
+                            <p><span className="font-medium">Time:</span> {event.start_time} - {event.end_time}</p>
+                            <p><span className="font-medium">Location:</span> {event.location}</p>
+                            <p><span className="font-medium">Category:</span> {event.category}</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEventEdit(event)}
+                              className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleEventDelete(event.id)}
+                              className="flex-1 px-3 py-2 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Desktop Table View */}
+                  <div className="desktop-only bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Date
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Title
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Location
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Category
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Time
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
                         {events.map((event) => (
                           <tr key={event.id}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -630,6 +731,7 @@ export default function AdminDashboard() {
                     </table>
                   </div>
                 </div>
+                </>
               )}
             </div>
           )}
@@ -638,8 +740,8 @@ export default function AdminDashboard() {
         {/* Edit Organization Modal */}
         {(selectedOrg || (!selectedOrg && editingOrg.organizationName !== undefined)) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold mb-4">{selectedOrg ? 'Edit Organization' : 'Add Organization'}</h2>
+            <div className="bg-white rounded-lg p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <h2 className="text-lg sm:text-xl font-bold mb-4">{selectedOrg ? 'Edit Organization' : 'Add Organization'}</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -787,8 +889,8 @@ export default function AdminDashboard() {
         {/* Event Modal */}
         {showEventModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold mb-4">{isEditingEvent ? 'Edit Event' : 'Add Event'}</h2>
+            <div className="bg-white rounded-lg p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <h2 className="text-lg sm:text-xl font-bold mb-4">{isEditingEvent ? 'Edit Event' : 'Add Event'}</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
