@@ -434,19 +434,19 @@ export default function AdminDashboard() {
                   <table className="w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Organization
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Category
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                           Address
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                           Phone
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ minWidth: '150px' }}>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
@@ -463,64 +463,41 @@ export default function AdminDashboard() {
                           try {
                             return (
                               <tr key={org.id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                  {org.organizationName}
+                                <td className="px-3 py-4 text-sm font-medium text-gray-900">
+                                  <div className="max-w-xs truncate" title={org.organizationName}>
+                                    {org.organizationName}
+                                  </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {org.category}
+                                <td className="px-3 py-4 text-sm text-gray-500">
+                                  <div className="max-w-[150px] truncate" title={org.category}>
+                                    {org.category}
+                                  </div>
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-500">
-                                  {org.address}
+                                <td className="px-3 py-4 text-sm text-gray-500 hidden lg:table-cell">
+                                  <div className="max-w-xs truncate" title={org.address}>
+                                    {org.address}
+                                  </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td className="px-3 py-4 text-sm text-gray-500 hidden md:table-cell">
                                   {org.phone}
                                 </td>
-                                <td style={{ 
-                                  padding: '16px 24px',
-                                  fontSize: '14px',
-                                  fontWeight: '500',
-                                  minWidth: '150px',
-                                  whiteSpace: 'normal',
-                                  overflow: 'visible',
-                                  textOverflow: 'clip'
-                                }}>
-                                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                    <div 
-                                      onClick={() => {
-                                        console.log('Edit clicked for org:', org.id, org.organizationName);
-                                        handleOrgEdit(org);
-                                      }}
-                                      style={{
-                                        backgroundColor: '#2563eb',
-                                        color: 'white',
-                                        padding: '6px 12px',
-                                        borderRadius: '6px',
-                                        cursor: 'pointer',
-                                        display: 'block',
-                                        textAlign: 'center',
-                                        userSelect: 'none'
-                                      }}
+                                <td className="px-3 py-4 text-sm font-medium">
+                                  <div className="flex gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOrgEdit(org)}
+                                      className="text-blue-600 hover:text-blue-900 font-medium text-sm"
                                     >
                                       Edit
-                                    </div>
-                                    <div 
-                                      onClick={() => {
-                                        console.log('Delete clicked for org:', org.id, org.organizationName);
-                                        handleOrgDelete(org.id);
-                                      }}
-                                      style={{
-                                        backgroundColor: '#dc2626',
-                                        color: 'white',
-                                        padding: '6px 12px',
-                                        borderRadius: '6px',
-                                        cursor: 'pointer',
-                                        display: 'block',
-                                        textAlign: 'center',
-                                        userSelect: 'none'
-                                      }}
+                                    </button>
+                                    <span className="text-gray-300">|</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOrgDelete(org.id)}
+                                      className="text-red-600 hover:text-red-900 font-medium text-sm"
                                     >
                                       Delete
-                                    </div>
+                                    </button>
                                   </div>
                                 </td>
                               </tr>
