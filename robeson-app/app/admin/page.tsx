@@ -476,8 +476,7 @@ export default function AdminDashboard() {
                                   {org.phone}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                  <button
-                                    type="button"
+                                  <span 
                                     onClick={() => {
                                       console.log('Edit clicked for org:', org.id, org.organizationName);
                                       handleOrgEdit(org);
@@ -487,19 +486,14 @@ export default function AdminDashboard() {
                                       color: 'white',
                                       padding: '6px 12px',
                                       borderRadius: '6px',
-                                      border: 'none',
                                       marginRight: '8px',
                                       cursor: 'pointer',
-                                      fontSize: '14px',
-                                      fontWeight: '500'
+                                      display: 'inline-block'
                                     }}
-                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
-                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
                                   >
                                     Edit
-                                  </button>
-                                  <button
-                                    type="button"
+                                  </span>
+                                  <span 
                                     onClick={() => {
                                       console.log('Delete clicked for org:', org.id, org.organizationName);
                                       handleOrgDelete(org.id);
@@ -509,16 +503,12 @@ export default function AdminDashboard() {
                                       color: 'white',
                                       padding: '6px 12px',
                                       borderRadius: '6px',
-                                      border: 'none',
                                       cursor: 'pointer',
-                                      fontSize: '14px',
-                                      fontWeight: '500'
+                                      display: 'inline-block'
                                     }}
-                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
-                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
                                   >
                                     Delete
-                                  </button>
+                                  </span>
                                 </td>
                               </tr>
                             );
