@@ -428,49 +428,9 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              {/* Debug Info */}
-              <div className="mb-4 p-4 bg-yellow-100 border border-yellow-400 rounded">
-                <p>Debug: Found {filteredOrgs.length} organizations</p>
-                {filteredOrgs.length > 0 && (
-                  <p>First org: {filteredOrgs[0].organizationName} (ID: {filteredOrgs[0].id})</p>
-                )}
-              </div>
-
-              {/* Simple Test - Organizations as Cards */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3">Organizations (Card View Test)</h3>
-                <div className="grid gap-4">
-                  {filteredOrgs.slice(0, 3).map((org) => (
-                    <div key={org.id} className="bg-white p-4 rounded-lg shadow border">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-semibold">{org.organizationName}</h4>
-                          <p className="text-sm text-gray-600">{org.category}</p>
-                          <p className="text-sm text-gray-600">{org.address}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleOrgEdit(org)}
-                            style={{ backgroundColor: 'blue', color: 'white', padding: '4px 8px', borderRadius: '4px' }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleOrgDelete(org.id)}
-                            style={{ backgroundColor: 'red', color: 'white', padding: '4px 8px', borderRadius: '4px' }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Organizations List */}
-              <div className="bg-white rounded-lg shadow-md">
-                <div>
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
@@ -516,23 +476,13 @@ export default function AdminDashboard() {
                                   {org.phone}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                  <span>TEST: </span>
                                   <button
                                     type="button"
                                     onClick={() => {
                                       console.log('Edit clicked for org:', org.id, org.organizationName);
                                       handleOrgEdit(org);
                                     }}
-                                    style={{ 
-                                      display: 'inline-block',
-                                      backgroundColor: '#2563eb', 
-                                      color: 'white', 
-                                      padding: '4px 12px', 
-                                      borderRadius: '4px',
-                                      border: 'none',
-                                      cursor: 'pointer',
-                                      marginRight: '8px'
-                                    }}
+                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-2"
                                   >
                                     Edit
                                   </button>
@@ -542,15 +492,7 @@ export default function AdminDashboard() {
                                       console.log('Delete clicked for org:', org.id, org.organizationName);
                                       handleOrgDelete(org.id);
                                     }}
-                                    style={{ 
-                                      display: 'inline-block',
-                                      backgroundColor: '#dc2626', 
-                                      color: 'white', 
-                                      padding: '4px 12px', 
-                                      borderRadius: '4px',
-                                      border: 'none',
-                                      cursor: 'pointer'
-                                    }}
+                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                                   >
                                     Delete
                                   </button>
