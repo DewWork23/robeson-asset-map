@@ -428,6 +428,46 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
+              {/* Debug Info */}
+              <div className="mb-4 p-4 bg-yellow-100 border border-yellow-400 rounded">
+                <p>Debug: Found {filteredOrgs.length} organizations</p>
+                {filteredOrgs.length > 0 && (
+                  <p>First org: {filteredOrgs[0].organizationName} (ID: {filteredOrgs[0].id})</p>
+                )}
+              </div>
+
+              {/* Simple Test - Organizations as Cards */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">Organizations (Card View Test)</h3>
+                <div className="grid gap-4">
+                  {filteredOrgs.slice(0, 3).map((org) => (
+                    <div key={org.id} className="bg-white p-4 rounded-lg shadow border">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-semibold">{org.organizationName}</h4>
+                          <p className="text-sm text-gray-600">{org.category}</p>
+                          <p className="text-sm text-gray-600">{org.address}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleOrgEdit(org)}
+                            style={{ backgroundColor: 'blue', color: 'white', padding: '4px 8px', borderRadius: '4px' }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleOrgDelete(org.id)}
+                            style={{ backgroundColor: 'red', color: 'white', padding: '4px 8px', borderRadius: '4px' }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Organizations List */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="overflow-x-auto">
@@ -478,20 +518,36 @@ export default function AdminDashboard() {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                   <div className="flex gap-3">
                                     <button
+                                      type="button"
                                       onClick={() => {
                                         console.log('Edit clicked for org:', org.id, org.organizationName);
                                         handleOrgEdit(org);
                                       }}
-                                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                                      style={{ 
+                                        backgroundColor: '#2563eb', 
+                                        color: 'white', 
+                                        padding: '4px 12px', 
+                                        borderRadius: '4px',
+                                        border: 'none',
+                                        cursor: 'pointer'
+                                      }}
                                     >
                                       Edit
                                     </button>
                                     <button
+                                      type="button"
                                       onClick={() => {
                                         console.log('Delete clicked for org:', org.id, org.organizationName);
                                         handleOrgDelete(org.id);
                                       }}
-                                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                                      style={{ 
+                                        backgroundColor: '#dc2626', 
+                                        color: 'white', 
+                                        padding: '4px 12px', 
+                                        borderRadius: '4px',
+                                        border: 'none',
+                                        cursor: 'pointer'
+                                      }}
                                     >
                                       Delete
                                     </button>
