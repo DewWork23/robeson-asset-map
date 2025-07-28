@@ -57,17 +57,6 @@ export default function Navigation() {
               Crisis Dashboard
             </Link>
             <Link
-              href="/providers"
-              className={`px-4 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 ${
-                isActive('/providers') 
-                  ? 'bg-green-100 text-green-700' 
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              Find a Provider
-              <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">BETA</span>
-            </Link>
-            <Link
               href="/events"
               className={`px-4 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 ${
                 isActive('/events') 
@@ -76,7 +65,6 @@ export default function Navigation() {
               }`}
             >
               Events
-              <span className="text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full">BETA</span>
             </Link>
           </div>
 
@@ -155,20 +143,6 @@ export default function Navigation() {
               </span>
             </Link>
             <Link
-              href="/providers"
-              onClick={closeMenu}
-              className={`block px-4 py-3 rounded-lg font-bold transition-colors ${
-                isActive('/providers') 
-                  ? 'bg-green-100 text-green-700' 
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <span>👨‍⚕️</span> Find a Provider
-                <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">BETA</span>
-              </span>
-            </Link>
-            <Link
               href="/events"
               onClick={closeMenu}
               className={`block px-4 py-3 rounded-lg font-bold transition-colors ${
@@ -179,7 +153,6 @@ export default function Navigation() {
             >
               <span className="flex items-center gap-2">
                 <span>📅</span> Events
-                <span className="text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full">BETA</span>
               </span>
             </Link>
             
