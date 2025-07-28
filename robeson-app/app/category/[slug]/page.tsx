@@ -35,6 +35,8 @@ function CategoryPageContent() {
       router.push('/');
       return;
     }
+    // Scroll to top when category page loads
+    window.scrollTo(0, 0);
   }, [category, router]);
 
   useEffect(() => {
