@@ -16,7 +16,7 @@ function CategoryPageContent() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const slug = params.slug as string;
+  const slug = params?.slug as string;
   const category = slugToCategory(slug);
 
   // Use cached organizations data
