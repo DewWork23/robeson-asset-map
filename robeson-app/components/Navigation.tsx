@@ -17,7 +17,7 @@ export default function Navigation() {
   };
 
   const isActive = (path: string) => {
-    return pathname === path || (path === '/' && (pathname === '/' || pathname.startsWith('/category')));
+    return pathname === path || (path === '/' && (pathname === '/' || pathname?.startsWith('/category')));
   };
 
   return (
