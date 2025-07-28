@@ -475,40 +475,53 @@ export default function AdminDashboard() {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                   {org.phone}
                                 </td>
-                                <td className="px-6 py-4 text-sm font-medium" style={{ minWidth: '150px' }}>
-                                  <span 
-                                    onClick={() => {
-                                      console.log('Edit clicked for org:', org.id, org.organizationName);
-                                      handleOrgEdit(org);
-                                    }}
-                                    style={{
-                                      backgroundColor: '#2563eb',
-                                      color: 'white',
-                                      padding: '6px 12px',
-                                      borderRadius: '6px',
-                                      marginRight: '8px',
-                                      cursor: 'pointer',
-                                      display: 'inline-block'
-                                    }}
-                                  >
-                                    Edit
-                                  </span>
-                                  <span 
-                                    onClick={() => {
-                                      console.log('Delete clicked for org:', org.id, org.organizationName);
-                                      handleOrgDelete(org.id);
-                                    }}
-                                    style={{
-                                      backgroundColor: '#dc2626',
-                                      color: 'white',
-                                      padding: '6px 12px',
-                                      borderRadius: '6px',
-                                      cursor: 'pointer',
-                                      display: 'inline-block'
-                                    }}
-                                  >
-                                    Delete
-                                  </span>
+                                <td style={{ 
+                                  padding: '16px 24px',
+                                  fontSize: '14px',
+                                  fontWeight: '500',
+                                  minWidth: '150px',
+                                  whiteSpace: 'normal',
+                                  overflow: 'visible',
+                                  textOverflow: 'clip'
+                                }}>
+                                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    <div 
+                                      onClick={() => {
+                                        console.log('Edit clicked for org:', org.id, org.organizationName);
+                                        handleOrgEdit(org);
+                                      }}
+                                      style={{
+                                        backgroundColor: '#2563eb',
+                                        color: 'white',
+                                        padding: '6px 12px',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        display: 'block',
+                                        textAlign: 'center',
+                                        userSelect: 'none'
+                                      }}
+                                    >
+                                      Edit
+                                    </div>
+                                    <div 
+                                      onClick={() => {
+                                        console.log('Delete clicked for org:', org.id, org.organizationName);
+                                        handleOrgDelete(org.id);
+                                      }}
+                                      style={{
+                                        backgroundColor: '#dc2626',
+                                        color: 'white',
+                                        padding: '6px 12px',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        display: 'block',
+                                        textAlign: 'center',
+                                        userSelect: 'none'
+                                      }}
+                                    >
+                                      Delete
+                                    </div>
+                                  </div>
                                 </td>
                               </tr>
                             );
