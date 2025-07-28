@@ -26,7 +26,7 @@ function CategoryPageContent() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   
   // Default to map view if coming from voice search, otherwise list
-  const fromVoice = searchParams.get('from') === 'voice';
+  const fromVoice = searchParams?.get('from') === 'voice';
   const [viewMode, setViewMode] = useState<'list' | 'map'>(fromVoice ? 'map' : 'list');
   const [mapSelectedCategory, setMapSelectedCategory] = useState<string | null>(null);
 
