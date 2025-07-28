@@ -109,41 +109,88 @@ export default function AdminDashboard() {
   };
 
   const handleOrgUpdate = async () => {
-    if (!selectedOrg || !editingOrg) return;
+    if (!editingOrg) return;
 
     try {
-      const { error } = await supabase
-        .from('organizations')
-        .update({
-          organization_name: editingOrg.organizationName,
-          category: editingOrg.category,
-          service_type: editingOrg.serviceType,
-          address: editingOrg.address,
-          phone: editingOrg.phone,
-          email: editingOrg.email,
-          website: editingOrg.website,
-          hours: editingOrg.hours,
-          services_offered: editingOrg.servicesOffered,
-          cost_payment: editingOrg.costPayment,
-          description: editingOrg.description,
-          crisis_service: editingOrg.crisisService,
-          languages: editingOrg.languages,
-          special_notes: editingOrg.specialNotes,
-          latitude: editingOrg.latitude,
-          longitude: editingOrg.longitude,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', selectedOrg.id);
+      if (selectedOrg) {
+        // Update existing organization
+        const { error } = await supabase
+          .from('organizations')
+          .update({
+            organization_name: editingOrg.organizationName,
+            category: editingOrg.category,
+            service_type: editingOrg.serviceType,
+            address: editingOrg.address,
+            phone: editingOrg.phone,
+            email: editingOrg.email,
+            website: editingOrg.website,
+            hours: editingOrg.hours,
+            services_offered: editingOrg.servicesOffered,
+            cost_payment: editingOrg.costPayment,
+            description: editingOrg.description,
+            crisis_service: editingOrg.crisisService,
+            languages: editingOrg.languages,
+            special_notes: editingOrg.specialNotes,
+            latitude: editingOrg.latitude,
+            longitude: editingOrg.longitude,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', selectedOrg.id);
 
-      if (error) throw error;
+        if (error) throw error;
+        alert('Organization updated successfully!');
+      } else {
+        // Create new organization
+        const { error } = await supabase
+          .from('organizations')
+          .insert({
+            organization_name: editingOrg.organizationName,
+            category: editingOrg.category || 'Other',
+            service_type: editingOrg.serviceType,
+            address: editingOrg.address,
+            phone: editingOrg.phone,
+            email: editingOrg.email,
+            website: editingOrg.website,
+            hours: editingOrg.hours,
+            services_offered: editingOrg.servicesOffered,
+            cost_payment: editingOrg.costPayment,
+            description: editingOrg.description,
+            crisis_service: editingOrg.crisisService || false,
+            languages: editingOrg.languages,
+            special_notes: editingOrg.specialNotes,
+            latitude: editingOrg.latitude,
+            longitude: editingOrg.longitude
+          });
 
-      alert('Organization updated successfully!');
+        if (error) throw error;
+        alert('Organization created successfully!');
+      }
+
       setSelectedOrg(null);
       setEditingOrg({});
       await refetch();
     } catch (error) {
-      console.error('Error updating organization:', error);
-      alert('Failed to update organization');
+      console.error('Error saving organization:', error);
+      alert('Failed to save organization');
+    }
+  };
+
+  const handleOrgDelete = async (orgId: string) => {
+    if (!confirm('Are you sure you want to delete this organization?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .delete()
+        .eq('id', orgId);
+
+      if (error) throw error;
+      
+      alert('Organization deleted successfully!');
+      await refetch();
+    } catch (error) {
+      console.error('Error deleting organization:', error);
+      alert('Failed to delete organization');
     }
   };
 
@@ -250,6 +297,10 @@ export default function AdminDashboard() {
     org.address.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Debug logging
+  console.log('Organizations:', organizations);
+  console.log('Filtered Organizations:', filteredOrgs);
+
   if (!isAdmin) {
     return (
       <>
@@ -340,15 +391,39 @@ export default function AdminDashboard() {
           {/* Organizations Tab */}
           {activeTab === 'organizations' && (
             <div>
-              {/* Search Bar */}
-              <div className="mb-6">
+              {/* Search Bar and Add Button */}
+              <div className="mb-6 flex gap-4">
                 <input
                   type="text"
                   placeholder="Search organizations..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="flex-1 px-4 py-2 border rounded-lg"
                 />
+                <button
+                  onClick={() => {
+                    setSelectedOrg(null);
+                    setEditingOrg({
+                      organizationName: '',
+                      category: 'Other',
+                      serviceType: '',
+                      address: '',
+                      phone: '',
+                      email: '',
+                      website: '',
+                      hours: '',
+                      servicesOffered: '',
+                      costPayment: '',
+                      description: '',
+                      crisisService: false,
+                      languages: '',
+                      specialNotes: ''
+                    });
+                  }}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                >
+                  Add Organization
+                </button>
               </div>
 
               {/* Organizations List */}
@@ -375,7 +450,14 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredOrgs.map((org) => (
+                      {filteredOrgs.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                            No organizations found. Click "Add Organization" to create one.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredOrgs.map((org) => (
                         <tr key={org.id}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {org.organizationName}
@@ -390,15 +472,23 @@ export default function AdminDashboard() {
                             {org.phone}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button
-                              onClick={() => handleOrgEdit(org)}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              Edit
-                            </button>
+                            <div className="flex gap-3">
+                              <button
+                                onClick={() => handleOrgEdit(org)}
+                                className="text-blue-600 hover:text-blue-900"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleOrgDelete(org.id)}
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </td>
                         </tr>
-                      ))}
+                      )))}
                     </tbody>
                   </table>
                 </div>
@@ -515,10 +605,10 @@ export default function AdminDashboard() {
         </div>
 
         {/* Edit Organization Modal */}
-        {selectedOrg && (
+        {(selectedOrg || (!selectedOrg && editingOrg.organizationName !== undefined)) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold mb-4">Edit Organization</h2>
+              <h2 className="text-xl font-bold mb-4">{selectedOrg ? 'Edit Organization' : 'Add Organization'}</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -533,12 +623,29 @@ export default function AdminDashboard() {
                 
                 <div>
                   <label className="block text-sm font-medium mb-1">Category</label>
-                  <input
-                    type="text"
+                  <select
                     value={editingOrg.category || ''}
                     onChange={(e) => setEditingOrg({...editingOrg, category: e.target.value})}
                     className="w-full px-3 py-2 border rounded-lg"
-                  />
+                  >
+                    <option value="">Select a category</option>
+                    <option value="Crisis Services">Crisis Services</option>
+                    <option value="Food Services">Food Services</option>
+                    <option value="Housing Services">Housing Services</option>
+                    <option value="Healthcare Services">Healthcare Services</option>
+                    <option value="Mental Health & Substance Use">Mental Health & Substance Use</option>
+                    <option value="Government Services">Government Services</option>
+                    <option value="Tribal Services">Tribal Services</option>
+                    <option value="Community Services">Community Services</option>
+                    <option value="Community Groups & Development">Community Groups & Development</option>
+                    <option value="Faith-Based Services">Faith-Based Services</option>
+                    <option value="Legal Services">Legal Services</option>
+                    <option value="Law Enforcement">Law Enforcement</option>
+                    <option value="Education">Education</option>
+                    <option value="Pharmacy">Pharmacy</option>
+                    <option value="Cultural & Information Services">Cultural & Information Services</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
                 
                 <div className="md:col-span-2">
@@ -627,9 +734,10 @@ export default function AdminDashboard() {
               <div className="mt-6 flex gap-3">
                 <button
                   onClick={handleOrgUpdate}
-                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  disabled={!editingOrg.organizationName || !editingOrg.category || !editingOrg.address}
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                  Save Changes
+                  {selectedOrg ? 'Save Changes' : 'Create Organization'}
                 </button>
                 <button
                   onClick={() => {
