@@ -62,7 +62,7 @@ export default function OrganizationCard({ organization, showDistance = true }: 
       <div className="flex flex-wrap gap-2">
         <a
           href={`/map?org=${encodeURIComponent(organization.id)}`}
-          className="flex-1 min-w-[120px] bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center"
+          className="flex-1 min-w-[110px] bg-blue-600 text-white px-3 py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-blue-700 transition-colors text-center"
         >
           View on Map
         </a>
@@ -70,14 +70,14 @@ export default function OrganizationCard({ organization, showDistance = true }: 
           href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(organization.address)}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 min-w-[120px] bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors text-center"
+          className="flex-1 min-w-[110px] bg-purple-600 text-white px-3 py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-purple-700 transition-colors text-center"
         >
           Directions
         </a>
         {organization.phone && (
           <a
             href={`tel:${formatPhoneForTel(organization.phone)}`}
-            className="flex-1 min-w-[120px] bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors text-center"
+            className="flex-1 min-w-[110px] bg-green-600 text-white px-3 py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-green-700 transition-colors text-center"
           >
             Call Now
           </a>
@@ -87,7 +87,7 @@ export default function OrganizationCard({ organization, showDistance = true }: 
             href={organization.website.startsWith('http') ? organization.website : `https://${organization.website}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 min-w-[120px] bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors text-center"
+            className="flex-1 min-w-[110px] bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-indigo-700 transition-colors text-center"
           >
             Website
           </a>
