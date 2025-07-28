@@ -241,7 +241,8 @@ export default function EventsPage() {
         {/* Header text - centered */}
         <div className="mb-6 text-center">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Community Events</h1>
-          <p className="text-sm md:text-base text-gray-600">Stay connected with what's happening in Robeson County</p>
+          <p className="text-sm md:text-base text-gray-600 mb-1">Join us in building a stronger, more connected Robeson County!</p>
+          <p className="text-xs md:text-sm text-gray-500 italic">Click on any event to learn more</p>
         </div>
 
 
