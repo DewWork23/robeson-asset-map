@@ -469,8 +469,8 @@ export default function AdminDashboard() {
               </div>
 
               {/* Organizations List */}
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="overflow-x-auto">
+              <div className="bg-white rounded-lg shadow-md">
+                <div>
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
@@ -516,42 +516,44 @@ export default function AdminDashboard() {
                                   {org.phone}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                  <div className="flex gap-3">
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        console.log('Edit clicked for org:', org.id, org.organizationName);
-                                        handleOrgEdit(org);
-                                      }}
-                                      style={{ 
-                                        backgroundColor: '#2563eb', 
-                                        color: 'white', 
-                                        padding: '4px 12px', 
-                                        borderRadius: '4px',
-                                        border: 'none',
-                                        cursor: 'pointer'
-                                      }}
-                                    >
-                                      Edit
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        console.log('Delete clicked for org:', org.id, org.organizationName);
-                                        handleOrgDelete(org.id);
-                                      }}
-                                      style={{ 
-                                        backgroundColor: '#dc2626', 
-                                        color: 'white', 
-                                        padding: '4px 12px', 
-                                        borderRadius: '4px',
-                                        border: 'none',
-                                        cursor: 'pointer'
-                                      }}
-                                    >
-                                      Delete
-                                    </button>
-                                  </div>
+                                  <span>TEST: </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      console.log('Edit clicked for org:', org.id, org.organizationName);
+                                      handleOrgEdit(org);
+                                    }}
+                                    style={{ 
+                                      display: 'inline-block',
+                                      backgroundColor: '#2563eb', 
+                                      color: 'white', 
+                                      padding: '4px 12px', 
+                                      borderRadius: '4px',
+                                      border: 'none',
+                                      cursor: 'pointer',
+                                      marginRight: '8px'
+                                    }}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      console.log('Delete clicked for org:', org.id, org.organizationName);
+                                      handleOrgDelete(org.id);
+                                    }}
+                                    style={{ 
+                                      display: 'inline-block',
+                                      backgroundColor: '#dc2626', 
+                                      color: 'white', 
+                                      padding: '4px 12px', 
+                                      borderRadius: '4px',
+                                      border: 'none',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    Delete
+                                  </button>
                                 </td>
                               </tr>
                             );
