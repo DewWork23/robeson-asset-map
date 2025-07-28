@@ -244,18 +244,6 @@ export default function EventsPage() {
           <p className="text-sm md:text-base text-gray-600">Stay connected with what's happening in Robeson County</p>
         </div>
 
-        {/* Category Legend */}
-        <div className="mb-6 flex flex-wrap gap-3 justify-center px-4">
-          {categories.map(category => (
-            <div key={category} className="flex items-center gap-2">
-              <div 
-                className="w-4 h-4 rounded"
-                style={{ backgroundColor: getCategoryColor(category) }}
-              />
-              <span className="text-sm text-gray-700">{category}</span>
-            </div>
-          ))}
-        </div>
 
         {/* View Toggle Buttons */}
         <div className="mb-4 flex justify-center gap-2 px-4">
