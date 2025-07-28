@@ -9,7 +9,7 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '';
 const RANGE = 'A:P'; // Extended to include Latitude (O) and Longitude (P) columns
 
 // Cache key and duration
-const CACHE_KEY = 'robeson_resources_cache_v19'; // Force new cache - fixed lat/lon column positions
+const CACHE_KEY = 'robeson_resources_cache_v20'; // Force new cache - updated Monarch data
 const CACHE_DURATION = 1000 * 60 * 5; // 5 minutes for testing
 
 interface CachedData {

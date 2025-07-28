@@ -179,14 +179,17 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Create marker cluster group with custom options
     const organizationLayer = (L as any).markerClusterGroup({
       showCoverageOnHover: false,
-      maxClusterRadius: 40, // Reduced to prevent over-clustering
+      maxClusterRadius: 20, // Very small radius to prevent most clustering
       spiderfyOnMaxZoom: false, // Disable spiderfy - we'll handle zoom manually
-      disableClusteringAtZoom: 12, // Show individual markers at zoom 12+ (much earlier)
+      disableClusteringAtZoom: 10, // Show individual markers at zoom 10+ (very early)
       animate: true,
       animateAddingMarkers: true,
       removeOutsideVisibleBounds: false, // Keep all markers loaded
       zoomToBoundsOnClick: false, // Disable default zoom - we handle it manually
-      singleMarkerMode: true, // Always show single markers (no clustering for single items)
+      // Only cluster when markers are practically on top of each other
+      spiderfyDistanceMultiplier: 2,
+      // Prevent clustering of single markers
+      clusterPane: 'markerPane',
       // Custom cluster icon creation
       iconCreateFunction: function(cluster: any) {
         const count = cluster.getChildCount();
