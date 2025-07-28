@@ -636,8 +636,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
             expandedClusters: expandedClustersRef.current.size
           });
           
-          // Call the handler immediately
-          if (onOrganizationClick) {
+          // Only call the handler if it's a meaningful action (not on category/search pages)
+          // On category pages, we want the popup to be the primary interaction
+          if (onOrganizationClick && window.location.pathname.includes('/map')) {
             onOrganizationClick(organization);
           }
           
@@ -652,10 +653,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
             }
           }, resetDelay);
           
-          // On mobile, ensure popup opens
-          if (isMobile) {
-            marker.openPopup();
-          }
+          // Always open popup on marker click
+          marker.openPopup();
           
           // Stop propagation after handling to prevent unintended zoom
           if (e && e.originalEvent) {
