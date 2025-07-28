@@ -484,16 +484,21 @@ export default function AdminDashboard() {
                             {org.phone}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            {console.log('Rendering actions for org:', org.id, org.organizationName)}
                             <div className="flex gap-3">
                               <button
-                                onClick={() => handleOrgEdit(org)}
+                                onClick={() => {
+                                  console.log('Edit clicked for org:', org.id, org.organizationName);
+                                  handleOrgEdit(org);
+                                }}
                                 className="text-blue-600 hover:text-blue-900"
                               >
                                 Edit
                               </button>
                               <button
-                                onClick={() => handleOrgDelete(org.id)}
+                                onClick={() => {
+                                  console.log('Delete clicked for org:', org.id, org.organizationName);
+                                  handleOrgDelete(org.id);
+                                }}
                                 className="text-red-600 hover:text-red-900"
                               >
                                 Delete
