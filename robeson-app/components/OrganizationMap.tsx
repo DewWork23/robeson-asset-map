@@ -628,6 +628,14 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         
         // Add click handler with immediate response
         const handleMarkerClick = (e: any) => {
+          // Stop propagation immediately to prevent any parent handlers
+          if (e && e.originalEvent) {
+            e.originalEvent.stopPropagation();
+            e.originalEvent.preventDefault();
+            L.DomEvent.stopPropagation(e.originalEvent);
+            L.DomEvent.preventDefault(e.originalEvent);
+          }
+          
           // Set flag FIRST before any other actions
           preventZoomRef.current = true;
           
@@ -636,12 +644,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
             name: organization.organizationName,
             hasClickHandler: !!onOrganizationClick,
             preventZoomRef: preventZoomRef.current,
-            expandedClusters: expandedClustersRef.current.size
+            expandedClusters: expandedClustersRef.current.size,
+            pathname: window.location.pathname
           });
           
-          // Only call the handler if it's a meaningful action (not on category/search pages)
-          // On category pages, we want the popup to be the primary interaction
-          if (onOrganizationClick && window.location.pathname.includes('/map')) {
+          // Completely prevent calling the handler on category pages
+          // Only call on the dedicated map page
+          if (onOrganizationClick && window.location.pathname === '/map') {
             onOrganizationClick(organization);
           }
           
@@ -658,15 +667,23 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
           
           // Always open popup on marker click
           marker.openPopup();
-          
-          // Stop propagation after handling to prevent unintended zoom
-          if (e && e.originalEvent) {
-            L.DomEvent.stopPropagation(e.originalEvent);
-          }
         };
         
         // Use direct event binding for better control
         marker.on('click', handleMarkerClick);
+        
+        // Add touch event handling for mobile
+        if (isMobile) {
+          marker.on('touchstart', (e: any) => {
+            // Prevent any default touch behavior
+            if (e && e.originalEvent) {
+              e.originalEvent.stopPropagation();
+              e.originalEvent.preventDefault();
+            }
+          });
+          
+          marker.on('touchend', handleMarkerClick);
+        }
       })(org);  // Pass org as parameter to the IIFE
     });
 

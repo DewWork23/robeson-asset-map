@@ -192,9 +192,6 @@ function CategoryPageContent() {
               onCategorySelect={(newCat) => {
                 setMapSelectedCategory(newCat);
               }}
-              onOrganizationClick={(org) => {
-                console.log('Organization clicked:', org);
-              }}
             />
           </div>
         )}

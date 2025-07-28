@@ -175,6 +175,21 @@ button, a {
   pointer-events: auto !important;
 }
 
+/* Ensure map markers are clickable */
+.leaflet-marker-pane {
+  z-index: 600 !important;
+}
+
+.leaflet-marker-icon {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Ensure popups are above everything */
+.leaflet-popup-pane {
+  z-index: 700 !important;
+}
+
 /* Ensure scrollbars are always visible on map page */
 .overflow-auto {
   scrollbar-width: thin;
