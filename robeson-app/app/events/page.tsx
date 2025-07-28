@@ -423,14 +423,14 @@ export default function EventsPage() {
         ) : (
           /* Agenda View */
           <div className="bg-white rounded-lg shadow-md p-4 md:p-6" key={refreshKey}>
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Upcoming Events</h2>
+            <h2 className="text-2xl sm:text-xl font-bold text-gray-800 mb-4">Upcoming Events</h2>
             {loading ? (
               <p className="text-center py-8">Loading events...</p>
             ) : (
               <div className="space-y-6">
                 {Object.entries(groupEventsByDate(getUpcomingEvents())).map(([date, dayEvents]) => (
                   <div key={date}>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
+                    <h3 className="text-xl sm:text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
                       {formatAgendaDate(date)}
                     </h3>
                     <div className="space-y-3">
@@ -441,28 +441,28 @@ export default function EventsPage() {
                             setSelectedEvent(event);
                             setShowEventModal(true);
                           }}
-                          className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                          className="flex items-start gap-3 p-4 sm:p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
                         >
                           <div 
-                            className="w-1 h-16 rounded-full flex-shrink-0"
+                            className="w-1.5 sm:w-1 h-20 sm:h-16 rounded-full flex-shrink-0"
                             style={{ backgroundColor: getCategoryColor(event.category) }}
                           />
                           <div className="flex-grow">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
-                              <h4 className="font-medium text-gray-800 text-base sm:text-base">{event.title}</h4>
-                              <span className="text-sm sm:text-sm text-gray-500">{event.time}</span>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
+                              <h4 className="font-semibold text-gray-800 text-lg sm:text-base">{event.title}</h4>
+                              <span className="text-base sm:text-sm text-gray-500">{event.time}</span>
                             </div>
-                            <p className="text-sm sm:text-sm text-gray-600">
+                            <p className="text-base sm:text-sm text-gray-600 mb-1">
                               <span className="font-medium">Location:</span> {event.location}
                             </p>
-                            <div className="flex flex-wrap items-center gap-2 mt-1">
+                            <div className="flex flex-wrap items-center gap-2 mt-2">
                               <span 
-                                className="text-xs sm:text-xs px-2 py-1 rounded-full text-white"
+                                className="text-sm sm:text-xs px-2 py-1 rounded-full text-white"
                                 style={{ backgroundColor: getCategoryColor(event.category) }}
                               >
                                 {event.category}
                               </span>
-                              <span className="text-xs sm:text-xs text-gray-500">
+                              <span className="text-sm sm:text-xs text-gray-500">
                                 Organized by {event.organizer}
                               </span>
                             </div>
