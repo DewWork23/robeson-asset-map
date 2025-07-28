@@ -486,15 +486,14 @@ export default function AdminDashboard() {
                                     <button
                                       type="button"
                                       onClick={() => handleOrgEdit(org)}
-                                      className="text-blue-600 hover:text-blue-900 font-medium text-sm"
+                                      className="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
                                     >
                                       Edit
                                     </button>
-                                    <span className="text-gray-300">|</span>
                                     <button
                                       type="button"
                                       onClick={() => handleOrgDelete(org.id)}
-                                      className="text-red-600 hover:text-red-900 font-medium text-sm"
+                                      className="px-3 py-1 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 transition-colors"
                                     >
                                       Delete
                                     </button>
