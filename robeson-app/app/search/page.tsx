@@ -19,8 +19,8 @@ function SearchContent() {
   const [showEmergencyWarning, setShowEmergencyWarning] = useState(false);
 
   useEffect(() => {
-    const query = searchParams.get('q') || '';
-    const fromVoice = searchParams.get('from') === 'voice';
+    const query = searchParams?.get('q') || '';
+    const fromVoice = searchParams?.get('from') === 'voice';
     
     setSearchQuery(query);
     setIsVoiceSearch(fromVoice);
