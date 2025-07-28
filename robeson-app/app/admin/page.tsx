@@ -429,9 +429,9 @@ export default function AdminDashboard() {
               </div>
 
               {/* Organizations List */}
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
+              <div className="bg-white rounded-lg shadow-md">
+                <div style={{ overflowX: 'auto' }}>
+                  <table className="w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -446,7 +446,7 @@ export default function AdminDashboard() {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Phone
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{ minWidth: '150px' }}>
                           Actions
                         </th>
                       </tr>
@@ -475,7 +475,7 @@ export default function AdminDashboard() {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                   {org.phone}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <td className="px-6 py-4 text-sm font-medium" style={{ minWidth: '150px' }}>
                                   <span 
                                     onClick={() => {
                                       console.log('Edit clicked for org:', org.id, org.organizationName);
