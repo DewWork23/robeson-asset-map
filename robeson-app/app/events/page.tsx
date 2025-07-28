@@ -240,9 +240,9 @@ export default function EventsPage() {
         <div className="max-w-6xl mx-auto">
         {/* Header text - centered */}
         <div className="mb-6 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-blue-800 mb-1">Community Events</h1>
-          <p className="text-sm md:text-base text-blue-700 mb-1 font-medium">Join us in building a stronger, more connected Robeson County!</p>
-          <p className="text-xs md:text-sm text-blue-600 italic">Click on any event to learn more</p>
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-2 leading-tight pb-1">Community Events</h1>
+          <p className="text-sm md:text-base text-blue-700 mb-2 font-medium">Join us in building a stronger, more connected Robeson County!</p>
+          <p className="text-sm md:text-base bg-green-600 text-white px-3 py-1 rounded-full inline-block font-medium">Click on any event to learn more</p>
         </div>
 
 
