@@ -64,7 +64,7 @@ export default function OrganizationCard({ organization, showDistance = true }: 
           href={`/map?org=${encodeURIComponent(organization.id)}`}
           className="flex-1 min-w-[110px] bg-blue-600 text-white px-3 py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-blue-700 transition-colors inline-flex items-center justify-center"
         >
-          View on Map
+          Map
         </a>
         <a
           href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(organization.address)}`}
@@ -79,7 +79,7 @@ export default function OrganizationCard({ organization, showDistance = true }: 
             href={`tel:${formatPhoneForTel(organization.phone)}`}
             className="flex-1 min-w-[110px] bg-green-600 text-white px-3 py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-green-700 transition-colors inline-flex items-center justify-center"
           >
-            Call Now
+            Call
           </a>
         )}
         {organization.website && (

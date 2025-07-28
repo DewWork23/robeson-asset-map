@@ -722,7 +722,7 @@ function SearchContent() {
                     href={`/map?org=${encodeURIComponent(org.id)}`}
                     className="flex-1 min-w-[110px] bg-blue-600 text-white px-3 py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-blue-700 transition-colors inline-flex items-center justify-center"
                   >
-                    View on Map
+                    Map
                   </Link>
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(org.address)}`}
@@ -737,7 +737,7 @@ function SearchContent() {
                       href={`tel:${org.phone.replace(/\D/g, '')}`}
                       className="flex-1 min-w-[110px] bg-green-600 text-white px-3 py-2 rounded-lg text-sm sm:text-base font-medium hover:bg-green-700 transition-colors inline-flex items-center justify-center"
                     >
-                      Call Now
+                      Call
                     </a>
                   )}
                   {org.website && (
