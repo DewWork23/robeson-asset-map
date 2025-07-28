@@ -65,7 +65,7 @@ function MapPageContent() {
   // Handle organization parameter from URL
   useEffect(() => {
     if (!initialOrgHandled && organizations.length > 0) {
-      const orgId = searchParams.get('org');
+      const orgId = searchParams?.get('org');
       if (orgId) {
         const org = organizations.find(o => o.id === orgId);
         if (org) {
