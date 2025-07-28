@@ -297,11 +297,11 @@ export default function AdminDashboard() {
     org.address.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Debug logging
-  console.log('Organizations:', organizations);
-  console.log('Filtered Organizations:', filteredOrgs);
-  console.log('Number of organizations:', organizations.length);
-  console.log('Number of filtered organizations:', filteredOrgs.length);
+  // Debug logging only in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Organizations count:', organizations.length);
+    console.log('Filtered organizations count:', filteredOrgs.length);
+  }
 
   if (!isAdmin) {
     return (
@@ -428,16 +428,6 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              {/* Test Button */}
-              <div className="mb-4">
-                <button
-                  onClick={() => alert('Test button clicked!')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  Test Button
-                </button>
-              </div>
-
               {/* Organizations List */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="overflow-x-auto">
@@ -469,44 +459,51 @@ export default function AdminDashboard() {
                           </td>
                         </tr>
                       ) : (
-                        filteredOrgs.map((org) => (
-                        <tr key={org.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {org.organizationName}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {org.category}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-500">
-                            {org.address}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {org.phone}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex gap-3">
-                              <button
-                                onClick={() => {
-                                  console.log('Edit clicked for org:', org.id, org.organizationName);
-                                  handleOrgEdit(org);
-                                }}
-                                className="text-blue-600 hover:text-blue-900"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => {
-                                  console.log('Delete clicked for org:', org.id, org.organizationName);
-                                  handleOrgDelete(org.id);
-                                }}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )))}
+                        filteredOrgs.map((org) => {
+                          try {
+                            return (
+                              <tr key={org.id}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                  {org.organizationName}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {org.category}
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-500">
+                                  {org.address}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {org.phone}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                  <div className="flex gap-3">
+                                    <button
+                                      onClick={() => {
+                                        console.log('Edit clicked for org:', org.id, org.organizationName);
+                                        handleOrgEdit(org);
+                                      }}
+                                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        console.log('Delete clicked for org:', org.id, org.organizationName);
+                                        handleOrgDelete(org.id);
+                                      }}
+                                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          } catch (error) {
+                            console.error('Error rendering org row:', org.id, error);
+                            return null;
+                          }
+                        }))}
                     </tbody>
                   </table>
                 </div>
