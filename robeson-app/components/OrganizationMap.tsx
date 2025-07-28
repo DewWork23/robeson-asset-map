@@ -179,9 +179,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Create marker cluster group with custom options
     const organizationLayer = (L as any).markerClusterGroup({
       showCoverageOnHover: false,
-      maxClusterRadius: 80, // Increased to better capture organizations at same address
+      maxClusterRadius: 40, // Reduced to prevent over-clustering
       spiderfyOnMaxZoom: false, // Disable spiderfy - we'll handle zoom manually
-      disableClusteringAtZoom: 16, // Show individual markers at zoom 16+
+      disableClusteringAtZoom: 14, // Show individual markers at zoom 14+ (earlier than before)
       animate: true,
       animateAddingMarkers: true,
       removeOutsideVisibleBounds: false, // Keep all markers loaded
@@ -994,9 +994,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     <div className="h-full w-full relative">
       <div id="map" className="h-full w-full" />
       
-      {/* Reset View Button - moved to bottom right to avoid popup interference */}
+      {/* Reset View Button - positioned to avoid conflicts with map elements */}
       {isZoomedIn && onResetView && (
-        <div className="absolute bottom-20 right-4 z-[1000]">
+        <div className="absolute bottom-4 left-4 z-[400]">
           <button
             onClick={onResetView}
             className="bg-white shadow-xl rounded-full px-4 py-2.5 flex items-center gap-2 hover:bg-gray-50 active:bg-gray-100 transition-colors border border-gray-300"
