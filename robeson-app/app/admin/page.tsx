@@ -79,6 +79,20 @@ export default function AdminDashboard() {
     }
   };
 
+  // Generate time options for dropdowns
+  const generateTimeOptions = () => {
+    const times = [];
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+        const ampm = hour < 12 ? 'AM' : 'PM';
+        const minuteStr = minute.toString().padStart(2, '0');
+        times.push(`${hour12}:${minuteStr} ${ampm}`);
+      }
+    }
+    return times;
+  };
+
   const handleLogout = () => {
     setIsAdmin(false);
     sessionStorage.removeItem('isAdmin');
@@ -826,24 +840,28 @@ export default function AdminDashboard() {
                 
                 <div>
                   <label className="block text-sm font-medium mb-1">Start Time</label>
-                  <input
-                    type="text"
+                  <select
                     value={editingEvent.start_time || '9:00 AM'}
                     onChange={(e) => setEditingEvent({...editingEvent, start_time: e.target.value})}
-                    placeholder="9:00 AM"
                     className="w-full px-3 py-2 border rounded-lg"
-                  />
+                  >
+                    {generateTimeOptions().map(time => (
+                      <option key={time} value={time}>{time}</option>
+                    ))}
+                  </select>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium mb-1">End Time</label>
-                  <input
-                    type="text"
+                  <select
                     value={editingEvent.end_time || '10:00 AM'}
                     onChange={(e) => setEditingEvent({...editingEvent, end_time: e.target.value})}
-                    placeholder="10:00 AM"
                     className="w-full px-3 py-2 border rounded-lg"
-                  />
+                  >
+                    {generateTimeOptions().map(time => (
+                      <option key={time} value={time}>{time}</option>
+                    ))}
+                  </select>
                 </div>
                 
                 <div className="md:col-span-2">
