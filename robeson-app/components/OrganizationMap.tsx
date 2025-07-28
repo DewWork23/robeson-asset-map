@@ -25,6 +25,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   const lastSelectedOrgRef = useRef<string | null>(null);
   const preventZoomRef = useRef(false);
   const expandedClustersRef = useRef<Set<any>>(new Set());
+  const userHasInteractedRef = useRef(false);
   const [isZoomedIn, setIsZoomedIn] = useState(false);
   const [onResetView, setOnResetView] = useState<(() => void) | null>(null);
 
@@ -323,8 +324,10 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Force map to recalculate its size
     setTimeout(() => {
       map.invalidateSize();
-      // After resize, ensure we're at the right zoom
-      map.setView([34.6400, -79.1100], 9);
+      // Only reset view if we haven't interacted with the map yet
+      if (!preventZoomRef.current) {
+        map.setView([34.6400, -79.1100], 9);
+      }
     }, 100);
 
     // Add layer control
@@ -338,6 +341,24 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     map.on('zoomend', () => {
       const currentZoom = map.getZoom();
       setIsZoomedIn(currentZoom > 11);
+    });
+    
+    // Track user interactions
+    map.on('zoomstart', () => {
+      userHasInteractedRef.current = true;
+      preventZoomRef.current = true;
+    });
+    
+    map.on('dragstart', () => {
+      userHasInteractedRef.current = true;
+      preventZoomRef.current = true;
+    });
+    
+    // Reset preventZoom after user interaction completes
+    map.on('zoomend dragend', () => {
+      setTimeout(() => {
+        preventZoomRef.current = false;
+      }, 500);
     });
     
 
@@ -651,6 +672,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     const resetViewFunction = () => {
       if (!map) return;
       
+      // Clear user interaction flag when explicitly resetting
+      userHasInteractedRef.current = false;
+      
       if (selectedCategory && organizations.length > 0) {
         // Reset to show all resources in category
         const bounds = L.latLngBounds([]);
@@ -700,7 +724,7 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     setOnResetView(() => resetViewFunction);
 
     // Handle zoom based on selected category
-    const shouldSkipZoom = isJustOrgSelection || preventZoomRef.current || expandedClustersRef.current.size > 0;
+    const shouldSkipZoom = isJustOrgSelection || preventZoomRef.current || expandedClustersRef.current.size > 0 || userHasInteractedRef.current;
     
     console.log('Zoom decision:', {
       selectedCategory,
@@ -708,7 +732,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       shouldSkipZoom,
       isJustOrgSelection,
       preventZoomRef: preventZoomRef.current,
-      expandedClusters: expandedClustersRef.current.size
+      expandedClusters: expandedClustersRef.current.size,
+      userHasInteracted: userHasInteractedRef.current
     });
     
     if (selectedCategory && organizations.length > 0 && !shouldSkipZoom) {
