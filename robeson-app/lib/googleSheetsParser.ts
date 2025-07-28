@@ -129,7 +129,7 @@ export async function loadOrganizationsFromGoogleSheets(): Promise<Organization[
     }
     
     // Skip header row and map data
-    const organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => {
+    let organizations: Organization[] = rows.slice(1).map((row: string[], index: number) => {
       // Debug can be re-enabled if needed
       // if (index < 3) {
       //   console.log(`Row ${index + 1}: ${row[0]} at ${row[3]} - Lat: ${row[4]}, Lon: ${row[5]}`);
@@ -201,7 +201,7 @@ async function loadOrganizationsFromCSV(): Promise<Organization[]> {
     const text = await response.text();
     
     const lines = text.split('\n').filter(line => line.trim());
-    const organizations: Organization[] = [];
+    let organizations: Organization[] = [];
     
     for (let i = 1; i < lines.length; i++) {
       const values = parseCSVLine(lines[i]);
