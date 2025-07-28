@@ -604,6 +604,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         
         // Add click handler with immediate response
         const handleMarkerClick = (e: any) => {
+          // Set flag FIRST before any other actions
+          preventZoomRef.current = true;
+          
           console.log('Map marker clicked:', {
             id: organization.id,
             name: organization.organizationName,
@@ -612,16 +615,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
             expandedClusters: expandedClustersRef.current.size
           });
           
-          // Always set flag to prevent view changes
-          preventZoomRef.current = true;
-          
           // Call the handler immediately
           if (onOrganizationClick) {
             onOrganizationClick(organization);
           }
           
-          // Keep the flag set longer if we're in an expanded cluster
-          const resetDelay = expandedClustersRef.current.size > 0 ? 1500 : 800;
+          // Keep the flag set longer to ensure all re-renders respect it
+          const resetDelay = expandedClustersRef.current.size > 0 ? 2000 : 1500;
           
           setTimeout(() => {
             preventZoomRef.current = false;
@@ -702,8 +702,17 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Handle zoom based on selected category
     const shouldSkipZoom = isJustOrgSelection || preventZoomRef.current || expandedClustersRef.current.size > 0;
     
+    console.log('Zoom decision:', {
+      selectedCategory,
+      organizationsLength: organizations.length,
+      shouldSkipZoom,
+      isJustOrgSelection,
+      preventZoomRef: preventZoomRef.current,
+      expandedClusters: expandedClustersRef.current.size
+    });
+    
     if (selectedCategory && organizations.length > 0 && !shouldSkipZoom) {
-      console.log(`Zooming to category: ${selectedCategory}, organizations: ${organizations.length}, shouldSkipZoom: ${shouldSkipZoom}`);
+      console.log(`Zooming to category: ${selectedCategory}, organizations: ${organizations.length}`);
       
       // Always start by centering on Robeson County
       const robesonCenter = [34.6400, -79.1100] as [number, number];
@@ -788,16 +797,25 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       });
     }
     
-    // Restore view if we should preserve it
+    // Restore view if we should preserve it - increase priority of this action
     if (shouldPreserveView && currentCenter && currentZoom) {
-      setTimeout(() => {
+      // Use immediate execution and multiple attempts to ensure view is preserved
+      const preserveView = () => {
         if (mapRef.current) {
           console.log('Preserving view at:', currentCenter, currentZoom);
           mapRef.current.setView(currentCenter, currentZoom, {
-            animate: false
+            animate: false,
+            duration: 0
           });
         }
-      }, 0);
+      };
+      
+      // Try immediately
+      preserveView();
+      
+      // And again after a short delay to override any competing animations
+      setTimeout(preserveView, 100);
+      setTimeout(preserveView, 300);
     }
   }, [mapReady, L, organizations, selectedCategory, onOrganizationClick]);
 
