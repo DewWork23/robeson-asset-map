@@ -300,6 +300,8 @@ export default function AdminDashboard() {
   // Debug logging
   console.log('Organizations:', organizations);
   console.log('Filtered Organizations:', filteredOrgs);
+  console.log('Number of organizations:', organizations.length);
+  console.log('Number of filtered organizations:', filteredOrgs.length);
 
   if (!isAdmin) {
     return (
@@ -426,6 +428,16 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
+              {/* Test Button */}
+              <div className="mb-4">
+                <button
+                  onClick={() => alert('Test button clicked!')}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                >
+                  Test Button
+                </button>
+              </div>
+
               {/* Organizations List */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="overflow-x-auto">
@@ -472,6 +484,7 @@ export default function AdminDashboard() {
                             {org.phone}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            {console.log('Rendering actions for org:', org.id, org.organizationName)}
                             <div className="flex gap-3">
                               <button
                                 onClick={() => handleOrgEdit(org)}
