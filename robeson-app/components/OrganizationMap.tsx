@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Organization, CATEGORY_COLORS, CATEGORY_ICONS } from '@/types/organization';
 import { getCoordinatesFromAddress, locationCoordinates, resetLocationOffsets } from '@/lib/locationUtils';
 import { robesonCountyBoundary } from '@/lib/robesonCountyBoundary';
+import MapAddressSearch from './MapAddressSearch';
 import dynamic from 'next/dynamic';
 
 interface OrganizationMapProps {
@@ -28,6 +29,8 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   const userHasInteractedRef = useRef(false);
   const [isZoomedIn, setIsZoomedIn] = useState(false);
   const [onResetView, setOnResetView] = useState<(() => void) | null>(null);
+  const searchMarkerRef = useRef<any>(null);
+  const [searchLocation, setSearchLocation] = useState<{ lat: number; lon: number; displayName: string } | null>(null);
 
   useEffect(() => {
     // Dynamically import leaflet and marker cluster
@@ -694,6 +697,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
       // Clear user interaction flag when explicitly resetting
       userHasInteractedRef.current = false;
       
+      // Clear search marker if any
+      if (searchMarkerRef.current) {
+        map.removeLayer(searchMarkerRef.current);
+        searchMarkerRef.current = null;
+      }
+      setSearchLocation(null);
+      
       if (selectedCategory && organizations.length > 0) {
         // Reset to show all resources in category
         const bounds = L.latLngBounds([]);
@@ -1005,6 +1015,75 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     };
   }, [mapReady, L, organizations]);
 
+  // Handle search location updates
+  useEffect(() => {
+    if (!mapReady || !L || !mapRef.current || !searchLocation) return;
+
+    const map = mapRef.current;
+
+    // Remove existing search marker if any
+    if (searchMarkerRef.current) {
+      map.removeLayer(searchMarkerRef.current);
+    }
+
+    // Create search result marker with a different style
+    const searchIcon = L.divIcon({
+      html: `
+        <div style="
+          background-color: #ef4444;
+          border: 3px solid white;
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+          position: relative;
+        "></div>
+        <div style="
+          position: absolute;
+          bottom: -8px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 8px solid transparent;
+          border-right: 8px solid transparent;
+          border-top: 8px solid #ef4444;
+        "></div>
+      `,
+      className: 'search-result-marker',
+      iconSize: [20, 28],
+      iconAnchor: [10, 28],
+      popupAnchor: [0, -28],
+    });
+
+    const marker = L.marker([searchLocation.lat, searchLocation.lon], { icon: searchIcon })
+      .addTo(map)
+      .bindPopup(`<div style="font-weight: bold;">${searchLocation.displayName}</div>`)
+      .openPopup();
+
+    searchMarkerRef.current = marker;
+
+    // Pan and zoom to the search location
+    map.setView([searchLocation.lat, searchLocation.lon], 15, {
+      animate: true,
+      duration: 1.0
+    });
+
+    // Set user has interacted flag to prevent auto-zoom
+    userHasInteractedRef.current = true;
+    preventZoomRef.current = true;
+    
+    setTimeout(() => {
+      preventZoomRef.current = false;
+    }, 1500);
+
+  }, [mapReady, L, searchLocation]);
+
+  const handleLocationSearch = (coords: { lat: number; lon: number; displayName: string }) => {
+    setSearchLocation(coords);
+    setIsZoomedIn(true);
+  };
+
   if (!mapReady) {
     return <div className="h-full flex items-center justify-center">Loading map...</div>;
   }
@@ -1012,6 +1091,9 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   return (
     <div className="h-full w-full relative">
       <div id="map" className="h-full w-full" />
+      
+      {/* Address Search Component */}
+      <MapAddressSearch onLocationSelect={handleLocationSearch} />
       
       {/* Reset View Button - positioned to avoid conflicts with map elements */}
       {isZoomedIn && onResetView && (
