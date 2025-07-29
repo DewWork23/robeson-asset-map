@@ -26,6 +26,7 @@ function MapPageContent() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [initialOrgHandled, setInitialOrgHandled] = useState(false);
+  const [searchLocation, setSearchLocation] = useState<{ lat: number; lon: number; displayName: string } | null>(null);
 
   // Set sidebar open on desktop by default and check if mobile
   useEffect(() => {
@@ -227,6 +228,9 @@ function MapPageContent() {
           onCategoryChange={(category) => {
             setSelectedCategory(category);
           }}
+          onLocationSearch={(location) => {
+            setSearchLocation(location);
+          }}
           isOpen={sidebarOpen}
           onToggle={() => setSidebarOpen(!sidebarOpen)}
         />
@@ -250,6 +254,7 @@ function MapPageContent() {
             allOrganizations={organizations}
             selectedCategory={selectedCategory}
             selectedOrganization={selectedOrganization}
+            searchLocation={searchLocation}
             onCategorySelect={(cat) => {
               setSelectedCategory(cat);
             }}

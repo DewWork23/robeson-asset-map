@@ -14,6 +14,7 @@ interface MapSidebarProps {
   selectedCategory?: string | null;
   onOrganizationClick?: (org: Organization) => void;
   onCategoryChange?: (category: string | null) => void;
+  onLocationSearch?: (location: { lat: number; lon: number; displayName: string }) => void;
   isOpen: boolean;
   onToggle: () => void;
 }
@@ -27,6 +28,7 @@ export default function MapSidebar({
   selectedCategory,
   onOrganizationClick,
   onCategoryChange,
+  onLocationSearch,
   isOpen,
   onToggle
 }: MapSidebarProps) {
@@ -126,6 +128,11 @@ export default function MapSidebar({
       if (result) {
         setSearchLocation({ lat: result.lat, lon: result.lon });
         setSortBy('distance');
+        
+        // Call the map search callback if provided
+        if (onLocationSearch) {
+          onLocationSearch(result);
+        }
       } else {
         setLocationError('Could not find that address');
       }

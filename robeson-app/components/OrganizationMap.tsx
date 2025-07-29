@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from 'react';
 import { Organization, CATEGORY_COLORS, CATEGORY_ICONS } from '@/types/organization';
 import { getCoordinatesFromAddress, locationCoordinates, resetLocationOffsets } from '@/lib/locationUtils';
 import { robesonCountyBoundary } from '@/lib/robesonCountyBoundary';
-import MapAddressSearch from './MapAddressSearch';
 import dynamic from 'next/dynamic';
 
 interface OrganizationMapProps {
@@ -14,9 +13,10 @@ interface OrganizationMapProps {
   onCategorySelect?: (category: string | null) => void;
   selectedOrganization?: Organization | null;
   onOrganizationClick?: (org: Organization) => void;
+  searchLocation?: { lat: number; lon: number; displayName: string } | null;
 }
 
-const MapContent = ({ organizations, allOrganizations = [], selectedCategory, onCategorySelect, selectedOrganization, onOrganizationClick }: OrganizationMapProps) => {
+const MapContent = ({ organizations, allOrganizations = [], selectedCategory, onCategorySelect, selectedOrganization, onOrganizationClick, searchLocation }: OrganizationMapProps) => {
   const [L, setL] = useState<any>(null);
   const [mapReady, setMapReady] = useState(false);
   const mapRef = useRef<any>(null);
@@ -30,7 +30,6 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   const [isZoomedIn, setIsZoomedIn] = useState(false);
   const [onResetView, setOnResetView] = useState<(() => void) | null>(null);
   const searchMarkerRef = useRef<any>(null);
-  const [searchLocation, setSearchLocation] = useState<{ lat: number; lon: number; displayName: string } | null>(null);
 
   useEffect(() => {
     // Dynamically import leaflet and marker cluster
@@ -702,7 +701,6 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
         map.removeLayer(searchMarkerRef.current);
         searchMarkerRef.current = null;
       }
-      setSearchLocation(null);
       
       if (selectedCategory && organizations.length > 0) {
         // Reset to show all resources in category
@@ -1072,17 +1070,13 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
     // Set user has interacted flag to prevent auto-zoom
     userHasInteractedRef.current = true;
     preventZoomRef.current = true;
+    setIsZoomedIn(true);
     
     setTimeout(() => {
       preventZoomRef.current = false;
     }, 1500);
 
   }, [mapReady, L, searchLocation]);
-
-  const handleLocationSearch = (coords: { lat: number; lon: number; displayName: string }) => {
-    setSearchLocation(coords);
-    setIsZoomedIn(true);
-  };
 
   if (!mapReady) {
     return <div className="h-full flex items-center justify-center">Loading map...</div>;
@@ -1091,9 +1085,6 @@ const MapContent = ({ organizations, allOrganizations = [], selectedCategory, on
   return (
     <div className="h-full w-full relative">
       <div id="map" className="h-full w-full" />
-      
-      {/* Address Search Component */}
-      <MapAddressSearch onLocationSelect={handleLocationSearch} />
       
       {/* Reset View Button - positioned to avoid conflicts with map elements */}
       {isZoomedIn && onResetView && (
