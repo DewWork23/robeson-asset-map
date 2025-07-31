@@ -1,12 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Simplified helping hand icon for 32x32 -->
   <rect width="32" height="32" rx="4" fill="#2563eb"/>
-  <g transform="translate(16, 16) scale(0.05)">
-    <path d="M-80,-120 C-80,-140 -60,-160 -40,-160 L40,-160 C60,-160 80,-140 80,-120 L80,-20 C80,0 60,20 40,20 L-40,20 C-60,20 -80,0 -80,-20 Z" fill="white"/>
-    <path d="M-80,-80 C-100,-80 -120,-60 -120,-40 L-120,-20 C-120,0 -100,20 -80,20" fill="none" stroke="white" stroke-width="20" stroke-linecap="round"/>
-    <rect x="-60" y="-160" width="20" height="80" rx="10" fill="white"/>
-    <rect x="-30" y="-180" width="20" height="100" rx="10" fill="white"/>
-    <rect x="0" y="-180" width="20" height="100" rx="10" fill="white"/>
-    <rect x="30" y="-160" width="20" height="80" rx="10" fill="white"/>
-    <path d="M-20,0 C-20,-10 -10,-20 0,-20 C10,-20 20,-10 20,0 C20,10 0,30 0,30 C0,30 -20,10 -20,0 Z" fill="#ef4444"/>
+  
+  <!-- Simple bold hand shape -->
+  <g transform="translate(16, 18)">
+    <!-- Palm -->
+    <rect x="-6" y="-8" width="12" height="11" rx="2" fill="white"/>
+    
+    <!-- Fingers -->
+    <rect x="-5" y="-12" width="2.5" height="6" rx="1" fill="white"/>
+    <rect x="-2" y="-13.5" width="2.5" height="7.5" rx="1" fill="white"/>
+    <rect x="1" y="-13.5" width="2.5" height="7.5" rx="1" fill="white"/>
+    <rect x="4" y="-12" width="2.5" height="6" rx="1" fill="white"/>
+    
+    <!-- Heart -->
+    <path d="M-2.5,-2.5 C-2.5,-4 -1.5,-5 0,-5 C1.5,-5 2.5,-4 2.5,-2.5 C2.5,-1 0,2 0,2 C0,2 -2.5,-1 -2.5,-2.5 Z" fill="#ef4444"/>
   </g>
 </svg>
