@@ -1,19 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Simplified helping hand icon - bold and visible at small sizes -->
+  <!-- Extra large helping hand icon -->
   <rect width="512" height="512" rx="64" fill="#2563eb"/>
   
-  <!-- Simple bold hand shape -->
-  <g transform="translate(256, 280)">
-    <!-- Palm - larger and simpler -->
-    <rect x="-100" y="-140" width="200" height="180" rx="30" fill="white"/>
+  <!-- Massive hand that fills most of the space -->
+  <g transform="translate(256, 256)">
+    <!-- Single large rounded rectangle for the hand -->
+    <rect x="-180" y="-180" width="360" height="360" rx="80" fill="white"/>
     
-    <!-- Fingers - thicker and simpler -->
-    <rect x="-80" y="-200" width="40" height="100" rx="20" fill="white"/>
-    <rect x="-30" y="-220" width="40" height="120" rx="20" fill="white"/>
-    <rect x="20" y="-220" width="40" height="120" rx="20" fill="white"/>
-    <rect x="70" y="-200" width="40" height="100" rx="20" fill="white"/>
-    
-    <!-- Large heart in center - more visible -->
-    <path d="M-40,-40 C-40,-70 -20,-90 0,-90 C20,-90 40,-70 40,-40 C40,-10 0,40 0,40 C0,40 -40,-10 -40,-40 Z" fill="#ef4444" transform="scale(1.5)"/>
+    <!-- Large heart in center -->
+    <path d="M-60,-20 C-60,-60 -30,-90 0,-90 C30,-90 60,-60 60,-20 C60,20 0,80 0,80 C0,80 -60,20 -60,-20 Z" fill="#ef4444"/>
   </g>
 </svg>

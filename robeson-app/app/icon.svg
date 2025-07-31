@@ -1,19 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <!-- Simplified helping hand icon for 32x32 -->
+  <!-- Extra large hand for 32x32 -->
   <rect width="32" height="32" rx="4" fill="#2563eb"/>
   
-  <!-- Simple bold hand shape -->
-  <g transform="translate(16, 18)">
-    <!-- Palm -->
-    <rect x="-6" y="-8" width="12" height="11" rx="2" fill="white"/>
-    
-    <!-- Fingers -->
-    <rect x="-5" y="-12" width="2.5" height="6" rx="1" fill="white"/>
-    <rect x="-2" y="-13.5" width="2.5" height="7.5" rx="1" fill="white"/>
-    <rect x="1" y="-13.5" width="2.5" height="7.5" rx="1" fill="white"/>
-    <rect x="4" y="-12" width="2.5" height="6" rx="1" fill="white"/>
+  <!-- Massive simplified hand -->
+  <g transform="translate(16, 16)">
+    <!-- Large rounded square for hand -->
+    <rect x="-11" y="-11" width="22" height="22" rx="5" fill="white"/>
     
     <!-- Heart -->
-    <path d="M-2.5,-2.5 C-2.5,-4 -1.5,-5 0,-5 C1.5,-5 2.5,-4 2.5,-2.5 C2.5,-1 0,2 0,2 C0,2 -2.5,-1 -2.5,-2.5 Z" fill="#ef4444"/>
+    <path d="M-4,-2 C-4,-5 -2,-7 0,-7 C2,-7 4,-5 4,-2 C4,1 0,5 0,5 C0,5 -4,1 -4,-2 Z" fill="#ef4444"/>
   </g>
 </svg>
