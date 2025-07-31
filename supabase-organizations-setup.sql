@@ -91,7 +91,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create a view for crisis services for quick access
-CREATE VIEW crisis_organizations AS
+-- Using SECURITY INVOKER to ensure the view runs with the privileges of the querying user
+CREATE OR REPLACE VIEW crisis_organizations 
+WITH (security_invoker = true) AS
 SELECT * FROM organizations 
 WHERE crisis_service = true
 ORDER BY organization_name;
