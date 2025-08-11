@@ -1,0 +1,493 @@
+/* SPARC Page Specific Styles - Matching Original Design */
+
+/* Page Hero Section */
+.sparc-page-hero {
+  background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
+  padding: 120px 20px 80px;
+  text-align: center;
+  margin-top: 64px; /* Account for fixed navigation */
+  position: relative;
+}
+
+.sparc-page-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #000 25%, #FFB500 25%, #FFB500 75%, #000 75%);
+}
+
+.sparc-page-hero h1 {
+  font-size: 3rem;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 1rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.sparc-page-hero-subtitle {
+  font-size: 1.25rem;
+  color: #666;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Container */
+.sparc-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* About Main Section */
+.sparc-about-main {
+  padding: 80px 0;
+  background-color: #fff;
+}
+
+.sparc-about-intro {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.sparc-lead {
+  font-size: 1.25rem;
+  color: #666;
+  max-width: 900px;
+  margin: 0 auto;
+  line-height: 1.8;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  border-left: 5px solid #FFB500;
+}
+
+/* Content Grid */
+.sparc-content-grid {
+  margin-bottom: 5rem;
+}
+
+.sparc-content-section {
+  margin-bottom: 4rem;
+}
+
+.sparc-content-section h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-left: 20px;
+}
+
+.sparc-content-section h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 30px;
+  background-color: #FFB500;
+}
+
+.sparc-mission-statement {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-left: 5px solid #FFB500;
+  margin-bottom: 2rem;
+}
+
+.sparc-mission-statement p {
+  font-size: 1.125rem;
+  color: #000;
+  font-style: italic;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* Approach Cards */
+.sparc-approach-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.sparc-approach-card {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-top: 4px solid #FFB500;
+}
+
+.sparc-approach-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.sparc-approach-card h3 {
+  color: #000;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.sparc-approach-card p {
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Timeline Section */
+.sparc-timeline-section {
+  margin-bottom: 5rem;
+}
+
+.sparc-timeline-section h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.sparc-timeline {
+  position: relative;
+  padding: 2rem 0;
+}
+
+.sparc-timeline::before {
+  content: '';
+  position: absolute;
+  left: 50px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, #FFB500, #000);
+}
+
+.sparc-timeline-item {
+  position: relative;
+  padding-left: 100px;
+  margin-bottom: 3rem;
+}
+
+.sparc-timeline-marker {
+  position: absolute;
+  left: 38px;
+  top: 0;
+  width: 25px;
+  height: 25px;
+  background-color: #FFB500;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px #000;
+}
+
+.sparc-timeline-content {
+  background-color: #f9f9f9;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sparc-timeline-content h3 {
+  color: #FFB500;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.sparc-timeline-content p {
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.sparc-timeline-content strong {
+  color: #000;
+  font-weight: 600;
+}
+
+/* Leadership/Structure Section */
+.sparc-leadership-section {
+  background-color: #f9f9f9;
+  padding: 3rem;
+  border-radius: 12px;
+  margin-bottom: 5rem;
+}
+
+.sparc-leadership-section h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 1.5rem;
+}
+
+.sparc-leadership-section > p {
+  color: #666;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.sparc-structure-visual {
+  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+  padding: 3rem;
+  border-radius: 12px;
+  border: 2px solid #FFB500;
+}
+
+.sparc-structure-center {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background-color: #FFB500;
+  border-radius: 12px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sparc-structure-center h3 {
+  color: #000;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.sparc-structure-center p {
+  color: #000;
+  font-weight: 500;
+}
+
+.sparc-structure-branches {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.sparc-branch {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #000;
+}
+
+.sparc-branch h4 {
+  color: #000;
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.sparc-branch p {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Values Section */
+.sparc-values-section {
+  margin-bottom: 5rem;
+}
+
+.sparc-values-section h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.sparc-values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.sparc-value-card {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  border: 2px solid #f0f0f0;
+}
+
+.sparc-value-card:hover {
+  transform: translateY(-5px);
+  border-color: #FFB500;
+}
+
+.sparc-value-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.sparc-value-card h3 {
+  color: #000;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.sparc-value-card p {
+  color: #666;
+  line-height: 1.6;
+}
+
+/* CTA Section */
+.sparc-cta-section {
+  background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+  padding: 80px 20px;
+  text-align: center;
+  position: relative;
+}
+
+.sparc-cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #FFB500 0%, #FFB500 50%, #FFB500 100%);
+}
+
+.sparc-cta-section h2 {
+  color: #fff;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.sparc-cta-section p {
+  color: #FFB500;
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.sparc-cta-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.sparc-btn {
+  display: inline-block;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.sparc-btn-primary {
+  background-color: #FFB500;
+  color: #000;
+}
+
+.sparc-btn-primary:hover {
+  background-color: #CC9200;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Footer */
+.sparc-footer {
+  background-color: #000;
+  color: #fff;
+  padding: 60px 20px 20px;
+}
+
+.sparc-footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+.sparc-footer-section h3 {
+  color: #FFB500;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.sparc-footer-section h4 {
+  color: #FFB500;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.sparc-footer-section p {
+  color: #ccc;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.sparc-footer-section strong {
+  color: #fff;
+}
+
+.sparc-footer-bottom {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid #333;
+  color: #999;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sparc-page-hero h1 {
+    font-size: 2rem;
+  }
+  
+  .sparc-page-hero-subtitle {
+    font-size: 1rem;
+  }
+  
+  .sparc-approach-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .sparc-timeline::before {
+    left: 30px;
+  }
+  
+  .sparc-timeline-marker {
+    left: 18px;
+  }
+  
+  .sparc-timeline-item {
+    padding-left: 70px;
+  }
+  
+  .sparc-structure-branches {
+    grid-template-columns: 1fr;
+  }
+  
+  .sparc-values-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sparc-cta-section h2 {
+    font-size: 1.75rem;
+  }
+  
+  .sparc-footer-content {
+    grid-template-columns: 1fr;
+  }
+}
