@@ -281,6 +281,7 @@
 .sparc-page-wrapper .structure-visual {
     margin-top: 2rem;
     text-align: center;
+    position: relative;
 }
 
 .sparc-page-wrapper .structure-center {
@@ -302,13 +303,59 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1.5rem;
+    position: relative;
+}
+
+/* Add connecting lines from branches to center */
+.sparc-page-wrapper .structure-branches::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 50px;
+    background-color: #FFB500;
+}
+
+.sparc-page-wrapper .structure-branches::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: 25%;
+    right: 25%;
+    height: 3px;
+    background-color: #FFB500;
 }
 
 .sparc-page-wrapper .branch {
-    background-color: #FFFFFF;
+    background-color: #FFB500;
     padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border: 2px solid #000000;
+    position: relative;
+}
+
+.sparc-page-wrapper .branch h4 {
+    color: #000000;
+    font-weight: bold;
+}
+
+.sparc-page-wrapper .branch p {
+    color: #000000;
+}
+
+/* Add connecting lines from each branch to the horizontal line */
+.sparc-page-wrapper .branch::before {
+    content: '';
+    position: absolute;
+    top: -52px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 50px;
+    background-color: #FFB500;
 }
 
 .sparc-page-wrapper .values-section {
