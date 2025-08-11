@@ -66,6 +66,16 @@ export default function Navigation() {
             >
               Events
             </Link>
+            <Link
+              href="/sparc"
+              className={`px-4 py-2 rounded-lg font-bold transition-colors ${
+                isActive('/sparc') 
+                  ? 'bg-green-100 text-green-700' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              SPARC/RCORP
+            </Link>
           </div>
 
           {/* Hamburger Menu Button */}
@@ -153,6 +163,19 @@ export default function Navigation() {
             >
               <span className="flex items-center gap-2">
                 <span>📅</span> Events
+              </span>
+            </Link>
+            <Link
+              href="/sparc"
+              onClick={closeMenu}
+              className={`block px-4 py-3 rounded-lg font-bold transition-colors ${
+                isActive('/sparc') 
+                  ? 'bg-green-100 text-green-700' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <span>🤝</span> SPARC/RCORP
               </span>
             </Link>
             
