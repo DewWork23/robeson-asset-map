@@ -28,7 +28,7 @@ export default function SparcPage() {
       <section className="about-main">
         <div className="container">
           <div className="about-intro">
-            <p className="lead">The Southeastern Prevention and Addiction Recovery Resource Center (SPARC) is funded by the Kate B. Reynolds Foundation and supports the Robeson Rural Communities Opioid Response Program (RCORP) Consortium.</p>
+            <p className="lead">The Southeastern Prevention and Addiction Recovery Resource Center (SPARC) is housed at the University of North Carolina at Pembroke (UNCP), funded by the Kate B. Reynolds Foundation, and supports the Robeson Rural Communities Opioid Response Program (RCORP) Consortium through academic research and community partnerships.</p>
           </div>
 
           <div className="content-grid">
@@ -69,17 +69,17 @@ export default function SparcPage() {
               <div className="timeline-item">
                 <div className="timeline-marker"></div>
                 <div className="timeline-content">
-                  <h3>2022</h3>
+                  <h3>2021</h3>
                   <p>SPARC established with initial funding from Kate B. Reynolds Foundation</p>
-                  <p><strong>10 partner organizations</strong> join the consortium</p>
+                  <p>Coalition recruitment and building based on needs assessment conducted by RHCC</p>
                 </div>
               </div>
               <div className="timeline-item">
                 <div className="timeline-marker"></div>
                 <div className="timeline-content">
-                  <h3>2023</h3>
+                  <h3>2022-2023</h3>
                   <p>Rapid expansion of partnership network</p>
-                  <p>Implementation of evidence-based strategies across the county</p>
+                  <p>Workforce development support for addiction specialist certification</p>
                 </div>
               </div>
               <div className="timeline-item">
@@ -87,7 +87,8 @@ export default function SparcPage() {
                 <div className="timeline-content">
                   <h3>2024</h3>
                   <p><strong>60+ partner organizations</strong> now part of the consortium</p>
-                  <p>$1.178 million in Year 1 funding allocated across key service areas</p>
+                  <p>Continued expansion of services and community partnerships</p>
+                  <p>End of initial three-year stipend program, membership remains open</p>
                 </div>
               </div>
             </div>
@@ -123,6 +124,26 @@ export default function SparcPage() {
             </div>
           </div>
 
+          <div className="workforce-section">
+            <h2>Workforce Development</h2>
+            <p>SPARC supports the development of qualified addiction professionals in Robeson County through comprehensive training and certification programs.</p>
+            
+            <div className="approach-cards">
+              <div className="approach-card">
+                <h3>Professional Certification</h3>
+                <p>Exam preparation support for Certified Alcohol and Drug Counselors (CADC), Certified Clinical Supervisors (CCS), and Licensed Clinical Addiction Specialists (LCAS)</p>
+              </div>
+              <div className="approach-card">
+                <h3>Academic Partnership</h3>
+                <p>Collaborative teams of faculty and students conduct community-based participatory research to identify gaps and barriers</p>
+              </div>
+              <div className="approach-card">
+                <h3>Community Training</h3>
+                <p>Ongoing resources and training opportunities for consortium members to enhance professional capabilities</p>
+              </div>
+            </div>
+          </div>
+
           <div className="values-section">
             <h2>Our Core Values</h2>
             <div className="values-grid">
@@ -147,6 +168,11 @@ export default function SparcPage() {
                 <p>Believing in recovery and the potential for change</p>
               </div>
             </div>
+          </div>
+
+          <div className="media-section">
+            <h2>Community Recognition</h2>
+            <p>SPARC's impact has been recognized by local media and community partners. The center has been featured in WBTW news coverage, highlighting its collaborative approach to addressing substance use disorders in Robeson County.</p>
           </div>
         </div>
       </section>
