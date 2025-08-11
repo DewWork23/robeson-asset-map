@@ -301,31 +301,35 @@
 
 .sparc-page-wrapper .structure-branches {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
     position: relative;
+    margin-top: 60px;
 }
 
-/* Add connecting lines from branches to center */
+/* Horizontal line connecting all branches */
 .sparc-page-wrapper .structure-branches::before {
     content: '';
     position: absolute;
-    top: -50px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 3px;
-    height: 50px;
+    top: -60px;
+    left: 12.5%;
+    right: 12.5%;
+    height: 4px;
     background-color: #FFB500;
+    z-index: 1;
 }
 
+/* Vertical line from center box down to horizontal line */
 .sparc-page-wrapper .structure-branches::after {
     content: '';
     position: absolute;
-    top: -50px;
-    left: 25%;
-    right: 25%;
-    height: 3px;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 20px;
     background-color: #FFB500;
+    z-index: 2;
 }
 
 .sparc-page-wrapper .branch {
@@ -346,16 +350,17 @@
     color: #000000;
 }
 
-/* Add connecting lines from each branch to the horizontal line */
+/* Vertical lines from horizontal line down to each branch */
 .sparc-page-wrapper .branch::before {
     content: '';
     position: absolute;
-    top: -52px;
+    top: -60px;
     left: 50%;
     transform: translateX(-50%);
-    width: 3px;
-    height: 50px;
+    width: 4px;
+    height: 60px;
     background-color: #FFB500;
+    z-index: 2;
 }
 
 .sparc-page-wrapper .values-section {
@@ -466,6 +471,14 @@
     
     .sparc-page-wrapper .structure-branches {
         grid-template-columns: 1fr;
+        margin-top: 30px;
+    }
+    
+    /* Hide connecting lines on mobile */
+    .sparc-page-wrapper .structure-branches::before,
+    .sparc-page-wrapper .structure-branches::after,
+    .sparc-page-wrapper .branch::before {
+        display: none;
     }
     
     .sparc-page-wrapper .values-grid {
