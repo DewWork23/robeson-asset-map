@@ -1,493 +1,430 @@
-/* SPARC Page Specific Styles - Matching Original Design */
+/* SPARC Page - Complete Original Styles */
+/* Wrapped in sparc-page-wrapper to avoid conflicts with main site */
+
+.sparc-page-wrapper {
+  margin-top: 64px; /* Account for fixed navigation */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Copy of complete SPARC styles.css */
+.sparc-page-wrapper :root {
+    /* UNCP Brand Colors */
+    --primary-color: #FFB500; /* UNCP Gold */
+    --primary-dark: #CC9200; /* Darker gold for hover states */
+    --primary-light: #FFCC33; /* Lighter gold */
+    --black: #000000; /* UNCP Black */
+    --black-light: #1a1a1a; /* Slightly lighter black */
+    --white: #FFFFFF; /* White */
+    
+    /* Supporting Colors */
+    --secondary-color: #666666; /* Gray for secondary elements */
+    --success-color: #10b981;
+    --warning-color: #FFB500; /* Using gold for warnings */
+    --danger-color: #ef4444;
+    
+    /* Text Colors */
+    --text-primary: #000000; /* Black for primary text */
+    --text-secondary: #666666; /* Gray for secondary text */
+    --text-on-gold: #000000; /* Black text on gold backgrounds */
+    --text-on-black: #FFFFFF; /* White text on black backgrounds */
+    
+    /* Background Colors */
+    --bg-light: #f9f9f9; /* Light gray background */
+    --bg-white: #FFFFFF;
+    --bg-black: #000000;
+    --bg-gold: #FFB500;
+    
+    /* Borders and Shadows */
+    --border-color: #e5e7eb;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    
+    /* Layout */
+    --max-width: 1200px;
+    --section-padding: 100px;
+    --section-padding-mobile: 60px;
+}
+
+.sparc-page-wrapper * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.sparc-page-wrapper {
+    color: #000000;
+    line-height: 1.6;
+    background-color: #FFFFFF;
+}
+
+.sparc-page-wrapper .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+}
+
+.sparc-page-wrapper h1, 
+.sparc-page-wrapper h2, 
+.sparc-page-wrapper h3, 
+.sparc-page-wrapper h4, 
+.sparc-page-wrapper h5, 
+.sparc-page-wrapper h6 {
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+.sparc-page-wrapper h1 { font-size: 2.5rem; }
+.sparc-page-wrapper h2 { font-size: 2rem; }
+.sparc-page-wrapper h3 { font-size: 1.5rem; }
+.sparc-page-wrapper h4 { font-size: 1.25rem; }
+
+.sparc-page-wrapper p {
+    margin-bottom: 1rem;
+}
+
+.sparc-page-wrapper a {
+    color: #000000;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.sparc-page-wrapper a:hover {
+    background-color: #FFB500;
+    color: #000000;
+    padding: 0 4px;
+    margin: 0 -4px;
+    border-bottom: 2px solid #000000;
+}
+
+.sparc-page-wrapper .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+}
+
+.sparc-page-wrapper .btn-primary {
+    background-color: #FFB500;
+    color: #000000;
+    font-weight: 600;
+}
+
+.sparc-page-wrapper .btn-primary:hover {
+    background-color: #CC9200;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    color: #000000;
+}
+
+.sparc-page-wrapper .btn-secondary {
+    background-color: transparent;
+    color: #000000;
+    border: 2px solid #000000;
+}
+
+.sparc-page-wrapper .btn-secondary:hover {
+    background-color: #000000;
+    color: #FFFFFF;
+}
+
+.sparc-page-wrapper section {
+    padding: 80px 0;
+}
+
+.sparc-page-wrapper .lead {
+    font-size: 1.125rem;
+    color: #666666;
+    margin-bottom: 1.5rem;
+}
 
 /* Page Hero Section */
-.sparc-page-hero {
-  background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
-  padding: 120px 20px 80px;
-  text-align: center;
-  margin-top: 64px; /* Account for fixed navigation */
-  position: relative;
+.sparc-page-wrapper .page-hero {
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    color: white;
+    padding: 120px 20px 80px;
+    text-align: center;
+    position: relative;
 }
 
-.sparc-page-hero::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  background: linear-gradient(90deg, #000 25%, #FFB500 25%, #FFB500 75%, #000 75%);
+.sparc-page-wrapper .page-hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background-color: #FFB500;
 }
 
-.sparc-page-hero h1 {
-  font-size: 3rem;
-  font-weight: 600;
-  color: #000;
-  margin-bottom: 1rem;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+.sparc-page-wrapper .page-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #FFFFFF;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
-.sparc-page-hero-subtitle {
-  font-size: 1.25rem;
-  color: #666;
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-/* Container */
-.sparc-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+.sparc-page-wrapper .page-hero-subtitle {
+    font-size: 1.25rem;
+    color: #FFFFFF;
+    opacity: 0.95;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 /* About Main Section */
-.sparc-about-main {
-  padding: 80px 0;
-  background-color: #fff;
+.sparc-page-wrapper .about-main {
+    padding: 80px 0;
 }
 
-.sparc-about-intro {
-  text-align: center;
-  margin-bottom: 4rem;
+.sparc-page-wrapper .about-intro {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 4rem;
 }
 
-.sparc-lead {
-  font-size: 1.25rem;
-  color: #666;
-  max-width: 900px;
-  margin: 0 auto;
-  line-height: 1.8;
-  padding: 2rem;
-  background-color: #f9f9f9;
-  border-radius: 12px;
-  border-left: 5px solid #FFB500;
+.sparc-page-wrapper .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-bottom: 4rem;
 }
 
-/* Content Grid */
-.sparc-content-grid {
-  margin-bottom: 5rem;
+.sparc-page-wrapper .content-section h2 {
+    color: #000000;
+    margin-bottom: 2rem;
+    border-left: 5px solid #FFB500;
+    padding-left: 1rem;
 }
 
-.sparc-content-section {
-  margin-bottom: 4rem;
+.sparc-page-wrapper .mission-statement {
+    background-color: #FFB500;
+    padding: 2rem;
+    border-radius: 12px;
+    border-left: 5px solid #000000;
+    margin-bottom: 2rem;
+    color: #000000;
 }
 
-.sparc-content-section h2 {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #000;
-  margin-bottom: 1.5rem;
-  position: relative;
-  padding-left: 20px;
+.sparc-page-wrapper .approach-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
 }
 
-.sparc-content-section h2::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 5px;
-  height: 30px;
-  background-color: #FFB500;
+.sparc-page-wrapper .approach-card {
+    background-color: #FFFFFF;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-.sparc-mission-statement {
-  background-color: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border-left: 5px solid #FFB500;
-  margin-bottom: 2rem;
+.sparc-page-wrapper .timeline-section {
+    margin: 4rem 0;
 }
 
-.sparc-mission-statement p {
-  font-size: 1.125rem;
-  color: #000;
-  font-style: italic;
-  line-height: 1.8;
-  margin: 0;
+.sparc-page-wrapper .timeline {
+    position: relative;
+    padding-left: 3rem;
 }
 
-/* Approach Cards */
-.sparc-approach-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
+.sparc-page-wrapper .timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #e5e7eb;
 }
 
-.sparc-approach-card {
-  background-color: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border-top: 4px solid #FFB500;
+.sparc-page-wrapper .timeline-item {
+    position: relative;
+    margin-bottom: 3rem;
 }
 
-.sparc-approach-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+.sparc-page-wrapper .timeline-marker {
+    position: absolute;
+    left: -39px;
+    width: 16px;
+    height: 16px;
+    background-color: #FFB500;
+    border-radius: 50%;
+    border: 3px solid #000000;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-.sparc-approach-card h3 {
-  color: #000;
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
+.sparc-page-wrapper .timeline-content h3 {
+    color: #000000;
+    margin-bottom: 0.5rem;
+    background-color: #FFB500;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    display: inline-block;
 }
 
-.sparc-approach-card p {
-  color: #666;
-  line-height: 1.6;
+.sparc-page-wrapper .leadership-section {
+    background-color: #f9f9f9;
+    padding: 3rem;
+    border-radius: 12px;
+    margin: 4rem 0;
 }
 
-/* Timeline Section */
-.sparc-timeline-section {
-  margin-bottom: 5rem;
+.sparc-page-wrapper .structure-visual {
+    margin-top: 2rem;
+    text-align: center;
 }
 
-.sparc-timeline-section h2 {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #000;
-  margin-bottom: 3rem;
-  text-align: center;
+.sparc-page-wrapper .structure-center {
+    background-color: #FFB500;
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    display: inline-block;
+    margin-bottom: 3rem;
 }
 
-.sparc-timeline {
-  position: relative;
-  padding: 2rem 0;
+.sparc-page-wrapper .structure-branches {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
 }
 
-.sparc-timeline::before {
-  content: '';
-  position: absolute;
-  left: 50px;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: linear-gradient(to bottom, #FFB500, #000);
+.sparc-page-wrapper .branch {
+    background-color: #FFFFFF;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-.sparc-timeline-item {
-  position: relative;
-  padding-left: 100px;
-  margin-bottom: 3rem;
+.sparc-page-wrapper .values-section {
+    margin: 4rem 0;
 }
 
-.sparc-timeline-marker {
-  position: absolute;
-  left: 38px;
-  top: 0;
-  width: 25px;
-  height: 25px;
-  background-color: #FFB500;
-  border: 4px solid #fff;
-  border-radius: 50%;
-  box-shadow: 0 0 0 3px #000;
+.sparc-page-wrapper .values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
 }
 
-.sparc-timeline-content {
-  background-color: #f9f9f9;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.sparc-page-wrapper .value-card {
+    text-align: center;
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 12px;
 }
 
-.sparc-timeline-content h3 {
-  color: #FFB500;
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-
-.sparc-timeline-content p {
-  color: #666;
-  margin-bottom: 0.5rem;
-}
-
-.sparc-timeline-content strong {
-  color: #000;
-  font-weight: 600;
-}
-
-/* Leadership/Structure Section */
-.sparc-leadership-section {
-  background-color: #f9f9f9;
-  padding: 3rem;
-  border-radius: 12px;
-  margin-bottom: 5rem;
-}
-
-.sparc-leadership-section h2 {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #000;
-  margin-bottom: 1.5rem;
-}
-
-.sparc-leadership-section > p {
-  color: #666;
-  margin-bottom: 2rem;
-  line-height: 1.6;
-}
-
-.sparc-structure-visual {
-  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
-  padding: 3rem;
-  border-radius: 12px;
-  border: 2px solid #FFB500;
-}
-
-.sparc-structure-center {
-  text-align: center;
-  margin-bottom: 3rem;
-  padding: 2rem;
-  background-color: #FFB500;
-  border-radius: 12px;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.sparc-structure-center h3 {
-  color: #000;
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
-.sparc-structure-center p {
-  color: #000;
-  font-weight: 500;
-}
-
-.sparc-structure-branches {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-
-.sparc-branch {
-  background-color: #fff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #000;
-}
-
-.sparc-branch h4 {
-  color: #000;
-  font-size: 1.125rem;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
-.sparc-branch p {
-  color: #666;
-  font-size: 0.95rem;
-}
-
-/* Values Section */
-.sparc-values-section {
-  margin-bottom: 5rem;
-}
-
-.sparc-values-section h2 {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #000;
-  margin-bottom: 3rem;
-  text-align: center;
-}
-
-.sparc-values-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-}
-
-.sparc-value-card {
-  background-color: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-  border: 2px solid #f0f0f0;
-}
-
-.sparc-value-card:hover {
-  transform: translateY(-5px);
-  border-color: #FFB500;
-}
-
-.sparc-value-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.sparc-value-card h3 {
-  color: #000;
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-
-.sparc-value-card p {
-  color: #666;
-  line-height: 1.6;
+.sparc-page-wrapper .value-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
 }
 
 /* CTA Section */
-.sparc-cta-section {
-  background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
-  padding: 80px 20px;
-  text-align: center;
-  position: relative;
+.sparc-page-wrapper .cta-section {
+    background-color: #FFB500;
+    color: #000000;
+    padding: 60px 0;
+    text-align: center;
 }
 
-.sparc-cta-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  background: linear-gradient(90deg, #FFB500 0%, #FFB500 50%, #FFB500 100%);
+.sparc-page-wrapper .cta-section h2 {
+    color: #000000;
+    margin-bottom: 1rem;
 }
 
-.sparc-cta-section h2 {
-  color: #fff;
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
+.sparc-page-wrapper .cta-section p {
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+    color: #000000;
 }
 
-.sparc-cta-section p {
-  color: #FFB500;
-  font-size: 1.25rem;
-  margin-bottom: 2rem;
-}
-
-.sparc-cta-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.sparc-btn {
-  display: inline-block;
-  padding: 14px 32px;
-  border-radius: 8px;
-  font-weight: 600;
-  text-align: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: none;
-  font-size: 1rem;
-  text-decoration: none;
-}
-
-.sparc-btn-primary {
-  background-color: #FFB500;
-  color: #000;
-}
-
-.sparc-btn-primary:hover {
-  background-color: #CC9200;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+.sparc-page-wrapper .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 /* Footer */
-.sparc-footer {
-  background-color: #000;
-  color: #fff;
-  padding: 60px 20px 20px;
+.sparc-page-wrapper .footer {
+    background-color: #000000;
+    color: white;
+    padding: 3rem 0 1rem;
+    border-top: 5px solid #FFB500;
 }
 
-.sparc-footer-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 3rem;
-  margin-bottom: 3rem;
+.sparc-page-wrapper .footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 3rem;
+    margin-bottom: 2rem;
 }
 
-.sparc-footer-section h3 {
-  color: #FFB500;
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
+.sparc-page-wrapper .footer-section h3,
+.sparc-page-wrapper .footer-section h4 {
+    margin-bottom: 1rem;
 }
 
-.sparc-footer-section h4 {
-  color: #FFB500;
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
+.sparc-page-wrapper .footer-section ul {
+    list-style: none;
 }
 
-.sparc-footer-section p {
-  color: #ccc;
-  margin-bottom: 0.5rem;
-  line-height: 1.6;
+.sparc-page-wrapper .footer-section li {
+    padding: 0.5rem 0;
 }
 
-.sparc-footer-section strong {
-  color: #fff;
+.sparc-page-wrapper .footer-section a {
+    color: #d1d5db;
 }
 
-.sparc-footer-bottom {
-  text-align: center;
-  padding-top: 2rem;
-  border-top: 1px solid #333;
-  color: #999;
+.sparc-page-wrapper .footer-section a:hover {
+    color: white;
+}
+
+.sparc-page-wrapper .footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid #374151;
+    color: #9ca3af;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .sparc-page-hero h1 {
-    font-size: 2rem;
-  }
-  
-  .sparc-page-hero-subtitle {
-    font-size: 1rem;
-  }
-  
-  .sparc-approach-cards {
-    grid-template-columns: 1fr;
-  }
-  
-  .sparc-timeline::before {
-    left: 30px;
-  }
-  
-  .sparc-timeline-marker {
-    left: 18px;
-  }
-  
-  .sparc-timeline-item {
-    padding-left: 70px;
-  }
-  
-  .sparc-structure-branches {
-    grid-template-columns: 1fr;
-  }
-  
-  .sparc-values-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .sparc-cta-section h2 {
-    font-size: 1.75rem;
-  }
-  
-  .sparc-footer-content {
-    grid-template-columns: 1fr;
-  }
+    .sparc-page-wrapper .page-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .sparc-page-wrapper .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .sparc-page-wrapper .approach-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .sparc-page-wrapper .structure-branches {
+        grid-template-columns: 1fr;
+    }
+    
+    .sparc-page-wrapper .values-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .sparc-page-wrapper .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .sparc-page-wrapper section {
+        padding: 60px 0;
+    }
 }
