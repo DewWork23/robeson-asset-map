@@ -141,9 +141,15 @@
 }
 
 .sparc-page-wrapper .lead {
-    font-size: 1.125rem;
-    color: #666666;
+    font-size: 1.25rem;
+    color: #000000;
     margin-bottom: 1.5rem;
+    font-weight: 600;
+    background-color: #FFB500;
+    padding: 2rem;
+    border-radius: 12px;
+    border-left: 5px solid #000000;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 /* Page Hero Section */
