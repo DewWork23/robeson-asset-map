@@ -156,7 +156,6 @@ export default function SparcPage() {
           <h2>Join Our Mission</h2>
           <p>Together, we can build a stronger, healthier Robeson County</p>
           <div className="cta-buttons">
-            <a href="#" className="btn btn-primary">Explore Our Services</a>
             <a href="mailto:jordan.dew@uncp.edu" className="btn btn-secondary">Partner With Us</a>
           </div>
         </div>
@@ -169,15 +168,6 @@ export default function SparcPage() {
               <h3>SPARC</h3>
               <p>Southeastern Prevention and Addiction Recovery Resource Center</p>
               <p>Funded by the Kate B. Reynolds Foundation</p>
-            </div>
-            <div className="footer-section">
-              <h4>Quick Links</h4>
-              <ul>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Services</a></li>
-                <li><a href="#">Resources</a></li>
-                <li><a href="#">Contact</a></li>
-              </ul>
             </div>
             <div className="footer-section">
               <h4>Emergency Resources</h4>
