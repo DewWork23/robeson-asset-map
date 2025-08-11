@@ -311,7 +311,7 @@
 .sparc-page-wrapper .structure-branches::before {
     content: '';
     position: absolute;
-    top: -60px;
+    top: -62px;
     left: 12.5%;
     right: 12.5%;
     height: 4px;
@@ -319,15 +319,15 @@
     z-index: 1;
 }
 
-/* Vertical line from center box down to horizontal line */
+/* Vertical line from horizontal line up to center box */
 .sparc-page-wrapper .structure-branches::after {
     content: '';
     position: absolute;
-    top: -60px;
+    top: -102px;
     left: 50%;
     transform: translateX(-50%);
     width: 4px;
-    height: 20px;
+    height: 40px;
     background-color: #FFB500;
     z-index: 2;
 }
@@ -354,11 +354,11 @@
 .sparc-page-wrapper .branch::before {
     content: '';
     position: absolute;
-    top: -60px;
+    top: -62px;
     left: 50%;
     transform: translateX(-50%);
     width: 4px;
-    height: 60px;
+    height: 62px;
     background-color: #FFB500;
     z-index: 2;
 }
