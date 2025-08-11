@@ -354,11 +354,11 @@
 .sparc-page-wrapper .branch::before {
     content: '';
     position: absolute;
-    top: -58px;
+    top: -60px;
     left: 50%;
     transform: translateX(-50%);
     width: 4px;
-    height: 58px;
+    height: 60px;
     background-color: #FFB500;
     z-index: 2;
 }
