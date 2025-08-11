@@ -285,11 +285,17 @@
 
 .sparc-page-wrapper .structure-center {
     background-color: #FFB500;
-    color: white;
+    color: #000000;
     padding: 2rem;
     border-radius: 12px;
     display: inline-block;
     margin-bottom: 3rem;
+}
+
+.sparc-page-wrapper .structure-center h3,
+.sparc-page-wrapper .structure-center p {
+    color: #000000;
+    font-weight: bold;
 }
 
 .sparc-page-wrapper .structure-branches {
